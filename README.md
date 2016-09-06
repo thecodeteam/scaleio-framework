@@ -1,18 +1,12 @@
 # ScaleIO Framework
 
-The [ScaleIO](https://www.emc.com/storage/scaleio/index.htm) Framework implements the Scheduler and Executor components for an [Apache Mesos Framework](http://mesos.apache.org/documentation/latest/architecture/) that onboards new Mesos Agent nodes to provision and consume storage from an existing [ScaleIO](https://www.emc.com/storage/scaleio/index.htm) cluster. Due to the nature of ScaleIO being a Software Defined Storage (SDS) platform, all ScaleIO volumes are external persistent volumes that are accessible via all Mesos Agent nodes such that they enable applications running as a Marathon task to be highly available natively within the Mesos cluster.
-
-## Status
-This first version is more of a proof of concept or demonstration to highlight the capabilities of combining Software Defined Storage together with a Scheduling platform that offers 2 layer scheduling like Apache Mesos. Subsequent versions will add significantly more features towards making this framework production worthy.
-
-## Full Documentation
-Continue reading the full documentation at [TBD](https://github.com/codedellemc/scaleio-framework).
+The ScaleIO Framework implements the [Apache Mesos Framework](http://mesos.apache.org/documentation/latest/architecture/) interface for managing [ScaleIO](https://www.emc.com/storage/scaleio/index.htm), a Software Defined Storage (SDS) platform, as a scale-out persistent application that seamlessly enables external volumes with Mesos Agents. ScaleIO volumes are accessible via all Mesos Agent nodes such that they enable applications running as a Marathon task to be highly available natively within the Mesos cluster.
 
 ## Key Features
 - Installs all components on existing Mesos Agents to consume and provision ScaleIO storage volumes
 - Onboards new Mesos Agent nodes and adds before mentioned capabilities to the node
-- Since all ScaleIO volume are external persistent volumes, all Agents nodes are configured to be highly available so failed applications can be restarted on other Agent nodes while preserving their data
-- Since ScaleIO has a scale out architecture, additional storage can be added to the ScaleIO cluster to expand capacity
+- All Agents nodes are configured to be highly available so failed applications can be restarted on other Agent nodes while preserving their data
+- Additional storage can be added to the ScaleIO cluster to expand capacity
 
 ## Roadmap / TBDs
 - Add CentOS/RHEL support
@@ -40,7 +34,13 @@ There are two supported configurations for your preexisting ScaleIO cluster:
 - The first is a minimal ScaleIO configuration of 3 nodes in which each nodes has minimally a 180GB disk attached to each MDM (Pri, Sec, Tiebreaker) node and those disks comprise the Protection Domain and Storage Pool. The Mesos Agent nodes that are brought online will then create/mount/unmount volumes that are provisioned from the MDM nodes.
 - In this configuration, the 3 ScaleIO MDM nodes and a second group/pool of servers that contribute attached disks to the Protection Domain and Storage Pool are separate servers. In this scenario, the Mesos Agent nodes that are brought online will then create/mount/unmount volumes that are provisioned from this second group/pool of servers.
 
-*NOTE:* The limited configuration support is mainly due to lack of management capabilities and the reduced scope for this first release. These limitations will be lifted in future versions.
+The limited configuration support is mainly due to lack of management capabilities and the reduced scope for this first release. These limitations will be lifted in future versions.
+
+## Status
+This first release highlights the capabilities of combining Software Defined Storage together with a Scheduling platform that offers 2 layer scheduling. Subsequent versions will add significantly more features towards making this framework enable new use-cases.
+
+## Full Documentation
+Continue reading the full documentation at [TBD](https://github.com/codedellemc/scaleio-framework).
 
 ## Launching the Framework
 If you are not running [MesosDNS](https://github.com/mesosphere/mesos-dns) or some other service discovery application in your Mesos cluster, you can create the following JSON to curl to Marathon:
