@@ -30,6 +30,18 @@ Continue reading the full documentation at [TBD](https://github.com/codedellemc/
 - The ScaleIO cluster must already have a Protection Domain and Storage Pool present which is capable of provisioning volumes from.
 - This Framework is implemented on the HTTP APIs provided by Apache Mesos. This requires an Apache Mesos cluster running version 1.0 or higher.
 
+**IMPORTANT NOTE:** In order to avoid the Mesos Agent nodes from rebooting, it is highly recommended that the Agent Nodes have kernel version 4.2.0-30 installed prior to launching the scheduler. You can do this by running the following command:
+<pre>
+apt-get -y install linux-image-4.2.0-30-generic
+</pre>
+
+## Supported ScaleIO Configurations
+There are two supported configurations for your preexisting ScaleIO cluster:
+- The first is a minimal ScaleIO configuration of 3 nodes in which each nodes has minimally a 180GB disk attached to each MDM (Pri, Sec, Tiebreaker) node and those disks comprise the Protection Domain and Storage Pool. The Mesos Agent nodes that are brought online will then create/mount/unmount volumes that are provisioned from the MDM nodes.
+- In this configuration, the 3 ScaleIO MDM nodes and a second group/pool of servers that contribute attached disks to the Protection Domain and Storage Pool are separate servers. In this scenario, the Mesos Agent nodes that are brought online will then create/mount/unmount volumes that are provisioned from this second group/pool of servers.
+
+*NOTE:* The limited configuration support is mainly due to lack of management capabilities and the reduced scope for this first release. These limitations will be lifted in future versions.
+
 ## Launching the Framework
 If you are not running [MesosDNS](https://github.com/mesosphere/mesos-dns) or some other service discovery application in your Mesos cluster, you can create the following JSON to curl to Marathon:
 <pre>
@@ -49,7 +61,7 @@ If you are not running [MesosDNS](https://github.com/mesosphere/mesos-dns) or so
 }
 </pre>
 
-If you are using a service discovery application like [MesosDNS](https://github.com/mesosphere/mesos-dns), you can replace the Mesos Master IP with mesos.leader as shown below. It is *highly recommended* that you run a service discovery application in the event that the Mesos Master Leader dies. In the previous JSON example, the IP address is hardcoded to only talk to that individual Mesos Master.
+If you are using a service discovery application like [MesosDNS](https://github.com/mesosphere/mesos-dns), you can replace the Mesos Master IP with mesos.leader as shown below. It is **highly recommended** that you run a service discovery application in the event that the Mesos Master Leader dies. In the previous JSON example, the IP address is hardcoded to only talk to that individual Mesos Master.
 <pre>
 {
   "id": "scaleio-scheduler",
