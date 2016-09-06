@@ -6,7 +6,7 @@ The [ScaleIO](https://www.emc.com/storage/scaleio/index.htm) Framework implement
 This first version is more of a proof of concept or demonstration to highlight the capabilities of combining Software Defined Storage together with a Scheduling platform that offers 2 layer scheduling like Apache Mesos. Subsequent versions will add significantly more features towards making this framework production worthy.
 
 ## Full Documentation
-Continue reading the full documentation at [TBD](https://github.com/dvonthenen/scaleio-scheduler).
+Continue reading the full documentation at [TBD](https://github.com/codedellemc/scaleio-framework).
 
 ## Key Features
 - Installs all components on existing Mesos Agents to consume and provision ScaleIO storage volumes
@@ -36,8 +36,8 @@ If you are not running [MesosDNS](https://github.com/mesosphere/mesos-dns) or so
 {
   "id": "scaleio-scheduler",
   "uris": [
-    "https://github.com/dvonthenen/scaleio-scheduler/releases/download/v0.1.0/scaleio-scheduler",
-    "https://github.com/dvonthenen/scaleio-scheduler/releases/download/v0.1.0/scaleio-executor"
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/scaleio-scheduler",
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/scaleio-executor"
   ],
   "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=[IP ADDRESS FOR MESOS MASTER LEADER]:5050 -scaleio.preconfig.primary=[IP ADDRESS FOR PRIMARY MDM] -scaleio.preconfig.secondary=[IP ADDRESS FOR SECONDARY MDM] -scaleio.preconfig.tiebreaker=[IP ADDRESS FOR TIEBREAKER] -executor.memory.non=256 -executor.cpu.non=0.5",
   "mem": 32,
@@ -54,8 +54,8 @@ If you are using a service discovery application like [MesosDNS](https://github.
 {
   "id": "scaleio-scheduler",
   "uris": [
-    "https://github.com/dvonthenen/scaleio-scheduler/releases/download/v0.1.0/scaleio-scheduler",
-    "https://github.com/dvonthenen/scaleio-scheduler/releases/download/v0.1.0/scaleio-executor"
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/scaleio-scheduler",
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/scaleio-executor"
   ],
   "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=leader.mesos:5050 -scaleio.preconfig.primary=[IP ADDRESS FOR PRIMARY MDM] -scaleio.preconfig.secondary=[IP ADDRESS FOR SECONDARY MDM] -scaleio.preconfig.tiebreaker=[IP ADDRESS FOR TIEBREAKER] -executor.memory.non=256 -executor.cpu.non=0.5",
   "mem": 32,
