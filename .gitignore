@@ -1,5 +1,6 @@
 .vagrant/
 .DS_Store
 glide.lock
-vendor/
+scaleio-scheduler/vendor/
+scaleio-executor/vendor/
 .build/
