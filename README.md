@@ -1,10 +1,10 @@
 # ScaleIO Framework
 
-The ScaleIO Framework implements the [Apache Mesos Framework](http://mesos.apache.org/documentation/latest/architecture/) interface for managing [ScaleIO](https://www.emc.com/storage/scaleio/index.htm), a Software Defined Storage (SDS) platform, as a scale-out persistent application that seamlessly enables external volumes with Mesos Agents. ScaleIO volumes are accessible via all Mesos Agent nodes such that they enable applications running as a Marathon task to be highly available natively within the Mesos cluster.
+The ScaleIO Framework implements the [Apache Mesos Framework](http://mesos.apache.org/documentation/latest/architecture/) interface for managing [ScaleIO](https://www.emc.com/storage/scaleio/index.htm), a Software Defined Storage (SDS) platform, as a scale-out persistent application that seamlessly enables external volumes with Mesos Agents. ScaleIO volumes are accessible via all Mesos Agent nodes such that they enable applications running as a Marathon task to be highly available within the Mesos cluster.
 
 ## Key Features
 - Installs all components on existing Mesos Agents to consume and provision ScaleIO storage volumes
-- Onboards new Mesos Agent nodes and adds before mentioned capabilities to the node
+- Onboards new Agent nodes with *by defaut* access to ScaleIO volumes
 - All Agents nodes are configured to be highly available so failed applications can be restarted on other Agent nodes while preserving their data
 - Additional storage can be added to the ScaleIO cluster to expand capacity
 
@@ -24,7 +24,7 @@ The ScaleIO Framework implements the [Apache Mesos Framework](http://mesos.apach
 - The ScaleIO cluster must already have a Protection Domain and Storage Pool present which is capable of provisioning volumes from.
 - This Framework is implemented on the HTTP APIs provided by Apache Mesos. This requires an Apache Mesos cluster running version 1.0 or higher.
 
-**IMPORTANT NOTE:** In order to avoid the Mesos Agent nodes from rebooting, it is highly recommended that the Agent Nodes have kernel version 4.2.0-30 installed prior to launching the scheduler. You can do this by running the following command:
+**IMPORTANT NOTE:** In order to avoid the Mesos Agent nodes from rebooting, it is highly recommended that the Agent Nodes have kernel version 4.2.0-30 installed prior to launching the scheduler. You can do this by running the following command prior to bringing up the Mesos Agent service ```mesos-slave```:
 <pre>
 apt-get -y install linux-image-4.2.0-30-generic
 </pre>
@@ -34,7 +34,7 @@ There are two supported configurations for your preexisting ScaleIO cluster:
 - The first is a minimal ScaleIO configuration of 3 nodes in which each nodes has minimally a 180GB disk attached to each MDM (Pri, Sec, Tiebreaker) node and those disks comprise the Protection Domain and Storage Pool. The Mesos Agent nodes that are brought online will then create/mount/unmount volumes that are provisioned from the MDM nodes.
 - In this configuration, the 3 ScaleIO MDM nodes and a second group/pool of servers that contribute attached disks to the Protection Domain and Storage Pool are separate servers. In this scenario, the Mesos Agent nodes that are brought online will then create/mount/unmount volumes that are provisioned from this second group/pool of servers.
 
-The limited configuration support is mainly due to lack of management capabilities and the reduced scope for this first release. These limitations will be lifted in future versions.
+The limited configuration support is mainly due to lack of management capabilities in this initial version and the reduced scope for this first release. These limitations will be expanded in future versions.
 
 ## Status
 This first release highlights the capabilities of combining Software Defined Storage together with a Scheduling platform that offers 2 layer scheduling. Subsequent versions will add significantly more features towards making this framework enable new use-cases.
