@@ -11,7 +11,7 @@ const (
 	VersionInt = 1
 
 	//VersionStr in string form
-	VersionStr = "0.1.0"
+	VersionStr = "0.1.0-rc1"
 
 	//CPUPerMdmExecutor num of CPUs to MDM executor
 	CPUPerMdmExecutor = 1.5
@@ -37,16 +37,16 @@ const (
 
 //consts internal
 const (
-	debMdm = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-mdm-2.0-5014.0.Ubuntu.14.04.x86_64.deb"
-	debSds = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-sds-2.0-5014.0.Ubuntu.14.04.x86_64.deb"
-	debSdc = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-sdc-2.0-5014.0.Ubuntu.14.04.x86_64.deb"
-	debLia = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-lia-2.0-5014.0.Ubuntu.14.04.x86_64.deb"
-	debGw  = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/emc-scaleio-gateway_2.0-5014.0_amd64.deb"
-	rpmMdm = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-mdm-2.0-6035.0.el7.x86_64.rpm"
-	rpmSds = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-sds-2.0-6035.0.el7.x86_64.rpm"
-	rpmSdc = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-sdc-2.0-6035.0.el7.x86_64.rpm"
-	rpmLia = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-lia-2.0-6035.0.el7.x86_64.rpm"
-	rpmGw  = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-gateway-2.0-6035.0.x86_64.rpm"
+	debMdm = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/EMC-ScaleIO-mdm-2.0-5014.0.Ubuntu.14.04.x86_64.deb"
+	debSds = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/EMC-ScaleIO-sds-2.0-5014.0.Ubuntu.14.04.x86_64.deb"
+	debSdc = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/EMC-ScaleIO-sdc-2.0-5014.0.Ubuntu.14.04.x86_64.deb"
+	debLia = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/EMC-ScaleIO-lia-2.0-5014.0.Ubuntu.14.04.x86_64.deb"
+	debGw  = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/emc-scaleio-gateway_2.0-5014.0_amd64.deb"
+	rpmMdm = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/EMC-ScaleIO-mdm-2.0-6035.0.el7.x86_64.rpm"
+	rpmSds = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/EMC-ScaleIO-sds-2.0-6035.0.el7.x86_64.rpm"
+	rpmSdc = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/EMC-ScaleIO-sdc-2.0-6035.0.el7.x86_64.rpm"
+	rpmLia = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/EMC-ScaleIO-lia-2.0-6035.0.el7.x86_64.rpm"
+	rpmGw  = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/EMC-ScaleIO-gateway-2.0-6035.0.x86_64.rpm"
 	isoBin = "https://github.com/emccode/mesos-module-dvdi/releases/download/v0.4.5/libmesos_dvdi_isolator-1.0.0.so"
 )
 

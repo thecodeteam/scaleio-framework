@@ -1,10 +1,10 @@
 # ScaleIO Framework
 
-The ScaleIO Framework implements the [Apache Mesos Framework](http://mesos.apache.org/documentation/latest/architecture/) interface for managing [ScaleIO](https://www.emc.com/storage/scaleio/index.htm), a Software Defined Storage (SDS) platform, as a scale-out persistent application that seamlessly enables external volumes with Mesos Agents. ScaleIO volumes are accessible via all Mesos Agent nodes such that they enable applications running as a Marathon task to be highly available within the Mesos cluster.
+Today software storage platforms are managed through a combination of manual/automated installs and runbooks to help with those “Day 2” maintenance operations typically done by hand. With this  [Framework](http://mesos.apache.org/documentation/latest/architecture/), deploying ScaleIO is as simple as launching any other task in Mesos. All software needed is rolled out and configured without any manual intervention and within a couple of minutes, [ScaleIO](https://www.emc.com/storage/scaleio/index.htm) is ready to provision volumes for all your container needs.
 
 ## Key Features
 - Installs all components on existing Mesos Agents to consume and provision ScaleIO storage volumes
-- Onboards new Agent nodes with *by defaut* access to ScaleIO volumes
+- Onboards new Agent nodes with *by default* access to ScaleIO volumes
 - All Agents nodes are configured to be highly available so failed applications can be restarted on other Agent nodes while preserving their data
 - Additional storage can be added to the ScaleIO cluster to expand capacity
 
@@ -37,7 +37,7 @@ There are two supported configurations for your preexisting ScaleIO cluster:
 The limited configuration support is mainly due to lack of management capabilities in this initial version and the reduced scope for this first release. These limitations will be expanded in future versions.
 
 ## Status
-This first release highlights the capabilities of combining Software Defined Storage together with a Scheduling platform that offers 2 layer scheduling. Subsequent versions will add significantly more features towards making this framework enable new use-cases.
+This first release highlights the capabilities of combining Software Defined Storage together with a Scheduling platform that offers 2 layer scheduling. Subsequent versions will add significantly more features towards making this framework open up new use-cases.
 
 ## Full Documentation
 Continue reading the full documentation at [TBD](https://github.com/codedellemc/scaleio-framework).
