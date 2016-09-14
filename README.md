@@ -1,6 +1,6 @@
 # ScaleIO Framework
 
-Today, scale-out applications can be complex to manage. [Apache Mesos Frameworks](http://mesos.apache.org/documentation/latest/architecture/) make this easy and seamless. Persistent applications work best with external volumes. This project is a [ScaleIO](https://www.emc.com/storage/scaleio/index.htm) Framework for 1) enabling external persistent volumes, 2) managing the lifecycle of your block storage platform as a scale-out application, and 3) provides the necessary glue to connect the persistent applications to those external volumes.
+Today software storage platforms are managed through a combination of manual/automated installs and runbooks to help with those “Day 2” maintenance operations typically done by hand. With this  [Framework](http://mesos.apache.org/documentation/latest/architecture/), deploying ScaleIO is as simple as launching any other task in Mesos. All software needed is rolled out and configured without any manual intervention and within a couple of minutes, [ScaleIO](https://www.emc.com/storage/scaleio/index.htm) is ready to provision volumes for all your container needs.
 
 ## Key Features
 - Installs all components on existing Mesos Agents to consume and provision ScaleIO storage volumes
