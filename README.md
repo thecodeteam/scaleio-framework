@@ -48,8 +48,8 @@ If you are not running [MesosDNS](https://github.com/mesosphere/mesos-dns) or so
 {
   "id": "scaleio-scheduler",
   "uris": [
-    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/scaleio-scheduler",
-    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/scaleio-executor"
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/scaleio-scheduler",
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/scaleio-executor"
   ],
   "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=[IP ADDRESS FOR MESOS MASTER LEADER]:5050 -scaleio.preconfig.primary=[IP ADDRESS FOR PRIMARY MDM] -scaleio.preconfig.secondary=[IP ADDRESS FOR SECONDARY MDM] -scaleio.preconfig.tiebreaker=[IP ADDRESS FOR TIEBREAKER] -executor.memory.non=256 -executor.cpu.non=0.5",
   "mem": 32,
@@ -66,8 +66,8 @@ If you are using a service discovery application like [MesosDNS](https://github.
 {
   "id": "scaleio-scheduler",
   "uris": [
-    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/scaleio-scheduler",
-    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/scaleio-executor"
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/scaleio-scheduler",
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/scaleio-executor"
   ],
   "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=leader.mesos:5050 -scaleio.preconfig.primary=[IP ADDRESS FOR PRIMARY MDM] -scaleio.preconfig.secondary=[IP ADDRESS FOR SECONDARY MDM] -scaleio.preconfig.tiebreaker=[IP ADDRESS FOR TIEBREAKER] -executor.memory.non=256 -executor.cpu.non=0.5",
   "mem": 32,
