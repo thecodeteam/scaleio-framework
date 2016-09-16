@@ -1,0 +1,14 @@
+{
+  "id": "scaleio-scheduler",
+  "uris": [
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/scaleio-scheduler",
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/scaleio-executor"
+  ],
+  "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=[IP ADDRESS FOR MESOS MASTER LEADER]:5050 -scaleio.password=F00barbaz -scaleio.protectiondomain=default -scaleio.storagepool=default -scaleio.preconfig.primary=[IP ADDRESS FOR PRIMARY MDM] -scaleio.preconfig.secondary=[IP ADDRESS FOR SECONDARY MDM] -scaleio.preconfig.tiebreaker=[IP ADDRESS FOR TIEBREAKER] -executor.memory.non=256 -executor.cpu.non=0.5",
+  "mem": 32,
+  "cpus": 0.2,
+  "instances": 1,
+  "constraints": [
+    ["hostname", "UNIQUE"]
+  ]
+}
