@@ -30,8 +30,8 @@ func NewRestServer(cfg *config.Config) *RestServer {
 		DemoMode:         cfg.DemoMode,
 		Experimental:     cfg.Experimental,
 		ScaleIO: types.ScaleIOConfig{
+			ClusterID:        cfg.ClusterID,
 			ClusterName:      cfg.ClusterName,
-			LbGateway:        cfg.LbGateway,
 			ProtectionDomain: cfg.ProtectionDomain,
 			StoragePool:      cfg.StoragePool,
 			AdminPassword:    cfg.AdminPassword,

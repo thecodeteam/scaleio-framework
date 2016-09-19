@@ -76,7 +76,7 @@ type Config struct {
 	Role                 string
 
 	ClusterName          string
-	LbGateway            string
+	ClusterID            string
 	ProtectionDomain     string
 	StoragePool          string
 	AdminPassword        string
@@ -136,8 +136,8 @@ func (cfg *Config) AddFlags(fs *flag.FlagSet) {
 	fs.StringVar(&cfg.Hostname, "hostname", cfg.Hostname, "The Hostname where the framework runs")
 	fs.StringVar(&cfg.Role, "role", cfg.Role, "Framework role to register with the Mesos master")
 
-	fs.StringVar(&cfg.ClusterName, "scaleio.cluster", cfg.ClusterName, "ScaleIO Cluster Name")
-	fs.StringVar(&cfg.LbGateway, "scaleio.lbgateway", cfg.LbGateway, "Load Balanced IP/DNS Name")
+	fs.StringVar(&cfg.ClusterName, "scaleio.clustername", cfg.ClusterName, "ScaleIO Cluster Name")
+	fs.StringVar(&cfg.ClusterID, "scaleio.clusterid", cfg.ClusterID, "ScaleIO Cluster ID")
 	fs.StringVar(&cfg.ProtectionDomain, "scaleio.protectiondomain", cfg.ProtectionDomain,
 		"ScaleIO Protection Domain Name")
 	fs.StringVar(&cfg.StoragePool, "scaleio.storagepool", cfg.StoragePool,
@@ -198,7 +198,7 @@ func NewConfig() *Config {
 		Hostname:             env("HOSTNAME", mesosHostname()),
 		Role:                 env("ROLE", "scaleio"),
 		ClusterName:          env("CLUSTER_NAME", "scaleio"),
-		LbGateway:            env("LB_GATEWAY", ""),
+		ClusterID:            env("CLUSTER_ID", ""),
 		ProtectionDomain:     env("PROTECTION_DOMAIN", "pd"),
 		StoragePool:          env("STORAGE_POOL", "sp"),
 		AdminPassword:        env("ADMIN_PASSWORD", "Scaleio123"),

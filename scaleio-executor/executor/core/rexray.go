@@ -70,6 +70,11 @@ func rexraySetup(state *types.ScaleIOFramework) error {
 			return err
 		}
 
+		systemIdenifier := "systemName: " + state.ScaleIO.ClusterName
+		if state.ScaleIO.ClusterID != "" {
+			systemIdenifier = "systemId: " + state.ScaleIO.ClusterID
+		}
+
 		rexrayConfig := `rexray:
   logLevel: debug
 libstorage:
@@ -88,17 +93,18 @@ libstorage:
         scaleio:
           endpoint: https://{IP_ADDRESS}/api
           insecure: true
+          thinOrThick: ThinProvisioned
           userName: admin
           password: {PASSWORD}
-          systemName: {SYSTEMNAME}
+          {SYSTEMIDENTIFIER}
           protectionDomainName: {PROTECTIONDOMAINNAME}
           storagePoolName: {STORAGEPOOLNAME}`
 
 		rexrayConfig = strings.Replace(rexrayConfig, "{IP_ADDRESS}", gateway, -1)
 		rexrayConfig = strings.Replace(rexrayConfig, "{PASSWORD}",
 			state.ScaleIO.AdminPassword, -1)
-		rexrayConfig = strings.Replace(rexrayConfig, "{SYSTEMNAME}",
-			state.ScaleIO.ClusterName, -1)
+		rexrayConfig = strings.Replace(rexrayConfig, "{SYSTEMIDENTIFIER}",
+			systemIdenifier, -1)
 		rexrayConfig = strings.Replace(rexrayConfig, "{PROTECTIONDOMAINNAME}",
 			state.ScaleIO.ProtectionDomain, -1)
 		rexrayConfig = strings.Replace(rexrayConfig, "{STORAGEPOOLNAME}",

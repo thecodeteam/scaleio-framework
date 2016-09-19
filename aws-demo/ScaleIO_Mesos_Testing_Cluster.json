@@ -331,6 +331,30 @@
           },
           {
             "IpProtocol": "tcp",
+            "FromPort": "8080",
+            "ToPort": "8080",
+            "CidrIp": {
+              "Ref": "SSHLocation"
+            }
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "5050",
+            "ToPort": "5050",
+            "CidrIp": {
+              "Ref": "SSHLocation"
+            }
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "31000",
+            "ToPort": "32000",
+            "CidrIp": {
+              "Ref": "SSHLocation"
+            }
+          },
+          {
+            "IpProtocol": "tcp",
             "FromPort": "1",
             "ToPort": "65535",
             "CidrIp": "10.0.0.0/24"
@@ -785,15 +809,15 @@
         }
       }
     },
-    "MesosNode1": {
+    "MesosMaster": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
         "InstanceType": "t2.medium",
-        "ImageId": "ami-48db9d28",
+        "ImageId": "ami-c5c887a5",
         "Tags": [
           {
             "Key": "Name",
-            "Value": "MesosNode1"
+            "Value": "MesosMaster"
           }
         ],
         "KeyName": {
@@ -821,7 +845,7 @@
               "",
               [
                 "#!/bin/bash -xe\n",
-                "echo MesosNode1 > /etc/hostname",
+                "echo MesosMaster > /etc/hostname",
                 "yum update -y aws-cfn-bootstrap\n",
                 "# Install the files and packages from the metadata\n",
                 "/opt/aws/bin/cfn-init -v ",
@@ -862,15 +886,15 @@
         "PublicRoute"
       ]
     },
-    "MesosNode2": {
+    "MesosAgent1": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
         "InstanceType": "t2.medium",
-        "ImageId": "ami-48db9d28",
+        "ImageId": "ami-2ecc834e",
         "Tags": [
           {
             "Key": "Name",
-            "Value": "MesosNode2"
+            "Value": "MesosAgent1"
           }
         ],
         "KeyName": {
@@ -898,7 +922,7 @@
               "",
               [
                 "#!/bin/bash -xe\n",
-                "echo MesosNode2 > /etc/hostname",
+                "echo MesosAgent1 > /etc/hostname",
                 "yum update -y aws-cfn-bootstrap\n",
                 "# Install the files and packages from the metadata\n",
                 "/opt/aws/bin/cfn-init -v ",
@@ -939,15 +963,15 @@
         "PublicRoute"
       ]
     },
-    "MesosNode3": {
+    "MesosAgent2": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
         "InstanceType": "t2.medium",
-        "ImageId": "ami-48db9d28",
+        "ImageId": "ami-b9cb84d9",
         "Tags": [
           {
             "Key": "Name",
-            "Value": "MesosNode3"
+            "Value": "MesosAgent2"
           }
         ],
         "KeyName": {
@@ -975,7 +999,7 @@
               "",
               [
                 "#!/bin/bash -xe\n",
-                "echo MesosNode3 > /etc/hostname",
+                "echo MesosAgent2 > /etc/hostname",
                 "yum update -y aws-cfn-bootstrap\n",
                 "# Install the files and packages from the metadata\n",
                 "/opt/aws/bin/cfn-init -v ",

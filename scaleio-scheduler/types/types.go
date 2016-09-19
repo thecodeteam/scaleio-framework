@@ -120,7 +120,8 @@ type ScaleIOPreConfig struct {
 
 //ScaleIOConfig describes the configuration for this cluster
 type ScaleIOConfig struct {
-	ClusterName      string            `json:"cluster"` //optional. Default: scaleio
+	ClusterID        string            `json:"clusterid"`
+	ClusterName      string            `json:"clustername"`
 	LbGateway        string            `json:"lbgateway"`
 	ProtectionDomain string            `json:"protectiondomain"` //optional. Default: pd
 	StoragePool      string            `json:"storagepool"`      //optional. Default: sp
