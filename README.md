@@ -15,10 +15,7 @@ Today software storage platforms are managed through a combination of manual/aut
 - The ScaleIO cluster must already have a Protection Domain and Storage Pool present which is capable of provisioning volumes from.
 - This Framework is implemented on the HTTP APIs provided by Apache Mesos. This requires an Apache Mesos cluster running version 1.0 or higher.
 
-**IMPORTANT NOTE:** In order to avoid the Mesos Agent nodes from rebooting, it is highly recommended that the Agent Nodes have kernel version 4.2.0-30 installed prior to launching the scheduler. You can do this by running the following command prior to bringing up the Mesos Agent service ```mesos-slave```:
-<pre>
-apt-get -y install linux-image-4.2.0-30-generic
-</pre>
+**IMPORTANT NOTE:** In order to avoid the Mesos Agent nodes from rebooting, it is highly recommended that the Agent Nodes have kernel version 4.2.0-30 installed prior to launching the scheduler. You can do this by running the following command prior to bringing up the Mesos Agent service ```mesos-slave```: ```apt-get -y install linux-image-4.2.0-30-generic```
 
 ## Getting Started Quickly (For Demo or Test)
 
@@ -76,8 +73,8 @@ To help speed up getting started, a [scaleio.json](https://github.com/codedellem
 {
   "id": "scaleio-scheduler",
   "uris": [
-    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/scaleio-scheduler",
-    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/scaleio-executor"
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc2/scaleio-scheduler",
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc2/scaleio-executor"
   ],
   "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=10.0.0.21:5050 -scaleio.password=F00barbaz -scaleio.protectiondomain=default -scaleio.storagepool=default -scaleio.preconfig.primary=10.0.0.12 -scaleio.preconfig.secondary=10.0.0.11 -scaleio.preconfig.tiebreaker=10.0.0.13 -scaleio.preconfig.gateway=10.0.0.11 -executor.memory.non=256 -executor.cpu.non=0.5",
   "mem": 32,
@@ -94,14 +91,21 @@ Once the values are correct in the JSON file, you can then cURL the JSON to Mara
 curl -k -XPOST -d @scaleio.json -H "Content-Type: application/json" [MESOS MASTER PUBLIC DNS/IP ADDRESS]:8080/v2/apps
 </pre>
 
+You can see the status of the ScaleIO framework by viewing the status in the (for now, a minimal) UI. To do that, perform the following steps:
+
+- Open up the Marathon UI by opening the following URL: http://[MESOS MASTER PUBLIC DNS/IP ADDRESS]:8080
+- Click the scaleio-scheduler in the Marathon UI
+- The Private IP Address for the scheduler is listed, substitute that Private IP with the Agent's Public IP Address and keep the existing port values
+- You should see a list of Mesos Agent nodes with the current status of ScaleIO rollout
+
 ## Launching the Framework on your Existing ScaleIO Install
 If you are not running [MesosDNS](https://github.com/mesosphere/mesos-dns) or some other service discovery application in your Mesos cluster, you can create the following JSON to curl to Marathon:
 <pre>
 {
   "id": "scaleio-scheduler",
   "uris": [
-    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/scaleio-scheduler",
-    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc1/scaleio-executor"
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc2/scaleio-scheduler",
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc2/scaleio-executor"
   ],
   "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=[IP ADDRESS FOR MESOS MASTER LEADER]:5050 -scaleio.clustername=[SCALEIO NAME] -scaleio.password=[SCALEIO GATEWAY PASSWORD] -scaleio.protectiondomain=[PROTECTION DOMAIN NAME] -scaleio.storagepool=[STORAGE POOL NAME] -scaleio.preconfig.primary=[MASTER MDM IP ADDRESS] -scaleio.preconfig.secondary=[SLAVE MDM IP ADDRESS] -scaleio.preconfig.tiebreaker=[TIEBREAKER MDM IP ADDRESS] -scaleio.preconfig.gateway=[GATEWAY IP ADDRESS] -executor.memory.non=256 -executor.cpu.non=0.5",
   "mem": 32,
