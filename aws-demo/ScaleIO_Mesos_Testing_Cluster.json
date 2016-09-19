@@ -553,7 +553,7 @@
       "Type": "AWS::EC2::Instance",
       "Properties": {
         "InstanceType": "t2.medium",
-        "ImageId": "ami-a78bcec7",
+        "ImageId": "ami-cbc38cab",
         "Tags": [
           {
             "Key": "Name",
