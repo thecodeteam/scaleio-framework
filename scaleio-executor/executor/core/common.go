@@ -199,7 +199,8 @@ func generateSdsName(node *types.ScaleIONode) string {
 }
 
 func getGatewayAddress(state *types.ScaleIOFramework) (string, error) {
-	if state.ScaleIO.Preconfig.GatewayAddress != "" {
+	if state.ScaleIO.Preconfig.PreConfigEnabled &&
+		state.ScaleIO.Preconfig.GatewayAddress != "" {
 		log.Debugln("Using Pre-Configured Gateway:",
 			state.ScaleIO.Preconfig.GatewayAddress)
 		return state.ScaleIO.Preconfig.GatewayAddress, nil
@@ -207,6 +208,10 @@ func getGatewayAddress(state *types.ScaleIOFramework) (string, error) {
 		log.Debugln("Pre-Configured Gateway Not Set:",
 			state.ScaleIO.Preconfig.PrimaryMdmAddress)
 		return state.ScaleIO.Preconfig.PrimaryMdmAddress, nil
+	} else if state.ScaleIO.LbGateway != "" {
+		log.Debugln("Using Load Balancing Gateway:",
+			state.ScaleIO.LbGateway)
+		return state.ScaleIO.LbGateway, nil
 	}
 
 	pri, err := getPrimaryMdmNode(state)
