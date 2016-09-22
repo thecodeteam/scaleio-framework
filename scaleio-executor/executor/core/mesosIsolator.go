@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bufio"
 	"errors"
 	"io/ioutil"
 	"os"
@@ -25,8 +26,8 @@ const (
 )
 
 var (
-	//ErrParseIsolatorVersionFailed failed to parse version from filename
-	ErrParseIsolatorVersionFailed = errors.New("Failed to parse version from filename")
+	//ErrRegexMatchFailed failed to validate the regex against string
+	ErrRegexMatchFailed = errors.New("Failed to validate the regex against string")
 
 	//ErrIsolatorNotInstalled failed to parse version from filename
 	ErrIsolatorNotInstalled = errors.New("The Mesos Module Isolator is not installed")
@@ -49,7 +50,7 @@ func parseIsolatorVersionFromFilename(filename string) (string, error) {
 	if strings == nil || len(strings) < 2 {
 		log.Debugln("Unable to find version from string")
 		log.Debugln("parseIsolatorVersionFromFilename LEAVE")
-		return "", ErrParseIsolatorVersionFailed
+		return "", ErrRegexMatchFailed
 	}
 
 	version := strings[1]
@@ -98,6 +99,69 @@ func findIsolatorVersionOnFilesystem() (string, error) {
 	return "", ErrIsolatorNotInstalled
 }
 
+func getMesosPropertyFileContents(fullfilename string) (string, error) {
+	log.Debugln("getMesosPropertyFileContents LEAVE")
+	log.Debugln("fullfilename:", fullfilename)
+
+	file, err := os.Open(fullfilename)
+	if err != nil {
+		log.Debugln("Failed on file Open:", err)
+		log.Debugln("getMesosPropertyFileContents LEAVE")
+		return "", err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		log.Debugln("Line:", line)
+		if len(line) == 0 {
+			continue
+		}
+
+		log.Debugln("Got existing properties:", line)
+		log.Debugln("getMesosPropertyFileContents LEAVE")
+		return line, nil
+	}
+
+	log.Debugln("File exists but is empty")
+	log.Debugln("getMesosPropertyFileContents LEAVE")
+	return "", nil
+}
+
+func doesLineExistInMesosPropertyFile(fullfilename string, needle string) error {
+	log.Debugln("doesLineExistInMesosPropertyFile ENTER")
+	log.Debugln("fullfilename:", fullfilename)
+	log.Debugln("needle:", needle)
+
+	line, err := getMesosPropertyFileContents(fullfilename)
+	if err != nil {
+		log.Debugln("Failed getMesosPropertyFileContents:", err)
+		log.Debugln("doesLineExistInMesosPropertyFile LEAVE")
+		return err
+	}
+
+	r, err := regexp.Compile(needle)
+	if err != nil {
+		log.Debugln("regexp is invalid")
+		log.Debugln("doesLineExistInMesosPropertyFile LEAVE")
+		return err
+	}
+	strings := r.FindStringSubmatch(line)
+	if strings == nil || len(strings) != 1 {
+		log.Debugln("Unable to find specified content in file")
+		log.Debugln("doesLineExistInMesosPropertyFile LEAVE")
+		return ErrRegexMatchFailed
+	}
+
+	found := strings[0]
+	log.Debugln("Found:", found)
+
+	log.Debugln("Property exists in Properties file")
+	log.Debugln("doesLineExistInMesosPropertyFile LEAVE")
+	return nil
+}
+
 func setupIsolator(state *types.ScaleIOFramework) error {
 	log.Infoln("SetupIsolator ENTER")
 
@@ -129,18 +193,32 @@ func setupIsolator(state *types.ScaleIOFramework) error {
 		}
 
 		//Create the mesos-slave isolation file
+		isolationFile := "/etc/mesos-slave/isolation"
 		isolationFileContents := "com_emccode_mesos_DockerVolumeDriverIsolator"
 
-		isolationFile, err := os.OpenFile("/etc/mesos-slave/isolation",
-			os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0666)
+		err = doesLineExistInMesosPropertyFile(isolationFile, isolationFileContents)
 		if err != nil {
-			log.Errorln("Writing Isolation File Failed:", err)
-			log.Infoln("SetupIsolator LEAVE")
-			return err
-		}
+			contents, err := getMesosPropertyFileContents(isolationFile)
+			if err != nil {
+				log.Warnln("getMesosPropertyFileContents returned err:", err)
+			}
 
-		isolationFile.WriteString(isolationFileContents)
-		isolationFile.Close()
+			if len(contents) > 0 {
+				isolationFileContents = isolationFileContents + "," + contents
+				log.Infoln("Preserving existing contents:", isolationFileContents)
+			}
+
+			isolationFile, err := os.OpenFile(isolationFile,
+				os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0666)
+			if err != nil {
+				log.Errorln("Writing Isolation File Failed:", err)
+				log.Infoln("SetupIsolator LEAVE")
+				return err
+			}
+
+			isolationFile.WriteString(isolationFileContents)
+			isolationFile.Close()
+		}
 
 		//Create the mesos-slave modules file
 		modulesFileContents := "file:///usr/lib/dvdi-mod.json"
@@ -160,7 +238,7 @@ func setupIsolator(state *types.ScaleIOFramework) error {
 		dvdimodFileContents := `{
   "libraries": [
     {
-      "file": "/usr/lib/libmesos_dvdi_isolator-1.0.0.so",
+      "file": "/usr/lib/libmesos_dvdi_isolator-{ISO_VERSION}.so",
       "modules": [
         {
           "name": "com_emccode_mesos_DockerVolumeDriverIsolator",
@@ -175,6 +253,8 @@ func setupIsolator(state *types.ScaleIOFramework) error {
     }
   ]
 }`
+
+		dvdimodFileContents = strings.Replace(dvdimodFileContents, "{ISO_VERSION}", isoVer, -1)
 
 		dvdimodFile, err := os.OpenFile("/usr/lib/dvdi-mod.json",
 			os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0666)
