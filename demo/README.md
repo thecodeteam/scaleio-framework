@@ -21,7 +21,7 @@ Within the AWS Web GUI:
 1. Verify you are in the N. California region.
 2. Within the drop-down of `Services` choose `CloudFormation`
 3. Click `Create Stack`, then `Choose a Template`
-4. Click `Upload file to S3`, and upload [ScaleIO_Mesos_Testing_Cluster.json](ScaleIO_Mesos_Testing_Cluster.json) 
+4. Click `Upload file to S3`, and upload [ScaleIO_Mesos_Testing_Cluster.json](ScaleIO_Mesos_Testing_Cluster.json)
 5. Give the stack a unique name (such as: MesosFrameworkDemo)
 6. Select a keypair that exists in the **N.California region**
 7. Click `next`. Tags are optional. Click `next`
@@ -39,12 +39,12 @@ ssh -i "keypair.pem" ec2-user@ScaleIONode2-IP-or-DNS
 
 Run the following commands:
 
-1. Log into the ScaleIO shell: 
+1. Log into the ScaleIO shell:
     ```
 scli --login --username admin --password F00barbaz
     ```
 
-2. Verify the MDM nodes: 
+2. Verify the MDM nodes:
     ```
 scli --query_cluster
     ```
@@ -70,7 +70,7 @@ Tie-Breakers:
 ## Launch Framework
 
 Before launching, open the Marathon UI at:
-``` 
+```
 http://[MESOS MASTER PUBLIC DNS/IP ADDRESS]:8080
 ```
 
@@ -83,7 +83,7 @@ Utilize [scaleio.json](scaleio.json) to correctly match and/or update the intern
     "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc2/scaleio-scheduler",
     "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0-rc2/scaleio-executor"
   ],
-  "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=10.0.0.21:5050 -scaleio.password=F00barbaz -scaleio.protectiondomain=default -scaleio.storagepool=default -scaleio.preconfig.primary=10.0.0.12 -scaleio.preconfig.secondary=10.0.0.11 -scaleio.preconfig.tiebreaker=10.0.0.13 -scaleio.preconfig.gateway=10.0.0.11 -executor.memory.non=256 -executor.cpu.non=0.5",
+  "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=10.0.0.21:5050 -scaleio.clusterid=39f2e3fe27fbc1dc -scaleio.password=F00barbaz -scaleio.protectiondomain=default -scaleio.storagepool=default -scaleio.preconfig.primary=10.0.0.12 -scaleio.preconfig.secondary=10.0.0.11 -scaleio.preconfig.tiebreaker=10.0.0.13 -scaleio.preconfig.gateway=10.0.0.11 -executor.memory.non=256 -executor.cpu.non=0.5",
   "mem": 32,
   "cpus": 0.2,
   "instances": 1,
@@ -108,4 +108,3 @@ View the status of the ScaleIO framework by opening the Deployment UI.
 ![sio02](img/sio02.png)
 
 ## Will Complete
-
