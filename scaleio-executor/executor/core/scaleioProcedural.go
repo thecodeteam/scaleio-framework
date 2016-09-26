@@ -583,8 +583,8 @@ func gatewaySetup(state *types.ScaleIOFramework) error {
 			return err
 		}
 
-		serviceliaCmdline := "/usr/sbin/service lia restart"
-		err = exec.CreateProcess(serviceliaCmdline)
+		serviceliaCmdline := "service lia restart"
+		err = exec.RunCommand(serviceliaCmdline, liaRestartCheck, "")
 		if err != nil {
 			log.Errorln("Restart LIA Failed:", err)
 			log.Infoln("GatewaySetup LEAVE")
@@ -637,8 +637,8 @@ func gatewaySetup(state *types.ScaleIOFramework) error {
 			return err
 		}
 
-		servicegwCmdline := "/usr/sbin/service scaleio-gateway restart"
-		err = exec.CreateProcess(servicegwCmdline)
+		servicegwCmdline := "service scaleio-gateway restart"
+		err = exec.RunCommand(servicegwCmdline, gatewayRestartCheck, "")
 		if err != nil {
 			log.Errorln("Restart Gateway Failed:", err)
 			log.Infoln("GatewaySetup LEAVE")
