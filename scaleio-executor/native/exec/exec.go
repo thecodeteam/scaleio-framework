@@ -50,6 +50,21 @@ func RunCommand(cmdLine string, successRegex string, failureRegex string) error 
 		return ErrCommandCreateFailed
 	}
 
+	// The Credential fields are used to set UID, GID and attitional GIDS of the process
+	// You need to run the program as root to do this
+	cred := &syscall.Credential{
+		Uid:    rootUID,
+		Gid:    rootGID,
+		Groups: []uint32{},
+	}
+
+	// the Noctty flag is used to detach the process from parent tty
+	sysproc := &syscall.SysProcAttr{
+		Credential: cred,
+	}
+
+	cmd.SysProcAttr = sysproc
+
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Errorln("Error starting Cmd:", err)
