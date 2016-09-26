@@ -4,12 +4,19 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	"os"
 	"os/exec"
 	"regexp"
 	"strings"
+	"syscall"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+)
+
+const (
+	rootUID = 0
+	rootGID = 0
 )
 
 var (
@@ -242,4 +249,56 @@ func RunCommandOutput(cmdLine string) (string, error) {
 	log.Debugln(output)
 	log.Debugln("RunCommandOutput LEAVE")
 	return output, nil
+}
+
+//CreateProcess starts a new detached process
+func CreateProcess(cmdLine string) error {
+	log.Debugln("CreateProcess ENTER")
+	log.Debugln("cmdLine:", cmdLine)
+
+	// The Credential fields are used to set UID, GID and attitional GIDS of the process
+	// You need to run the program as root to do this
+	cred := &syscall.Credential{
+		Uid:    rootUID,
+		Gid:    rootGID,
+		Groups: []uint32{},
+	}
+
+	// the Noctty flag is used to detach the process from parent tty
+	sysproc := &syscall.SysProcAttr{Credential: cred, Noctty: true}
+
+	attr := os.ProcAttr{
+		Dir: ".",
+		Env: os.Environ(),
+		Files: []*os.File{
+			os.Stdin,
+			nil,
+			nil,
+		},
+		Sys: sysproc,
+	}
+
+	args := strings.Split(cmdLine, " ")
+	for i := 0; i < len(args); i++ {
+		log.Debugln("Arg #", i, ":", args[i])
+	}
+
+	log.Debugln("CreateProcess Before")
+	process, err := os.StartProcess(args[0], args, &attr)
+	log.Debugln("CreateProcess After")
+
+	if err == nil {
+		// It is not clear from docs, but Realease actually detaches the process
+		err = process.Release()
+		if err == nil {
+			log.Debugln("CreateProcess succeeded!")
+		} else {
+			log.Errorln("Process Release failed:", err)
+		}
+	} else {
+		log.Errorln("StartProcess failed:", err)
+	}
+
+	log.Debugln("CreateProcess LEAVE")
+	return err
 }

@@ -131,26 +131,18 @@ libstorage:
 
 		time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
 
-		rexrayStartCmdline := "service rexray start"
-		err = exec.RunCommand(rexrayStartCmdline, rexrayStartCheck, "")
+		rexrayStartCmdline := "/usr/sbin/service rexray start"
+		err = exec.CreateProcess(rexrayStartCmdline)
 		if err != nil {
 			log.Errorln("REX-Ray start Failed:", err)
-			log.Infoln("RexrayClientSetup LEAVE")
-			return err
-		}
-
-		rexrayEnableCmdline := "update-rc.d rexray enable"
-		err = exec.RunCommand(rexrayEnableCmdline, rexrayEnableCheck, "")
-		if err != nil {
-			log.Errorln("REX-Ray enable Failed:", err)
 			log.Infoln("RexrayClientSetup LEAVE")
 			return err
 		}
 	} else {
 		log.Infoln(types.RexRayPackageName, "is already installed")
 
-		rexrayStartCmdline := "service rexray start"
-		err := exec.RunCommand(rexrayStartCmdline, rexrayStartCheck, "")
+		rexrayStartCmdline := "/usr/sbin/service rexray start"
+		err := exec.CreateProcess(rexrayStartCmdline)
 		if err != nil {
 			log.Warnln("REX-Ray start Failed:", err)
 		}

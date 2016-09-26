@@ -269,8 +269,8 @@ func setupIsolator(state *types.ScaleIOFramework) error {
 
 		time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
 
-		slaveRestartCmdline := "service mesos-slave restart"
-		err = exec.RunCommand(slaveRestartCmdline, slaveRestartCheck, "")
+		slaveRestartCmdline := "/usr/sbin/service mesos-slave restart"
+		err = exec.CreateProcess(slaveRestartCmdline)
 		if err != nil {
 			log.Errorln("Mesos Slave restart Failed:", err)
 			log.Infoln("SetupIsolator LEAVE")
