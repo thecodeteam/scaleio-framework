@@ -16,12 +16,11 @@ import (
 
 //constants for verifying that the command lines executed properly
 const (
-	rexrayBintrayRootURI = "https://dl.bintray.com/emccode/rexray/"
-	rexrayInstallCheck   = "rexray has been installed to"
-	rexrayStopCheck      = "SUCCESS!|os: process already finished|REX-Ray is already stopped"
-	rexrayStartCheck     = "SUCCESS!|REX-Ray already running at"
-	rexrayRunningCheck   = "REX-Ray is running at PID"
-	rexrayEnableCheck    = "Adding system startup for"
+	rexrayInstallCheck = "rexray has been installed to"
+	rexrayStopCheck    = "SUCCESS!|os: process already finished|REX-Ray is already stopped"
+	rexrayStartCheck   = "SUCCESS!|REX-Ray already running at"
+	rexrayRunningCheck = "REX-Ray is running at PID"
+	rexrayEnableCheck  = "Adding system startup for"
 
 	rexrayBintrayRootURI = "https://dl.bintray.com/emccode/rexray/"
 )
