@@ -813,7 +813,7 @@
       "Type": "AWS::EC2::Instance",
       "Properties": {
         "InstanceType": "t2.medium",
-        "ImageId": "ami-c5c887a5",
+        "ImageId": "ami-87a8e6e7",
         "Tags": [
           {
             "Key": "Name",
@@ -890,7 +890,7 @@
       "Type": "AWS::EC2::Instance",
       "Properties": {
         "InstanceType": "t2.medium",
-        "ImageId": "ami-4a2b652a",
+        "ImageId": "ami-04aae464",
         "Tags": [
           {
             "Key": "Name",
@@ -967,7 +967,7 @@
       "Type": "AWS::EC2::Instance",
       "Properties": {
         "InstanceType": "t2.medium",
-        "ImageId": "ami-39105e59",
+        "ImageId": "ami-dba8e6bb",
         "Tags": [
           {
             "Key": "Name",
