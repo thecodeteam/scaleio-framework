@@ -1,7 +1,6 @@
 package core
 
 import (
-	"errors"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -41,12 +40,7 @@ const (
 	addVolumeCheck             = "Successfully created volume of size"
 )
 
-var (
-	//ErrRebootRequired reboot required
-	ErrRebootRequired = errors.New("Reboot required")
-)
-
-func environmentSetup(state *types.ScaleIOFramework) error {
+func environmentSetup(state *types.ScaleIOFramework) (bool, error) {
 	log.Infoln("EnvironmentSetup ENTER")
 
 	aioErr := deb.IsInstalled("libaio1")
@@ -59,7 +53,7 @@ func environmentSetup(state *types.ScaleIOFramework) error {
 		if err != nil {
 			log.Errorln("Install Prerequisites Failed:", err)
 			log.Infoln("EnvironmentSetup LEAVE")
-			return err
+			return false, err
 		}
 	} else {
 		log.Infoln("libaio1 and zip are already installed")
@@ -74,7 +68,7 @@ func environmentSetup(state *types.ScaleIOFramework) error {
 		if err != nil {
 			log.Errorln("Install Kernel Failed:", err)
 			log.Infoln("EnvironmentSetup LEAVE")
-			return err
+			return false, err
 		}
 	} else {
 		log.Infoln("linux-image-4.2.0-30-generic is already installed")
@@ -84,28 +78,20 @@ func environmentSetup(state *types.ScaleIOFramework) error {
 	if kernelVerErr != nil {
 		log.Errorln("Kernel Version Check Failed:", kernelVerErr)
 		log.Infoln("EnvironmentSetup LEAVE")
-		return kernelVerErr
+		return false, kernelVerErr
 	}
 
 	if kernelVer != requiredKernelVersionCheck {
-		rebootCmdline := "shutdown -r 1"
-		rebootErr := exec.RunCommand(rebootCmdline, rebootCheck, "")
-		if rebootErr != nil {
-			log.Errorln("Install Kernel Failed:", rebootErr)
-			log.Infoln("EnvironmentSetup LEAVE")
-			return rebootErr
-		}
-
-		log.Errorln("Reboot Required:", rebootErr)
+		log.Errorln("Reboot Required!")
 		log.Infoln("EnvironmentSetup LEAVE")
-		return ErrRebootRequired
+		return true, nil
 	}
 
 	log.Infoln("Already running kernel version", requiredKernelVersionCheck)
 
 	log.Infoln("EnvironmentSetup Succeeded")
 	log.Infoln("EnvironmentSetup LEAVE")
-	return nil
+	return false, nil
 }
 
 func managementSetup(state *types.ScaleIOFramework, isPriOrSec bool) error {
@@ -525,20 +511,20 @@ func addSdsNodesToCluster(state *types.ScaleIOFramework, needsLogin bool) error 
 	return nil
 }
 
-func gatewaySetup(state *types.ScaleIOFramework) error {
+func gatewaySetup(state *types.ScaleIOFramework) (bool, error) {
 	log.Infoln("GatewaySetup ENTER")
 
 	pri, errPri := getPrimaryMdmNode(state)
 	if errPri != nil {
 		log.Errorln("getPrimaryMdmNode Failed:", errPri)
 		log.Infoln("GatewaySetup LEAVE")
-		return errPri
+		return false, errPri
 	}
 	sec, errSec := getSecondaryMdmNode(state)
 	if errSec != nil {
 		log.Errorln("getSecondaryMdmNode Failed:", errSec)
 		log.Infoln("GatewaySetup LEAVE")
-		return errSec
+		return false, errSec
 	}
 
 	//Install LIA
@@ -556,7 +542,7 @@ func gatewaySetup(state *types.ScaleIOFramework) error {
 		if err != nil {
 			log.Errorln("Error downloading LIA package:", err)
 			log.Infoln("PrimaryMDM LEAVE")
-			return err
+			return false, err
 		}
 
 		liaCmdline := "TOKEN=" + state.ScaleIO.AdminPassword + " dpkg -i " + localLia
@@ -564,7 +550,7 @@ func gatewaySetup(state *types.ScaleIOFramework) error {
 		if err != nil {
 			log.Errorln("Install LIA Failed:", err)
 			log.Infoln("GatewaySetup LEAVE")
-			return err
+			return false, err
 		}
 
 		installIDCmdline := "scli --query_all | grep \"Installation ID\" | sed -n -e 's/^.*ID: //p'"
@@ -572,7 +558,7 @@ func gatewaySetup(state *types.ScaleIOFramework) error {
 		if err != nil {
 			log.Errorln("Install LIA Failed:", err)
 			log.Infoln("GatewaySetup LEAVE")
-			return err
+			return false, err
 		}
 
 		dumpIDCmdline := "echo " + output + " > /opt/emc/scaleio/lia/cfg/installation_id.txt"
@@ -580,7 +566,7 @@ func gatewaySetup(state *types.ScaleIOFramework) error {
 		if err != nil || len(output) > 0 {
 			log.Errorln("Install LIA Failed:", err)
 			log.Infoln("GatewaySetup LEAVE")
-			return err
+			return false, err
 		}
 
 		serviceliaCmdline := "service lia restart"
@@ -588,7 +574,7 @@ func gatewaySetup(state *types.ScaleIOFramework) error {
 		if err != nil {
 			log.Errorln("Restart LIA Failed:", err)
 			log.Infoln("GatewaySetup LEAVE")
-			return err
+			return false, err
 		}
 	} else {
 		log.Infoln(types.DebLiaPackageName, "is already installed")
@@ -609,7 +595,7 @@ func gatewaySetup(state *types.ScaleIOFramework) error {
 		if err != nil {
 			log.Errorln("Error downloading Gateway package:", err)
 			log.Infoln("PrimaryMDM LEAVE")
-			return err
+			return false, err
 		}
 
 		gwCmdline := "GATEWAY_ADMIN_PASSWORD=" + state.ScaleIO.AdminPassword + " dpkg -i " + localGw
@@ -617,7 +603,7 @@ func gatewaySetup(state *types.ScaleIOFramework) error {
 		if err != nil {
 			log.Errorln("Install GW Failed:", err)
 			log.Infoln("GatewaySetup LEAVE")
-			return err
+			return false, err
 		}
 
 		bypasssecCmdline := "sed -i 's/security.bypass_certificate_check=false/security.bypass_certificate_check=true/' /opt/emc/scaleio/gateway/webapps/ROOT/WEB-INF/classes/gatewayUser.properties"
@@ -625,7 +611,7 @@ func gatewaySetup(state *types.ScaleIOFramework) error {
 		if err != nil || len(output) > 0 {
 			log.Errorln("Configure By-Pass Security Check Failed:", err)
 			log.Infoln("GatewaySetup LEAVE")
-			return err
+			return false, err
 		}
 
 		writemdmCmdline := "sed -i 's/mdm.ip.addresses=/mdm.ip.addresses='" + pri.IPAddress +
@@ -634,21 +620,20 @@ func gatewaySetup(state *types.ScaleIOFramework) error {
 		if err != nil || len(output) > 0 {
 			log.Errorln("Configure MDM to Gateway Failed:", err)
 			log.Infoln("GatewaySetup LEAVE")
-			return err
-		}
-
-		servicegwCmdline := "service scaleio-gateway restart"
-		err = exec.RunCommand(servicegwCmdline, gatewayRestartCheck, "")
-		if err != nil {
-			log.Errorln("Restart Gateway Failed:", err)
-			log.Infoln("GatewaySetup LEAVE")
-			return err
+			return false, err
 		}
 	} else {
 		log.Infoln(types.DebGwPackageName, "is already installed")
 	}
 
+	if gwInst == "" && gwInstErr == nil {
+		log.Debugln("No previous install of", types.DebGwPackageName,
+			"exists. Reboot required!")
+		log.Infoln("GatewaySetup LEAVE")
+		return true, nil
+	}
+
 	log.Infoln("GatewaySetup Succeeded")
 	log.Infoln("GatewaySetup LEAVE")
-	return nil
+	return false, nil
 }

@@ -11,6 +11,10 @@ import (
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
+const (
+	rebootCmdline = "shutdown -r 1"
+)
+
 var (
 	//ErrInitialStateFailed failed to get the initial state
 	ErrInitialStateFailed = errors.New("Failed to get the initial cluster state")

@@ -32,7 +32,7 @@ const (
 
 type retrievestate func() (*types.ScaleIOFramework, error)
 
-func waitForRunState(state *types.ScaleIOFramework, runState int) bool {
+func waitForRunState(state *types.ScaleIOFramework, runState int, allNodes bool) bool {
 	for _, node := range state.ScaleIO.Nodes {
 		switch node.Persona {
 		case types.PersonaMdmPrimary:
@@ -45,6 +45,10 @@ func waitForRunState(state *types.ScaleIOFramework, runState int) bool {
 			}
 		case types.PersonaTb:
 			if node.State < runState {
+				return false
+			}
+		case types.PersonaNode:
+			if allNodes && node.State < runState {
 				return false
 			}
 		}
@@ -68,7 +72,7 @@ func waitForStableState(getstate retrievestate) *types.ScaleIOFramework {
 	return state
 }
 
-func waitForState(getstate retrievestate, nodeState int) *types.ScaleIOFramework {
+func waitForState(getstate retrievestate, nodeState int, allNodes bool) *types.ScaleIOFramework {
 	var err error
 	var state *types.ScaleIOFramework
 	for {
@@ -78,7 +82,7 @@ func waitForState(getstate retrievestate, nodeState int) *types.ScaleIOFramework
 			time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
 			continue
 		}
-		if waitForRunState(state, nodeState) {
+		if waitForRunState(state, nodeState, allNodes) {
 			log.Debugln("Achieve state", nodeState, "among management nodes")
 			break
 		}
@@ -89,17 +93,25 @@ func waitForState(getstate retrievestate, nodeState int) *types.ScaleIOFramework
 }
 
 func waitForPrereqsFinish(getstate retrievestate) *types.ScaleIOFramework {
-	return waitForState(getstate, types.StatePrerequisitesInstalled)
+	return waitForState(getstate, types.StatePrerequisitesInstalled, false)
+}
+
+func waitForCleanPrereqsReboot(getstate retrievestate) *types.ScaleIOFramework {
+	return waitForState(getstate, types.StateCleanPrereqsReboot, true)
 }
 
 func waitForBaseFinish(getstate retrievestate) *types.ScaleIOFramework {
-	return waitForState(getstate, types.StateBasePackagedInstalled)
+	return waitForState(getstate, types.StateBasePackagedInstalled, false)
 }
 
 func waitForClusterInstallFinish(getstate retrievestate) *types.ScaleIOFramework {
-	return waitForState(getstate, types.StateInitializeCluster)
+	return waitForState(getstate, types.StateInitializeCluster, false)
 }
 
 func waitForClusterInitializeFinish(getstate retrievestate) *types.ScaleIOFramework {
-	return waitForState(getstate, types.StateInstallRexRay)
+	return waitForState(getstate, types.StateInstallRexRay, false)
+}
+
+func waitForCleanInstallReboot(getstate retrievestate) *types.ScaleIOFramework {
+	return waitForState(getstate, types.StateCleanInstallReboot, true)
 }

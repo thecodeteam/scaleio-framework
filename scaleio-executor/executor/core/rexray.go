@@ -3,7 +3,6 @@ package core
 import (
 	"os"
 	"strings"
-	"time"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -32,7 +31,7 @@ func getRexrayVersionToInstall(state *types.ScaleIOFramework) (string, error) {
 	return state.Rexray.Version, nil
 }
 
-func rexraySetup(state *types.ScaleIOFramework) error {
+func rexraySetup(state *types.ScaleIOFramework) (bool, error) {
 	log.Infoln("RexraySetup ENTER")
 
 	//REX-Ray Install
@@ -49,7 +48,7 @@ func rexraySetup(state *types.ScaleIOFramework) error {
 		if err != nil {
 			log.Errorln("Unable to find the Gateway IP Address")
 			log.Infoln("RexraySetup LEAVE")
-			return err
+			return false, err
 		}
 
 		//REX-Ray Install
@@ -67,7 +66,7 @@ func rexraySetup(state *types.ScaleIOFramework) error {
 		if err != nil {
 			log.Errorln("Install REX-Ray Failed:", err)
 			log.Infoln("RexraySetup LEAVE")
-			return err
+			return false, err
 		}
 
 		systemIdenifier := "systemName: " + state.ScaleIO.ClusterName
@@ -115,42 +114,25 @@ libstorage:
 		if err != nil {
 			log.Errorln("Writing Config File Failed:", err)
 			log.Infoln("RexraySetup LEAVE")
-			return err
+			return false, err
 		}
 
 		file.WriteString(rexrayConfig)
 		file.Close()
-
-		time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
-
-		rexrayStopCmdline := "service rexray stop"
-		err = exec.RunCommand(rexrayStopCmdline, rexrayStopCheck, "")
-		if err != nil {
-			log.Warnln("REX-Ray stop Failed:", err)
-		}
-
-		time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
-
-		rexrayStartCmdline := "service rexray start"
-		err = exec.RunCommand(rexrayStartCmdline, rexrayStartCheck, "")
-		if err != nil {
-			log.Errorln("REX-Ray start Failed:", err)
-			log.Infoln("RexrayClientSetup LEAVE")
-			return err
-		}
 	} else {
 		log.Infoln(types.RexRayPackageName, "is already installed")
+	}
 
-		rexrayStartCmdline := "service rexray start"
-		err := exec.RunCommand(rexrayStartCmdline, rexrayStartCheck, "")
-		if err != nil {
-			log.Warnln("REX-Ray start Failed:", err)
-		}
+	if rrInst == "" && rrInstErr == nil {
+		log.Debugln("No previous install of", types.RexRayPackageName,
+			"exists. Reboot required!")
+		log.Infoln("RexraySetup LEAVE")
+		return true, nil
 	}
 
 	log.Infoln("RexraySetup Succeeded")
 	log.Infoln("RexraySetup LEAVE")
-	return nil
+	return false, nil
 }
 
 /*

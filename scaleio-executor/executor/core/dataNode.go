@@ -4,6 +4,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/dvonthenen/scaleio-executor/native/exec"
 
 	nodestate "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/node"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
@@ -28,8 +29,8 @@ func dataNode(executorID string, getstate retrievestate) {
 
 		switch node.State {
 		case types.StateUnknown:
-			err := environmentSetup(state)
-			if err != nil && err != ErrRebootRequired {
+			reboot, err := environmentSetup(state)
+			if err != nil {
 				log.Errorln("EnvironmentSetup Failed:", err)
 				errState := nodestate.UpdateNodeState(state.SchedulerAddress, node.ExecutorID,
 					types.StateFatalInstall)
@@ -40,13 +41,28 @@ func dataNode(executorID string, getstate retrievestate) {
 			}
 
 			errState := nodestate.UpdateNodeState(state.SchedulerAddress, node.ExecutorID,
+				types.StateCleanPrereqsReboot)
+			if errState != nil {
+				log.Errorln("Failed to signal state change:", errState)
+			}
+
+			state = waitForCleanPrereqsReboot(getstate)
+
+			errState = nodestate.UpdateNodeState(state.SchedulerAddress, node.ExecutorID,
 				types.StatePrerequisitesInstalled)
 			if errState != nil {
 				log.Errorln("Failed to signal state change:", errState)
 			}
 
-			//wait for the reboot
-			if err == ErrRebootRequired {
+			//requires a reboot?
+			if reboot {
+				log.Infoln("Reboot required before StatePrerequisitesInstalled!")
+
+				rebootErr := exec.RunCommand(rebootCmdline, rebootCheck, "")
+				if rebootErr != nil {
+					log.Errorln("Install Kernel Failed:", rebootErr)
+				}
+
 				time.Sleep(time.Duration(WaitForRebootInSeconds) * time.Second)
 			}
 
@@ -85,7 +101,7 @@ func dataNode(executorID string, getstate retrievestate) {
 				state = waitForClusterInitializeFinish(getstate)
 			}
 
-			err := rexraySetup(state)
+			reboot, err := rexraySetup(state)
 			if err != nil {
 				log.Errorln("REX-Ray setup Failed:", err)
 				errState := nodestate.UpdateNodeState(state.SchedulerAddress, node.ExecutorID,
@@ -108,9 +124,30 @@ func dataNode(executorID string, getstate retrievestate) {
 			}
 
 			errState := nodestate.UpdateNodeState(state.SchedulerAddress, node.ExecutorID,
+				types.StateCleanInstallReboot)
+			if errState != nil {
+				log.Errorln("Failed to signal state change:", errState)
+			}
+
+			state = waitForCleanInstallReboot(getstate)
+
+			errState = nodestate.UpdateNodeState(state.SchedulerAddress, node.ExecutorID,
 				types.StateFinishInstall)
 			if errState != nil {
 				log.Errorln("Failed to signal state change:", errState)
+			}
+
+			//requires a reboot?
+			if reboot {
+				log.Infoln("Reboot required before StateFinishInstall!")
+				log.Debugln("reboot:", reboot)
+
+				rebootErr := exec.RunCommand(rebootCmdline, rebootCheck, "")
+				if rebootErr != nil {
+					log.Errorln("Install Kernel Failed:", rebootErr)
+				}
+
+				time.Sleep(time.Duration(WaitForRebootInSeconds) * time.Second)
 			}
 
 		case types.StateFinishInstall:
