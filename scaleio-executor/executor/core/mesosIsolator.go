@@ -23,6 +23,8 @@ const (
 	isolatorInstallDir = "/usr/lib"
 	slaveRestartCheck  = "mesos-slave start/running, process"
 	dvdcliInstallCheck = "dvdcli has been installed to"
+
+	dvdcliBintrayRootURI = "https://dl.bintray.com/emccode/dvdcli/stable/"
 )
 
 var (
@@ -286,7 +288,7 @@ func setupIsolator(state *types.ScaleIOFramework) error {
 	}
 
 	//DVDCLI install
-	dcVer, dcVerErr := installers.GetDvdliVersionFromBintray()
+	dcVer, dcVerErr := getDvdcliVersionFromBintray()
 	dcInst, dcInstErr := deb.GetInstalledVersion(types.DvdcliPackageName, false)
 	dcInst = installers.CorrectVersionFromDeb(dcInst)
 	log.Debugln("dcVer:", dcVer)

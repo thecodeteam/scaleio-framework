@@ -12,11 +12,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-const (
-	rexrayBintrayRootURI = "https://dl.bintray.com/emccode/rexray/"
-	dvdcliBintrayRootURI = "https://dl.bintray.com/emccode/dvdcli/stable/"
-)
-
 //CorrectVersionFromDeb formats the version string to match dpkg info
 func CorrectVersionFromDeb(version string) string {
 	if len(version) == 0 {
