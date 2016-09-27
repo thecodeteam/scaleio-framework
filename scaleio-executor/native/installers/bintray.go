@@ -10,8 +10,6 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-
-	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
 const (
@@ -31,20 +29,8 @@ func CorrectVersionFromDeb(version string) string {
 	return arr[0]
 }
 
-//GetRexrayVersionFromBintray grabs the latest version from bintray
-func GetRexrayVersionFromBintray(state *types.ScaleIOFramework) (string, error) {
-	url := rexrayBintrayRootURI + state.Rexray.Branch
-	version, err := getVersionFromBintray(url)
-	return version, err
-}
-
-//GetDvdliVersionFromBintray grabs the latest version from bintray
-func GetDvdliVersionFromBintray() (string, error) {
-	version, err := getVersionFromBintray(dvdcliBintrayRootURI)
-	return version, err
-}
-
-func getVersionFromBintray(URI string) (string, error) {
+//GetVersionFromBintray grabs the version from bintray
+func GetVersionFromBintray(URI string) (string, error) {
 	log.Debugln("getRexrayVersionFromBintray ENTER")
 
 	req, err := http.NewRequest("GET", URI, nil)

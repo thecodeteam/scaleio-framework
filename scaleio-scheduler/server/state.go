@@ -20,6 +20,9 @@ func displayState(w http.ResponseWriter, r *http.Request, server *RestServer) {
 		case types.StateUnknown:
 			response += "Installing Prerequisite Packages"
 
+		case types.StateCleanPrereqsReboot:
+			response += "Sync on Prerequisite Install"
+
 		case types.StatePrerequisitesInstalled:
 			response += "Installing ScaleIO Packages"
 
@@ -31,6 +34,9 @@ func displayState(w http.ResponseWriter, r *http.Request, server *RestServer) {
 
 		case types.StateInstallRexRay:
 			response += "Installing REX-Ray"
+
+		case types.StateCleanInstallReboot:
+			response += "Sync on REX-Ray Install"
 
 		case types.StateFinishInstall:
 			response += "ScaleIO Running"
