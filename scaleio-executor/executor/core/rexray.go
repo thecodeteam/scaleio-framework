@@ -1,7 +1,9 @@
 package core
 
 import (
+	"bufio"
 	"os"
+	"regexp"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
@@ -22,13 +24,58 @@ const (
 	rexrayEnableCheck    = "Adding system startup for"
 )
 
+func getRexrayVersionFromBintray(state *types.ScaleIOFramework) (string, error) {
+	url := rexrayBintrayRootURI + state.Rexray.Branch
+	version, err := installers.GetVersionFromBintray(url)
+	return version, err
+}
+
 func getRexrayVersionToInstall(state *types.ScaleIOFramework) (string, error) {
 	if state.Rexray.Version == "latest" {
-		version, err := installers.GetRexrayVersionFromBintray(state)
+		version, err := getRexrayVersionFromBintray(state)
 		return version, err
 	}
 
 	return state.Rexray.Version, nil
+}
+
+func doesSciniExistInRexrayInitD() (bool, error) {
+	log.Debugln("doesSciniExistInRexrayInitD LEAVE")
+
+	file, err := os.Open("/etc/init.d/rexray")
+	if err != nil {
+		log.Debugln("Failed on file Open:", err)
+		log.Debugln("doesSciniExistInRexrayInitD LEAVE")
+		return false, err
+	}
+	defer file.Close()
+
+	r, err := regexp.Compile("scini")
+	if err != nil {
+		log.Debugln("regexp is invalid")
+		log.Debugln("doesSciniExistInRexrayInitD LEAVE")
+		return false, err
+	}
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		log.Debugln("Line:", line)
+		if len(line) == 0 {
+			continue
+		}
+
+		strings := r.FindStringSubmatch(line)
+		if strings != nil || len(strings) == 1 {
+			log.Debugln("Match found:", line)
+			log.Debugln("doesSciniExistInRexrayInitD LEAVE")
+			return true, nil
+		}
+	}
+
+	log.Debugln("Scini is not configured in the rexray init.d")
+	log.Debugln("doesSciniExistInRexrayInitD LEAVE")
+	return false, nil
 }
 
 func rexraySetup(state *types.ScaleIOFramework) (bool, error) {
@@ -119,6 +166,28 @@ libstorage:
 
 		file.WriteString(rexrayConfig)
 		file.Close()
+
+		found, errInitd := doesSciniExistInRexrayInitD()
+		if errInitd == nil {
+			if !found {
+				log.Debugln("Modify REX-Ray init.d to add Scini dependency")
+
+				writeSciniCmdline := "sed -i 's/\\/usr\\/bin\\/rexray start/if \\[ -e \\/etc\\/init.d\\/scini \\]\\; then \\/etc\\/init.d\\/scini start; fi\\n    \\/usr\\/bin\\/rexray start/' /etc/init.d/rexray"
+				output, err = exec.RunCommandOutput(writeSciniCmdline)
+				if err != nil || len(output) > 0 {
+					log.Errorln("Configure MDM to Gateway Failed:", err)
+					log.Infoln("GatewaySetup LEAVE")
+					return false, err
+				}
+			} else {
+				log.Debugln("Scini has already been configured as a dependency on REX-Ray initd")
+			}
+		} else {
+			log.Infoln("doesSciniExistInRexrayInitD failed:", errInitd)
+			log.Infoln("RexraySetup LEAVE")
+			return false, errInitd
+		}
+
 	} else {
 		log.Infoln(types.RexRayPackageName, "is already installed")
 	}

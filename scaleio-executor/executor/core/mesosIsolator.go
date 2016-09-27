@@ -36,6 +36,11 @@ var (
 	ErrIsolatorNameInvalid = errors.New("The Mesos Module Isolator name is invalid")
 )
 
+func getDvdcliVersionFromBintray() (string, error) {
+	version, err := installers.GetVersionFromBintray(dvdcliBintrayRootURI)
+	return version, err
+}
+
 func parseIsolatorVersionFromFilename(filename string) (string, error) {
 	log.Debugln("parseIsolatorVersionFromFilename ENTER")
 	log.Debugln("filename:", filename)
@@ -198,9 +203,9 @@ func setupIsolator(state *types.ScaleIOFramework) error {
 
 		err = doesLineExistInMesosPropertyFile(isolationFile, isolationFileContents)
 		if err != nil {
-			contents, err := getMesosPropertyFileContents(isolationFile)
+			contents, errProp := getMesosPropertyFileContents(isolationFile)
 			if err != nil {
-				log.Warnln("getMesosPropertyFileContents returned err:", err)
+				log.Warnln("getMesosPropertyFileContents returned err:", errProp)
 			}
 
 			if len(contents) > 0 {
@@ -208,12 +213,12 @@ func setupIsolator(state *types.ScaleIOFramework) error {
 				log.Infoln("Preserving existing contents:", isolationFileContents)
 			}
 
-			isolationFile, err := os.OpenFile(isolationFile,
+			isolationFile, errWrite := os.OpenFile(isolationFile,
 				os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0666)
-			if err != nil {
-				log.Errorln("Writing Isolation File Failed:", err)
+			if errWrite != nil {
+				log.Errorln("Writing Isolation File Failed:", errWrite)
 				log.Infoln("SetupIsolator LEAVE")
-				return err
+				return errWrite
 			}
 
 			isolationFile.WriteString(isolationFileContents)
