@@ -44,14 +44,20 @@ const (
 	//StatePrerequisitesInstalled the prerequisite packages are installed
 	StatePrerequisitesInstalled = 1
 
+	//StateCleanPrereqsReboot after kernel version has been updated
+	StateCleanPrereqsReboot = 2
+
 	//StateBasePackagedInstalled the base ScaleIO packages are installed
-	StateBasePackagedInstalled = 2
+	StateBasePackagedInstalled = 3
 
 	//StateInitializeCluster the cluster is setup, now initial the cluster
-	StateInitializeCluster = 3
+	StateInitializeCluster = 4
 
 	//StateInstallRexRay install rexray
-	StateInstallRexRay = 4
+	StateInstallRexRay = 5
+
+	//StateCleanInstallReboot after installing all components
+	StateCleanInstallReboot = 6
 
 	//StateFinishInstall the agent node installation is complete
 	StateFinishInstall = 1024
