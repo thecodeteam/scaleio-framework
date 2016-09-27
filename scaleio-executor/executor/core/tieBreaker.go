@@ -65,6 +65,8 @@ func tieBreaker(executorID string, getstate retrievestate) {
 				}
 
 				time.Sleep(time.Duration(WaitForRebootInSeconds) * time.Second)
+			} else {
+				log.Infoln("No need to reboot while installing prerequisites")
 			}
 
 		case types.StatePrerequisitesInstalled:
@@ -176,6 +178,8 @@ func tieBreaker(executorID string, getstate retrievestate) {
 				}
 
 				time.Sleep(time.Duration(WaitForRebootInSeconds) * time.Second)
+			} else {
+				log.Infoln("No need to reboot while installing REX-Ray")
 			}
 
 		case types.StateFinishInstall:

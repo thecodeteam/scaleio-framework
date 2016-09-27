@@ -41,11 +41,11 @@ const (
 	//StateUnknown will start with a fresh installation (or upgrade)
 	StateUnknown = 0
 
-	//StatePrerequisitesInstalled the prerequisite packages are installed
-	StatePrerequisitesInstalled = 1
-
 	//StateCleanPrereqsReboot after kernel version has been updated
-	StateCleanPrereqsReboot = 2
+	StateCleanPrereqsReboot = 1
+
+	//StatePrerequisitesInstalled the prerequisite packages are installed
+	StatePrerequisitesInstalled = 2
 
 	//StateBasePackagedInstalled the base ScaleIO packages are installed
 	StateBasePackagedInstalled = 3
