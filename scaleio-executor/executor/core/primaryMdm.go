@@ -23,6 +23,8 @@ func primaryMDM(executorID string, getstate retrievestate) {
 				types.StateFatalInstall)
 			if errState != nil {
 				log.Errorln("Failed to signal state change:", errState)
+			} else {
+				log.Debugln("Signaled StateFatalInstall")
 			}
 			time.Sleep(time.Duration(PollAfterFatalInSeconds) * time.Second)
 			continue
@@ -37,6 +39,8 @@ func primaryMDM(executorID string, getstate retrievestate) {
 					types.StateFatalInstall)
 				if errState != nil {
 					log.Errorln("Failed to signal state change:", errState)
+				} else {
+					log.Debugln("Signaled StateFatalInstall")
 				}
 				continue
 			}
@@ -45,6 +49,8 @@ func primaryMDM(executorID string, getstate retrievestate) {
 				types.StateCleanPrereqsReboot)
 			if errState != nil {
 				log.Errorln("Failed to signal state change:", errState)
+			} else {
+				log.Debugln("Signaled StateCleanPrereqsReboot")
 			}
 
 			state = waitForCleanPrereqsReboot(getstate)
@@ -53,6 +59,8 @@ func primaryMDM(executorID string, getstate retrievestate) {
 				types.StatePrerequisitesInstalled)
 			if errState != nil {
 				log.Errorln("Failed to signal state change:", errState)
+			} else {
+				log.Debugln("Signaled StatePrerequisitesInstalled")
 			}
 
 			//requires a reboot?
@@ -78,6 +86,8 @@ func primaryMDM(executorID string, getstate retrievestate) {
 					types.StateFatalInstall)
 				if errState != nil {
 					log.Errorln("Failed to signal state change:", errState)
+				} else {
+					log.Debugln("Signaled StateFatalInstall")
 				}
 				continue
 			}
@@ -89,6 +99,8 @@ func primaryMDM(executorID string, getstate retrievestate) {
 					types.StateFatalInstall)
 				if errState != nil {
 					log.Errorln("Failed to signal state change:", errState)
+				} else {
+					log.Debugln("Signaled StateFatalInstall")
 				}
 				continue
 			}
@@ -97,6 +109,8 @@ func primaryMDM(executorID string, getstate retrievestate) {
 				types.StateBasePackagedInstalled)
 			if errState != nil {
 				log.Errorln("Failed to signal state change:", errState)
+			} else {
+				log.Debugln("Signaled StateBasePackagedInstalled")
 			}
 
 		case types.StateBasePackagedInstalled:
@@ -108,6 +122,8 @@ func primaryMDM(executorID string, getstate retrievestate) {
 					types.StateFatalInstall)
 				if errState != nil {
 					log.Errorln("Failed to signal state change:", errState)
+				} else {
+					log.Debugln("Signaled StateFatalInstall")
 				}
 				continue
 			}
@@ -116,6 +132,8 @@ func primaryMDM(executorID string, getstate retrievestate) {
 				types.StateInitializeCluster)
 			if errState != nil {
 				log.Errorln("Failed to signal state change:", errState)
+			} else {
+				log.Debugln("Signaled StateInitializeCluster")
 			}
 
 		case types.StateInitializeCluster:
@@ -127,6 +145,8 @@ func primaryMDM(executorID string, getstate retrievestate) {
 					types.StateFatalInstall)
 				if errState != nil {
 					log.Errorln("Failed to signal state change:", errState)
+				} else {
+					log.Debugln("Signaled StateFatalInstall")
 				}
 				continue
 			}
@@ -138,6 +158,8 @@ func primaryMDM(executorID string, getstate retrievestate) {
 					types.StateFatalInstall)
 				if errState != nil {
 					log.Errorln("Failed to signal state change:", errState)
+				} else {
+					log.Debugln("Signaled StateFatalInstall")
 				}
 				continue
 			}
@@ -147,6 +169,8 @@ func primaryMDM(executorID string, getstate retrievestate) {
 				types.StateInstallRexRay)
 			if errState != nil {
 				log.Errorln("Failed to signal state change:", errState)
+			} else {
+				log.Debugln("Signaled StateInstallRexRay")
 			}
 
 		case types.StateInstallRexRay:
@@ -158,6 +182,8 @@ func primaryMDM(executorID string, getstate retrievestate) {
 					types.StateFatalInstall)
 				if errState != nil {
 					log.Errorln("Failed to signal state change:", errState)
+				} else {
+					log.Debugln("Signaled StateFatalInstall")
 				}
 				continue
 			}
@@ -169,6 +195,8 @@ func primaryMDM(executorID string, getstate retrievestate) {
 					types.StateFatalInstall)
 				if errState != nil {
 					log.Errorln("Failed to signal state change:", errState)
+				} else {
+					log.Debugln("Signaled StateFatalInstall")
 				}
 				continue
 			}
@@ -177,6 +205,8 @@ func primaryMDM(executorID string, getstate retrievestate) {
 				types.StateCleanInstallReboot)
 			if errState != nil {
 				log.Errorln("Failed to signal state change:", errState)
+			} else {
+				log.Debugln("Signaled StateCleanInstallReboot")
 			}
 
 			state = waitForCleanInstallReboot(getstate)
@@ -185,6 +215,8 @@ func primaryMDM(executorID string, getstate retrievestate) {
 				types.StateFinishInstall)
 			if errState != nil {
 				log.Errorln("Failed to signal state change:", errState)
+			} else {
+				log.Debugln("Signaled StateFinishInstall")
 			}
 
 			//requires a reboot?
