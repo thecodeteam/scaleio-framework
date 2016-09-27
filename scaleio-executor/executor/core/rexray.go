@@ -168,6 +168,9 @@ libstorage:
 		file.WriteString(rexrayConfig)
 		file.Close()
 
+		log.Debugln("Write Config File:")
+		log.Debugln(rexrayConfig)
+
 		found, errInitd := doesSciniExistInRexrayInitD()
 		if errInitd == nil {
 			if !found {
@@ -188,7 +191,6 @@ libstorage:
 			log.Infoln("RexraySetup LEAVE")
 			return false, errInitd
 		}
-
 	} else {
 		log.Infoln(types.RexRayPackageName, "is already installed")
 	}

@@ -21,6 +21,8 @@ func fakeNode(executorID string, getstate retrievestate) {
 				types.StateFatalInstall)
 			if errState != nil {
 				log.Errorln("Failed to signal state change:", errState)
+			} else {
+				log.Debugln("Signaled StateFatalInstall")
 			}
 			time.Sleep(time.Duration(PollAfterFatalInSeconds) * time.Second)
 			continue
@@ -32,6 +34,8 @@ func fakeNode(executorID string, getstate retrievestate) {
 				types.StateFinishInstall)
 			if errState != nil {
 				log.Errorln("Failed to signal state change:", errState)
+			} else {
+				log.Debugln("Signaled StateFinishInstall")
 			}
 
 		case types.StatePrerequisitesInstalled:

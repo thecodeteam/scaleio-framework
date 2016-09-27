@@ -82,7 +82,7 @@ func environmentSetup(state *types.ScaleIOFramework) (bool, error) {
 	}
 
 	if kernelVer != requiredKernelVersionCheck {
-		log.Errorln("Reboot Required!")
+		log.Errorln("Kernel is installed but not running. Reboot Required!")
 		log.Infoln("EnvironmentSetup LEAVE")
 		return true, nil
 	}
@@ -565,14 +565,6 @@ func gatewaySetup(state *types.ScaleIOFramework) (bool, error) {
 		output, err = exec.RunCommandOutput(dumpIDCmdline)
 		if err != nil || len(output) > 0 {
 			log.Errorln("Install LIA Failed:", err)
-			log.Infoln("GatewaySetup LEAVE")
-			return false, err
-		}
-
-		serviceliaCmdline := "service lia restart"
-		err = exec.RunCommand(serviceliaCmdline, liaRestartCheck, "")
-		if err != nil {
-			log.Errorln("Restart LIA Failed:", err)
 			log.Infoln("GatewaySetup LEAVE")
 			return false, err
 		}

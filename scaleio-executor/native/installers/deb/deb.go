@@ -2,6 +2,7 @@ package deb
 
 import (
 	"errors"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -48,6 +49,11 @@ func GetInstalledVersion(packageName string, parseVersion bool) (string, error) 
 		log.Debugln("Output length is empty")
 		log.Debugln("GetInstalledVersion LEAVE")
 		return "", ErrExecEmptyOutput
+	}
+
+	if strings.Contains(output, "is not installed") {
+		log.Warnln("Package", packageName, "is not installed. Blanking the output.")
+		output = ""
 	}
 
 	version := output
