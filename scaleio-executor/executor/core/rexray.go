@@ -22,6 +22,8 @@ const (
 	rexrayStartCheck     = "SUCCESS!|REX-Ray already running at"
 	rexrayRunningCheck   = "REX-Ray is running at PID"
 	rexrayEnableCheck    = "Adding system startup for"
+
+	rexrayBintrayRootURI = "https://dl.bintray.com/emccode/rexray/"
 )
 
 func getRexrayVersionFromBintray(state *types.ScaleIOFramework) (string, error) {
@@ -173,11 +175,11 @@ libstorage:
 				log.Debugln("Modify REX-Ray init.d to add Scini dependency")
 
 				writeSciniCmdline := "sed -i 's/\\/usr\\/bin\\/rexray start/if \\[ -e \\/etc\\/init.d\\/scini \\]\\; then \\/etc\\/init.d\\/scini start; fi\\n    \\/usr\\/bin\\/rexray start/' /etc/init.d/rexray"
-				output, err = exec.RunCommandOutput(writeSciniCmdline)
-				if err != nil || len(output) > 0 {
-					log.Errorln("Configure MDM to Gateway Failed:", err)
+				output, errScini := exec.RunCommandOutput(writeSciniCmdline)
+				if errScini != nil || len(output) > 0 {
+					log.Errorln("Failed to add Scini dependency:", errScini)
 					log.Infoln("GatewaySetup LEAVE")
-					return false, err
+					return false, errScini
 				}
 			} else {
 				log.Debugln("Scini has already been configured as a dependency on REX-Ray initd")
