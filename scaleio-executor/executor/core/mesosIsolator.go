@@ -7,7 +7,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-	"time"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -273,16 +272,6 @@ func setupIsolator(state *types.ScaleIOFramework) error {
 
 		dvdimodFile.WriteString(dvdimodFileContents)
 		dvdimodFile.Close()
-
-		time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
-
-		slaveRestartCmdline := "service mesos-slave restart"
-		err = exec.RunCommand(slaveRestartCmdline, slaveRestartCheck, "")
-		if err != nil {
-			log.Errorln("Mesos Slave restart Failed:", err)
-			log.Infoln("SetupIsolator LEAVE")
-			return err
-		}
 	} else {
 		log.Infoln("Mesos Module Isolator is already installed")
 	}
