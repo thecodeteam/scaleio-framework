@@ -38,6 +38,9 @@ func displayState(w http.ResponseWriter, r *http.Request, server *RestServer) {
 		case types.StateCleanInstallReboot:
 			response += "Sync on REX-Ray Install"
 
+		case types.StateSystemReboot:
+			response += "System is Rebooting"
+
 		case types.StateFinishInstall:
 			response += "ScaleIO Running"
 
