@@ -14,6 +14,9 @@ const (
 	//DelayOnVolumeCreateInSeconds just like it says
 	DelayOnVolumeCreateInSeconds = 20
 
+	//DelayForRebootInSeconds the amount of time to wait for the reboot
+	WaitForRebootInSeconds = 5
+
 	//WaitForRebootInSeconds the amount of time to wait for the reboot
 	WaitForRebootInSeconds = 120
 
