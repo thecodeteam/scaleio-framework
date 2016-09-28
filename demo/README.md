@@ -9,7 +9,7 @@ Steps:
 1. [Deploy The CloudFormation Template](#deploy-cloudformation-template)
 2. [Verify ScaleIO Configuration](#verify-scaleio-configuration)
 3. [Launch Framework](#launch-framework)
-4. [Start Containers](#)
+4. [Deploy Applications](#deploy-applications)
 
 
 ## Deploy CloudFormation Template
@@ -107,4 +107,19 @@ View the status of the ScaleIO framework by opening the Deployment UI.
 ![sio03](img/sio03.png)
 ![sio02](img/sio02.png)
 
-## Will Complete
+**The Agent Nodes WILL REBOOT after successful installation**. This is done within this demo ONLY to make sure ScaleIO, Docker, REX-Ray and Marathon services are functioning properly. This process can take 2-5 minutes.
+
+The status of ScaleIO deployment web portal will be restarted on the other Mesos Agent with a new port.
+
+## Deploy Applications
+
+This particular setup has a 5 minute timeout. If a Docker image takes longer than 5 minutes to download, then deployment will fail. It's suggested to go to each Mesos Agent and download the image using `docker pull` if there is a poor connection.
+
+```
+$ ssh -i "keypair.pem" ubuntu@MesosAgent1_IP_or_DNS
+$ docker pull <image name>
+```
+
+Deploying Applications:
+
+1. [Storage Persistence with Postgres using Mesos, Marathon, Docker, and REX-Ray](https://github.com/codedellemc/demo/tree/master/demo-persistence-with-postgres-marathon-docker)
