@@ -9,18 +9,20 @@ import (
 	"github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
-func findScaleIONodeByAgentID(nodes types.ScaleIONodes, agentID string) *types.ScaleIONode {
-	log.Debugln("findScaleIONodeByAgentID ENTER")
+func findScaleIONodeByHostname(nodes types.ScaleIONodes, hostname string) *types.ScaleIONode {
+	log.Debugln("findScaleIONodeByHostname ENTER")
+
 	for i := 0; i < len(nodes); i++ {
 		node := nodes[i]
-		if node.AgentID == agentID {
-			log.Debugln("Node Found:", node.AgentID)
-			log.Debugln("findScaleIONodeByAgentID LEAVE")
+		log.Debugln(node.Hostname, "=", hostname, "?")
+		if node.Hostname == hostname {
+			log.Debugln("Node Found")
+			log.Debugln("findScaleIONodeByHostname LEAVE")
 			return node
 		}
 	}
 	log.Debugln("Node NOT Found")
-	log.Debugln("findScaleIONodeByAgentID LEAVE")
+	log.Debugln("findScaleIONodeByHostname LEAVE")
 	return nil
 }
 
@@ -44,6 +46,7 @@ func prepareScaleIONode(offer *mesos.Offer, persona int, ID int) *types.ScaleION
 		ExecutorID:  "executor-scaleio" + strconv.Itoa(ID),
 		OfferID:     offer.GetId().GetValue(),
 		IPAddress:   offer.GetUrl().GetAddress().GetIp(),
+		Hostname:    offer.GetHostname(),
 		Index:       ID,
 		Persona:     persona,
 		State:       types.StateUnknown,
