@@ -38,6 +38,10 @@ func fakeNode(executorID string, getstate retrievestate) {
 				log.Debugln("Signaled StateFinishInstall")
 			}
 
+		case types.StateCleanPrereqsReboot:
+			log.Debugln("In StateCleanPrereqsReboot. Do nothing.")
+			time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
+
 		case types.StatePrerequisitesInstalled:
 			log.Debugln("In StatePrerequisitesInstalled. Do nothing.")
 			time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
@@ -52,6 +56,14 @@ func fakeNode(executorID string, getstate retrievestate) {
 
 		case types.StateInstallRexRay:
 			log.Debugln("In StateInstallRexRay. Do nothing.")
+			time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
+
+		case types.StateCleanInstallReboot:
+			log.Debugln("In StateCleanInstallReboot. Do nothing.")
+			time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
+
+		case types.StateSystemReboot:
+			log.Debugln("In StateSystemReboot. Do nothing.")
 			time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
 
 		case types.StateFinishInstall:

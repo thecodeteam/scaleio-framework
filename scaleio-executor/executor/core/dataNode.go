@@ -66,6 +66,8 @@ func dataNode(executorID string, getstate retrievestate) {
 			if reboot {
 				log.Infoln("Reboot required before StatePrerequisitesInstalled!")
 
+				time.Sleep(time.Duration(WaitForRebootInSeconds) * time.Second)
+
 				rebootErr := exec.RunCommand(rebootCmdline, rebootCheck, "")
 				if rebootErr != nil {
 					log.Errorln("Install Kernel Failed:", rebootErr)
@@ -75,6 +77,10 @@ func dataNode(executorID string, getstate retrievestate) {
 			} else {
 				log.Infoln("No need to reboot while installing prerequisites")
 			}
+
+		case types.StateCleanPrereqsReboot:
+			log.Debugln("In StateCleanPrereqsReboot. Do nothing.")
+			time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
 
 		case types.StatePrerequisitesInstalled:
 			err := nodeSetup(state)
@@ -151,18 +157,20 @@ func dataNode(executorID string, getstate retrievestate) {
 
 			state = waitForCleanInstallReboot(getstate)
 
-			errState = nodestate.UpdateNodeState(state.SchedulerAddress, node.ExecutorID,
-				types.StateFinishInstall)
-			if errState != nil {
-				log.Errorln("Failed to signal state change:", errState)
-			} else {
-				log.Debugln("Signaled StateFinishInstall")
-			}
-
 			//requires a reboot?
 			if reboot {
 				log.Infoln("Reboot required before StateFinishInstall!")
 				log.Debugln("reboot:", reboot)
+
+				time.Sleep(time.Duration(WaitForRebootInSeconds) * time.Second)
+
+				errState = nodestate.UpdateNodeState(state.SchedulerAddress, node.ExecutorID,
+					types.StateSystemReboot)
+				if errState != nil {
+					log.Errorln("Failed to signal state change:", errState)
+				} else {
+					log.Debugln("Signaled StateSystemReboot")
+				}
 
 				rebootErr := exec.RunCommand(rebootCmdline, rebootCheck, "")
 				if rebootErr != nil {
@@ -172,6 +180,27 @@ func dataNode(executorID string, getstate retrievestate) {
 				time.Sleep(time.Duration(WaitForRebootInSeconds) * time.Second)
 			} else {
 				log.Infoln("No need to reboot while installing REX-Ray")
+
+				errState = nodestate.UpdateNodeState(state.SchedulerAddress, node.ExecutorID,
+					types.StateFinishInstall)
+				if errState != nil {
+					log.Errorln("Failed to signal state change:", errState)
+				} else {
+					log.Debugln("Signaled StateFinishInstall")
+				}
+			}
+
+		case types.StateCleanInstallReboot:
+			log.Debugln("In StateCleanInstallReboot. Do nothing.")
+			time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
+
+		case types.StateSystemReboot:
+			errState := nodestate.UpdateNodeState(state.SchedulerAddress, node.ExecutorID,
+				types.StateFinishInstall)
+			if errState != nil {
+				log.Errorln("Failed to signal state change:", errState)
+			} else {
+				log.Debugln("Signaled StateFinishInstall")
 			}
 
 		case types.StateFinishInstall:

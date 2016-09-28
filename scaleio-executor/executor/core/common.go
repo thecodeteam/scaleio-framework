@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	rebootCmdline = "shutdown -r 1"
+	rebootCmdline = "shutdown -r now"
 )
 
 var (
