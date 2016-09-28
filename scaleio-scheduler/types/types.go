@@ -103,6 +103,7 @@ type ScaleIONode struct {
 	ExecutorID  string            `json:"executorid"`
 	OfferID     string            `json:"offerid"`
 	IPAddress   string            `json:"ipaddress"`
+	Hostname    string            `json:"hostname"`
 	Index       int               `json:"index"`
 	Persona     int               `json:"persona"`
 	State       int               `json:"state"`

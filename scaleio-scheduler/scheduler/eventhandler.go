@@ -27,9 +27,9 @@ func (s *ScaleIOScheduler) offers(event *sched.Event) {
 			continue
 		}
 
-		node := findScaleIONodeByAgentID(s.Server.State.ScaleIO.Nodes, offer.GetAgentId().GetValue())
+		node := findScaleIONodeByHostname(s.Server.State.ScaleIO.Nodes, offer.GetHostname())
 		if node != nil {
-			log.Errorln("Found existing node by AgentID:", offer.GetAgentId().GetValue())
+			log.Errorln("Found existing node by Hostname:", offer.GetHostname())
 			continue
 		}
 
@@ -73,9 +73,9 @@ func (s *ScaleIOScheduler) offers(event *sched.Event) {
 		}
 
 		//find node based on state
-		node := findScaleIONodeByAgentID(s.Server.State.ScaleIO.Nodes, offer.GetAgentId().GetValue())
+		node := findScaleIONodeByHostname(s.Server.State.ScaleIO.Nodes, offer.GetHostname())
 		if node == nil {
-			log.Errorln("Unable to find node by AgentID:", offer.GetAgentId().GetValue())
+			log.Errorln("Unable to find node by Hostname:", offer.GetHostname())
 			continue
 		}
 
