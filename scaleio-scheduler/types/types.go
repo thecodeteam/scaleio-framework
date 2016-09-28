@@ -59,6 +59,9 @@ const (
 	//StateCleanInstallReboot after installing all components
 	StateCleanInstallReboot = 6
 
+	//StateSystemReboot system is rebooting
+	StateSystemReboot = 7
+
 	//StateFinishInstall the agent node installation is complete
 	StateFinishInstall = 1024
 
