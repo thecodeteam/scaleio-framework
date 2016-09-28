@@ -4,7 +4,7 @@
 
 The ScaleIO Framework deploys Dell EMC ScaleIO as a simplified task in Apache Mesos. All the required components to consume and provision storage volumes from a ScaleIO cluster are automatically deployed and configured on the Mesos Agents. This creates an automated mechanism to have a fully configured and reliable persistent storage solution for containers running on Apache Mesos. 
 
-Test it out following the [Demo Guide](demo/README.md) using an AWS Cloud Formation Template and provided JSON files.
+Test it out following the [Demo Guide](demo/README.md) using an AWS Cloud Formation Template and provided JSON files. Watch the [YouTube Demo Video](https://youtu.be/tt6qhEkeVOQ?list=PLbssOJyyvHuWiBQAg9EFWH570timj2fxt) to see it in action.
 
 ## Key Features
 - Installs required components on existing Mesos Agents to consume and provision ScaleIO storage volumes

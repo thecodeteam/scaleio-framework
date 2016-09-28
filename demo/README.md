@@ -11,6 +11,7 @@ Steps:
 3. [Launch Framework](#launch-framework)
 4. [Deploy Applications](#deploy-applications)
 
+Watch the [YouTube Demo Video](https://youtu.be/tt6qhEkeVOQ?list=PLbssOJyyvHuWiBQAg9EFWH570timj2fxt) to see it in action.
 
 ## Deploy CloudFormation Template
 
