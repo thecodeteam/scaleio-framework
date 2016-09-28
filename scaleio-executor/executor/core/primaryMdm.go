@@ -67,7 +67,7 @@ func primaryMDM(executorID string, getstate retrievestate) {
 			if reboot {
 				log.Infoln("Reboot required before StatePrerequisitesInstalled!")
 
-				time.Sleep(time.Duration(WaitForRebootInSeconds) * time.Second)
+				time.Sleep(time.Duration(DelayForRebootInSeconds) * time.Second)
 
 				rebootErr := exec.RunCommand(rebootCmdline, rebootCheck, "")
 				if rebootErr != nil {
@@ -223,7 +223,7 @@ func primaryMDM(executorID string, getstate retrievestate) {
 				log.Debugln("rebootRequired:", rebootRequired)
 				log.Debugln("reboot:", reboot)
 
-				time.Sleep(time.Duration(WaitForRebootInSeconds) * time.Second)
+				time.Sleep(time.Duration(DelayForRebootInSeconds) * time.Second)
 
 				errState = nodestate.UpdateNodeState(state.SchedulerAddress, node.ExecutorID,
 					types.StateSystemReboot)
