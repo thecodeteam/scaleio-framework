@@ -9,11 +9,8 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
+	xplatform "github.com/dvonthenen/goxplatform"
 
-	"github.com/codedellemc/scaleio-framework/scaleio-executor/native"
-	"github.com/codedellemc/scaleio-framework/scaleio-executor/native/exec"
-	"github.com/codedellemc/scaleio-framework/scaleio-executor/native/installers"
-	"github.com/codedellemc/scaleio-framework/scaleio-executor/native/installers/deb"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
@@ -38,7 +35,7 @@ var (
 )
 
 func getDvdcliVersionFromBintray() (string, error) {
-	version, err := installers.GetVersionFromBintray(dvdcliBintrayRootURI)
+	version, err := xplatform.GetInstance().Inst.GetVersionFromBintray(dvdcliBintrayRootURI)
 	return version, err
 }
 
@@ -182,7 +179,7 @@ func setupIsolator(state *types.ScaleIOFramework) error {
 	if isoVerErr != nil || isoInstErr != nil || isoVer != isoInst {
 		log.Infoln("Installing Mesos Isolator")
 
-		localIsolator, err := installers.DownloadPackage(state.Isolator.Binary)
+		localIsolator, err := xplatform.GetInstance().Inst.DownloadPackage(state.Isolator.Binary)
 		if err != nil {
 			log.Errorln("Error downloading Isolator package:", err)
 			log.Infoln("SetupIsolator LEAVE")
@@ -190,8 +187,8 @@ func setupIsolator(state *types.ScaleIOFramework) error {
 		}
 
 		//Copy File
-		dstFullPath := isolatorInstallDir + "/" + native.GetFilenameFromURIOrFullPath(localIsolator)
-		err = native.FileCopy(localIsolator, dstFullPath)
+		dstFullPath := isolatorInstallDir + "/" + xplatform.GetInstance().Fs.GetFilenameFromURIOrFullPath(localIsolator)
+		err = xplatform.GetInstance().Fs.FileCopy(localIsolator, dstFullPath)
 		if err != nil {
 			log.Errorln("Failed to Copy isolator to Dst:", err)
 			log.Infoln("SetupIsolator LEAVE")
@@ -278,8 +275,8 @@ func setupIsolator(state *types.ScaleIOFramework) error {
 
 	//DVDCLI install
 	dcVer, dcVerErr := getDvdcliVersionFromBintray()
-	dcInst, dcInstErr := deb.GetInstalledVersion(types.DvdcliPackageName, false)
-	dcInst = installers.CorrectVersionFromDeb(dcInst)
+	dcInst, dcInstErr := xplatform.GetInstance().Inst.GetInstalledVersion(types.DvdcliPackageName, false)
+	dcInst = xplatform.GetInstance().Inst.CorrectVersionFromDeb(dcInst)
 	log.Debugln("dcVer:", dcVer)
 	log.Debugln("dcVerErr:", dcVerErr)
 	log.Debugln("dcInst:", dcInst)
@@ -288,7 +285,7 @@ func setupIsolator(state *types.ScaleIOFramework) error {
 	if dcVerErr != nil || dcInstErr != nil || dcVer != dcInst {
 		dvdcliInstallCmdline := "curl -ksSL https://dl.bintray.com/emccode/dvdcli/install " +
 			"| INSECURE=1 sh -"
-		err := exec.RunCommand(dvdcliInstallCmdline, dvdcliInstallCheck, "")
+		err := xplatform.GetInstance().Run.Command(dvdcliInstallCmdline, dvdcliInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install DVDCLI Failed:", err)
 			log.Infoln("RexraySetup LEAVE")

@@ -8,3 +8,5 @@ import:
   vcs:     git
 - package: github.com/twinj/uuid
   vcs:     git
+- package: github.com/dvonthenen/goxplatform
+  vcs:     git

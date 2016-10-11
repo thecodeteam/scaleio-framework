@@ -4,7 +4,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/dvonthenen/scaleio-executor/native/exec"
+	xplatform "github.com/dvonthenen/goxplatform"
 
 	nodestate "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/node"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
@@ -69,7 +69,7 @@ func secondaryMDM(executorID string, getstate retrievestate) {
 
 				time.Sleep(time.Duration(DelayForRebootInSeconds) * time.Second)
 
-				rebootErr := exec.RunCommand(rebootCmdline, rebootCheck, "")
+				rebootErr := xplatform.GetInstance().Run.Command(rebootCmdline, rebootCheck, "")
 				if rebootErr != nil {
 					log.Errorln("Install Kernel Failed:", rebootErr)
 				}
@@ -208,7 +208,7 @@ func secondaryMDM(executorID string, getstate retrievestate) {
 					log.Debugln("Signaled StateSystemReboot")
 				}
 
-				rebootErr := exec.RunCommand(rebootCmdline, rebootCheck, "")
+				rebootErr := xplatform.GetInstance().Run.Command(rebootCmdline, rebootCheck, "")
 				if rebootErr != nil {
 					log.Errorln("Install Kernel Failed:", rebootErr)
 				}

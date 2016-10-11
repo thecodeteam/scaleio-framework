@@ -7,10 +7,8 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
+	xplatform "github.com/dvonthenen/goxplatform"
 
-	"github.com/codedellemc/scaleio-framework/scaleio-executor/native/exec"
-	"github.com/codedellemc/scaleio-framework/scaleio-executor/native/installers"
-	"github.com/codedellemc/scaleio-framework/scaleio-executor/native/installers/deb"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
@@ -27,7 +25,7 @@ const (
 
 func getRexrayVersionFromBintray(state *types.ScaleIOFramework) (string, error) {
 	url := rexrayBintrayRootURI + state.Rexray.Branch
-	version, err := installers.GetVersionFromBintray(url)
+	version, err := xplatform.GetInstance().Inst.GetVersionFromBintray(url)
 	return version, err
 }
 
@@ -84,8 +82,8 @@ func rexraySetup(state *types.ScaleIOFramework) (bool, error) {
 
 	//REX-Ray Install
 	rrVer, rrVerErr := getRexrayVersionToInstall(state)
-	rrInst, rrInstErr := deb.GetInstalledVersion(types.RexRayPackageName, false)
-	rrInst = installers.CorrectVersionFromDeb(rrInst)
+	rrInst, rrInstErr := xplatform.GetInstance().Inst.GetInstalledVersion(types.RexRayPackageName, false)
+	rrInst = xplatform.GetInstance().Inst.CorrectVersionFromDeb(rrInst)
 	log.Debugln("rrVer:", rrVer)
 	log.Debugln("rrVerErr:", rrVerErr)
 	log.Debugln("rrInst:", rrInst)
@@ -110,7 +108,7 @@ func rexraySetup(state *types.ScaleIOFramework) (bool, error) {
 				state.Rexray.Branch
 		}
 
-		err = exec.RunCommand(rexrayInstallCmdline, rexrayInstallCheck, "")
+		err = xplatform.GetInstance().Run.Command(rexrayInstallCmdline, rexrayInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install REX-Ray Failed:", err)
 			log.Infoln("RexraySetup LEAVE")
@@ -177,7 +175,7 @@ libstorage:
 				log.Debugln("Modify REX-Ray init.d to add Scini dependency")
 
 				writeSciniCmdline := "sed -i 's/\\/usr\\/bin\\/rexray start/if \\[ -e \\/etc\\/init.d\\/scini \\]\\; then \\/etc\\/init.d\\/scini start; fi\\n    \\/usr\\/bin\\/rexray start/' /etc/init.d/rexray"
-				output, errScini := exec.RunCommandOutput(writeSciniCmdline)
+				output, errScini := xplatform.GetInstance().Run.CommandOutput(writeSciniCmdline)
 				if errScini != nil || len(output) > 0 {
 					log.Errorln("Failed to add Scini dependency:", errScini)
 					log.Infoln("GatewaySetup LEAVE")
@@ -220,7 +218,7 @@ func rexrayServerSetup(state *types.ScaleIOFramework) error {
 
 	//REX-Ray Install
 	rexrayInstallCmdline := "curl -ksSL https://dl.bintray.com/emccode/rexray/install | INSECURE=1 sh -"
-	err = exec.RunCommand(rexrayInstallCmdline, rexrayInstallCheck, "")
+	err = xplatform.GetInstance().Run.Command(rexrayInstallCmdline, rexrayInstallCheck, "")
 	if err != nil {
 		log.Errorln("Install REX-Ray Failed:", err)
 		log.Infoln("RexrayServerSetup LEAVE")
@@ -287,7 +285,7 @@ libstorage:
 	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
 
 	rexrayStopCmdline := "rexray service stop -l debug"
-	err = exec.RunCommandEx(rexrayStopCmdline, rexrayStopCheck, "", 20)
+	err = xplatform.GetInstance().Run.CommandEx(rexrayStopCmdline, rexrayStopCheck, "", 20)
 	if err != nil {
 		log.Warnln("REX-Ray stop Failed:", err)
 	}
@@ -295,7 +293,7 @@ libstorage:
 	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
 
 	rexrayStartCmdline := "rexray service start -l debug"
-	err = exec.RunCommandEx(rexrayStartCmdline, rexrayStartCheck, "", 20)
+	err = xplatform.GetInstance().Run.CommandEx(rexrayStartCmdline, rexrayStartCheck, "", 20)
 	if err != nil {
 		log.Errorln("REX-Ray start Failed:", err)
 		log.Infoln("RexrayServerSetup LEAVE")
@@ -319,7 +317,7 @@ func rexrayClientSetup(state *types.ScaleIOFramework) error {
 
 	//REX-Ray Install
 	rexrayInstallCmdline := "curl -ksSL https://dl.bintray.com/emccode/rexray/install | INSECURE=1 sh -"
-	err = exec.RunCommand(rexrayInstallCmdline, rexrayInstallCheck, "")
+	err = xplatform.GetInstance().Run.Command(rexrayInstallCmdline, rexrayInstallCheck, "")
 	if err != nil {
 		log.Errorln("Install REX-Ray Failed:", err)
 		log.Infoln("RexrayClientSetup LEAVE")
@@ -355,7 +353,7 @@ libstorage:
 	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
 
 	rexrayStopCmdline := "rexray service stop -l debug"
-	err = exec.RunCommandEx(rexrayStopCmdline, rexrayStopCheck, "", 20)
+	err = xplatform.GetInstance().Run.CommandEx(rexrayStopCmdline, rexrayStopCheck, "", 20)
 	if err != nil {
 		log.Warnln("REX-Ray stop Failed:", err)
 	}
@@ -363,7 +361,7 @@ libstorage:
 	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
 
 	rexrayStartCmdline := "rexray service start -l debug"
-	err = exec.RunCommandEx(rexrayStartCmdline, rexrayStartCheck, "", 20)
+	err = xplatform.GetInstance().Run.CommandEx(rexrayStartCmdline, rexrayStartCheck, "", 20)
 	if err != nil {
 		log.Errorln("REX-Ray start Failed:", err)
 		log.Infoln("RexrayClientSetup LEAVE")
