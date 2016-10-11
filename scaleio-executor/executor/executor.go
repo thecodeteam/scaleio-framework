@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
+	xplatform "github.com/dvonthenen/goxplatform"
 	jsonpb "github.com/gogo/protobuf/jsonpb"
 	"github.com/gogo/protobuf/proto"
 
@@ -17,7 +18,6 @@ import (
 	core "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/core"
 	exec "github.com/codedellemc/scaleio-framework/scaleio-executor/mesos/exec"
 	mesos "github.com/codedellemc/scaleio-framework/scaleio-executor/mesos/v1"
-	"github.com/codedellemc/scaleio-framework/scaleio-executor/native"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
@@ -271,7 +271,7 @@ func (e *ScaleIOExecutor) sendUpdate(task *mesos.TaskInfo, state *mesos.TaskStat
 				ExecutorId: e.ExecutorID,
 				State:      state,
 				Source:     mesos.TaskStatus_SOURCE_EXECUTOR.Enum(),
-				Uuid:       []byte(native.GetUUID()),
+				Uuid:       []byte(xplatform.GetInstance().Sys.GetUUID()),
 			},
 		},
 	}

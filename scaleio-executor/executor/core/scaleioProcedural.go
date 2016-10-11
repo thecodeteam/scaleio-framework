@@ -4,12 +4,9 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	xplatform "github.com/dvonthenen/goxplatform"
 
 	nodestate "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/node"
-	"github.com/codedellemc/scaleio-framework/scaleio-executor/native"
-	"github.com/codedellemc/scaleio-framework/scaleio-executor/native/exec"
-	"github.com/codedellemc/scaleio-framework/scaleio-executor/native/installers"
-	"github.com/codedellemc/scaleio-framework/scaleio-executor/native/installers/deb"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
@@ -43,13 +40,13 @@ const (
 func environmentSetup(state *types.ScaleIOFramework) (bool, error) {
 	log.Infoln("EnvironmentSetup ENTER")
 
-	aioErr := deb.IsInstalled("libaio1")
-	zipErr := deb.IsInstalled("zip")
+	aioErr := xplatform.GetInstance().Inst.IsInstalled("libaio1")
+	zipErr := xplatform.GetInstance().Inst.IsInstalled("zip")
 	if aioErr != nil || zipErr != nil {
 		log.Infoln("Installing libaio1 and zip")
 
 		miscCmdline := "apt-get -y install libaio1 zip"
-		err := exec.RunCommand(miscCmdline, aiozipCheck, "")
+		err := xplatform.GetInstance().Run.Command(miscCmdline, aiozipCheck, "")
 		if err != nil {
 			log.Errorln("Install Prerequisites Failed:", err)
 			log.Infoln("EnvironmentSetup LEAVE")
@@ -59,12 +56,12 @@ func environmentSetup(state *types.ScaleIOFramework) (bool, error) {
 		log.Infoln("libaio1 and zip are already installed")
 	}
 
-	kernelErr := deb.IsInstalled("linux-image-4.2.0-30-generic")
+	kernelErr := xplatform.GetInstance().Inst.IsInstalled("linux-image-4.2.0-30-generic")
 	if kernelErr != nil {
 		log.Infoln("Installing linux-image-4.2.0-30-generic")
 
 		kernelCmdline := "apt-get -y install linux-image-4.2.0-30-generic"
-		err := exec.RunCommand(kernelCmdline, genericInstallCheck, "")
+		err := xplatform.GetInstance().Run.Command(kernelCmdline, genericInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install Kernel Failed:", err)
 			log.Infoln("EnvironmentSetup LEAVE")
@@ -74,7 +71,7 @@ func environmentSetup(state *types.ScaleIOFramework) (bool, error) {
 		log.Infoln("linux-image-4.2.0-30-generic is already installed")
 	}
 
-	kernelVer, kernelVerErr := native.GetRunningKernelVersion()
+	kernelVer, kernelVerErr := xplatform.GetInstance().Sys.GetRunningKernelVersion()
 	if kernelVerErr != nil {
 		log.Errorln("Kernel Version Check Failed:", kernelVerErr)
 		log.Infoln("EnvironmentSetup LEAVE")
@@ -106,8 +103,8 @@ func managementSetup(state *types.ScaleIOFramework, isPriOrSec bool) error {
 	log.Infoln("MDM Pair String:", mdmPair)
 
 	//MDM Install
-	mdmVer, mdmVerErr := installers.ParseVersionFromFilename(state.ScaleIO.Deb.DebMdm)
-	mdmInst, mdmInstErr := deb.GetInstalledVersion(types.DebMdmPackageName, true)
+	mdmVer, mdmVerErr := xplatform.GetInstance().Inst.ParseVersionFromFilename(state.ScaleIO.Deb.DebMdm)
+	mdmInst, mdmInstErr := xplatform.GetInstance().Inst.GetInstalledVersion(types.DebMdmPackageName, true)
 	log.Debugln("mdmVer:", mdmVer)
 	log.Debugln("mdmVerErr:", mdmVerErr)
 	log.Debugln("mdmInst:", mdmInst)
@@ -116,7 +113,7 @@ func managementSetup(state *types.ScaleIOFramework, isPriOrSec bool) error {
 	if mdmVerErr != nil || mdmInstErr != nil || mdmVer != mdmInst {
 		log.Infoln("Installing", types.DebMdmPackageName)
 
-		localMdm, err := installers.DownloadPackage(state.ScaleIO.Deb.DebMdm)
+		localMdm, err := xplatform.GetInstance().Inst.DownloadPackage(state.ScaleIO.Deb.DebMdm)
 		if err != nil {
 			log.Errorln("Error downloading MDM package:", err)
 			log.Infoln("ManagementSetup LEAVE")
@@ -131,7 +128,7 @@ func managementSetup(state *types.ScaleIOFramework, isPriOrSec bool) error {
 		}
 
 		mdmCmdline := "MDM_ROLE_IS_MANAGER=" + strPriOrSec + " dpkg -i " + localMdm
-		err = exec.RunCommand(mdmCmdline, mdmInstallCheck, "")
+		err = xplatform.GetInstance().Run.Command(mdmCmdline, mdmInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install MDM Failed:", err)
 			log.Infoln("ManagementSetup LEAVE")
@@ -158,8 +155,8 @@ func nodeSetup(state *types.ScaleIOFramework) error {
 	log.Infoln("MDM Pair String:", mdmPair)
 
 	//SDS Install
-	sdsVer, sdsVerErr := installers.ParseVersionFromFilename(state.ScaleIO.Deb.DebSds)
-	sdsInst, sdsInstErr := deb.GetInstalledVersion(types.DebSdsPackageName, true)
+	sdsVer, sdsVerErr := xplatform.GetInstance().Inst.ParseVersionFromFilename(state.ScaleIO.Deb.DebSds)
+	sdsInst, sdsInstErr := xplatform.GetInstance().Inst.GetInstalledVersion(types.DebSdsPackageName, true)
 	log.Debugln("sdsVer:", sdsVer)
 	log.Debugln("sdsVerErr:", sdsVerErr)
 	log.Debugln("sdsInst:", sdsInst)
@@ -168,7 +165,7 @@ func nodeSetup(state *types.ScaleIOFramework) error {
 	if sdsVerErr != nil || sdsInstErr != nil || sdsVer != sdsInst {
 		log.Infoln("Installing", types.DebSdsPackageName)
 
-		localSds, err := installers.DownloadPackage(state.ScaleIO.Deb.DebSds)
+		localSds, err := xplatform.GetInstance().Inst.DownloadPackage(state.ScaleIO.Deb.DebSds)
 		if err != nil {
 			log.Errorln("Error downloading SDS package:", err)
 			log.Infoln("NodeSetup LEAVE")
@@ -176,7 +173,7 @@ func nodeSetup(state *types.ScaleIOFramework) error {
 		}
 
 		sdsCmdline := "dpkg -i " + localSds
-		err = exec.RunCommand(sdsCmdline, sdsInstallCheck, "")
+		err = xplatform.GetInstance().Run.Command(sdsCmdline, sdsInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install SDS Failed:", err)
 			log.Infoln("NodeSetup LEAVE")
@@ -187,8 +184,8 @@ func nodeSetup(state *types.ScaleIOFramework) error {
 	}
 
 	//SDC Install
-	sdcVer, sdcVerErr := installers.ParseVersionFromFilename(state.ScaleIO.Deb.DebSdc)
-	sdcInst, sdcInstErr := deb.GetInstalledVersion(types.DebSdcPackageName, true)
+	sdcVer, sdcVerErr := xplatform.GetInstance().Inst.ParseVersionFromFilename(state.ScaleIO.Deb.DebSdc)
+	sdcInst, sdcInstErr := xplatform.GetInstance().Inst.GetInstalledVersion(types.DebSdcPackageName, true)
 	log.Debugln("sdcVer:", sdcVer)
 	log.Debugln("sdcVerErr:", sdcVerErr)
 	log.Debugln("sdcInst:", sdcInst)
@@ -197,7 +194,7 @@ func nodeSetup(state *types.ScaleIOFramework) error {
 	if sdcVerErr != nil || sdcInstErr != nil || sdcVer != sdcInst {
 		log.Infoln("Installing", types.DebSdcPackageName)
 
-		localSdc, err := installers.DownloadPackage(state.ScaleIO.Deb.DebSdc)
+		localSdc, err := xplatform.GetInstance().Inst.DownloadPackage(state.ScaleIO.Deb.DebSdc)
 		if err != nil {
 			log.Errorln("Error downloading SDC package:", err)
 			log.Infoln("NodeSetup LEAVE")
@@ -205,7 +202,7 @@ func nodeSetup(state *types.ScaleIOFramework) error {
 		}
 
 		sdcCmdline := "MDM_IP=" + mdmPair + " dpkg -i " + localSdc
-		err = exec.RunCommand(sdcCmdline, sdcInstallCheck, "")
+		err = xplatform.GetInstance().Run.Command(sdcCmdline, sdcInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install SDC Failed:", err)
 			log.Infoln("NodeSetup LEAVE")
@@ -224,7 +221,7 @@ func isClusterInstalled() error {
 	log.Infoln("isClusterInstalled ENTER")
 
 	queryCmdline := "scli --query_cluster"
-	err := exec.RunCommand(queryCmdline, clusterConfigCheck, "")
+	err := xplatform.GetInstance().Run.Command(queryCmdline, clusterConfigCheck, "")
 	if err != nil {
 		log.Errorln("Query Cluster Failed:", err)
 		log.Infoln("isClusterInstalled LEAVE")
@@ -269,7 +266,7 @@ func createCluster(state *types.ScaleIOFramework) error {
 	createCmdline := "scli --create_mdm_cluster --master_mdm_ip " + pri.IPAddress +
 		" --master_mdm_management_ip " + pri.IPAddress + " --master_mdm_name mdm1 --accept_license " +
 		"--approve_certificate"
-	err = exec.RunCommand(createCmdline, createClusterCheck, "")
+	err = xplatform.GetInstance().Run.Command(createCmdline, createClusterCheck, "")
 	if err != nil {
 		log.Errorln("Init First Node Failed:", err)
 		log.Infoln("CreateCluster LEAVE")
@@ -279,7 +276,7 @@ func createCluster(state *types.ScaleIOFramework) error {
 	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
 
 	loginCmdline := "scli --login --username admin --password admin"
-	err = exec.RunCommand(loginCmdline, loggedInCheck, "")
+	err = xplatform.GetInstance().Run.Command(loginCmdline, loggedInCheck, "")
 	if err != nil {
 		log.Errorln("ScaleIO Login Failed:", err)
 		log.Infoln("CreateCluster LEAVE")
@@ -290,7 +287,7 @@ func createCluster(state *types.ScaleIOFramework) error {
 
 	setPassCmdline := "scli --set_password --old_password admin --new_password " +
 		state.ScaleIO.AdminPassword
-	err = exec.RunCommand(setPassCmdline, setPasswordCheck, "")
+	err = xplatform.GetInstance().Run.Command(setPassCmdline, setPasswordCheck, "")
 	if err != nil {
 		log.Errorln("ScaleIO Set Password Failed:", err)
 		log.Infoln("CreateCluster LEAVE")
@@ -300,7 +297,7 @@ func createCluster(state *types.ScaleIOFramework) error {
 	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
 
 	loginCmdline = "scli --login --username admin --password " + state.ScaleIO.AdminPassword
-	err = exec.RunCommand(loginCmdline, loggedInCheck, "")
+	err = xplatform.GetInstance().Run.Command(loginCmdline, loggedInCheck, "")
 	if err != nil {
 		log.Errorln("ScaleIO Login with new Password Failed:", err)
 		log.Infoln("CreateCluster LEAVE")
@@ -311,7 +308,7 @@ func createCluster(state *types.ScaleIOFramework) error {
 
 	secondaryCmdline := "scli --add_standby_mdm --new_mdm_ip " + sec.IPAddress +
 		" --mdm_role manager --new_mdm_management_ip " + sec.IPAddress + " --new_mdm_name mdm2"
-	err = exec.RunCommand(secondaryCmdline, addMdmToClusterCheck, "")
+	err = xplatform.GetInstance().Run.Command(secondaryCmdline, addMdmToClusterCheck, "")
 	if err != nil {
 		log.Errorln("Add Secondary MDM Failed:", err)
 		log.Infoln("CreateCluster LEAVE")
@@ -322,7 +319,7 @@ func createCluster(state *types.ScaleIOFramework) error {
 
 	tiebreakerCmdline := "scli --add_standby_mdm --new_mdm_ip " + tb.IPAddress +
 		" --mdm_role tb --new_mdm_name tb"
-	err = exec.RunCommand(tiebreakerCmdline, addMdmToClusterCheck, "")
+	err = xplatform.GetInstance().Run.Command(tiebreakerCmdline, addMdmToClusterCheck, "")
 	if err != nil {
 		log.Errorln("Add Tiebreaker MDM Failed:", err)
 		log.Infoln("CreateCluster LEAVE")
@@ -333,7 +330,7 @@ func createCluster(state *types.ScaleIOFramework) error {
 
 	changeClusterCmdline := "scli --switch_cluster_mode --cluster_mode 3_node " +
 		"--add_slave_mdm_name mdm2 --add_tb_name tb"
-	err = exec.RunCommand(changeClusterCmdline, changeClusterModeCheck, "")
+	err = xplatform.GetInstance().Run.Command(changeClusterCmdline, changeClusterModeCheck, "")
 	if err != nil {
 		log.Errorln("Change ScaleIO to 3 Node Cluster Failed:", err)
 		log.Infoln("CreateCluster LEAVE")
@@ -343,7 +340,7 @@ func createCluster(state *types.ScaleIOFramework) error {
 	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
 
 	queryCmdline := "scli --query_cluster"
-	err = exec.RunCommand(queryCmdline, clusterConfigCheck, "")
+	err = xplatform.GetInstance().Run.Command(queryCmdline, clusterConfigCheck, "")
 	if err != nil {
 		log.Errorln("Query Cluster Failed:", err)
 		log.Infoln("CreateCluster LEAVE")
@@ -361,7 +358,7 @@ func isClusterInitialized() error {
 	log.Infoln("isClusterInitialized ENTER")
 
 	queryCmdline := "scli --query_all_sds"
-	err := exec.RunCommand(queryCmdline, "", clusterNotInitialedCheck)
+	err := xplatform.GetInstance().Run.Command(queryCmdline, "", clusterNotInitialedCheck)
 	if err != nil {
 		log.Errorln("Check Cluster Failed:", err)
 		log.Infoln("isClusterInitialized LEAVE")
@@ -394,7 +391,7 @@ func initializeCluster(state *types.ScaleIOFramework) error {
 	}
 
 	renameCmdline := "scli --mdm_ip " + pri.IPAddress + " --rename_system --new_name scaleio"
-	err = exec.RunCommand(renameCmdline, clusterRenameCheck, "")
+	err = xplatform.GetInstance().Run.Command(renameCmdline, clusterRenameCheck, "")
 	if err != nil {
 		log.Errorln("Cluster Rename Failed:", err)
 		log.Infoln("InitializeCluster LEAVE")
@@ -405,7 +402,7 @@ func initializeCluster(state *types.ScaleIOFramework) error {
 
 	addProtectionDomainCmdline := "scli --add_protection_domain --protection_domain_name " +
 		state.ScaleIO.ProtectionDomain
-	err = exec.RunCommand(addProtectionDomainCmdline, addProtectionDomainCheck, "")
+	err = xplatform.GetInstance().Run.Command(addProtectionDomainCmdline, addProtectionDomainCheck, "")
 	if err != nil {
 		log.Errorln("Add Protection Domain Failed:", err)
 		log.Infoln("InitializeCluster LEAVE")
@@ -416,7 +413,7 @@ func initializeCluster(state *types.ScaleIOFramework) error {
 
 	addStoragePoolCmdline := "scli --add_storage_pool --protection_domain_name " +
 		state.ScaleIO.ProtectionDomain + " --storage_pool_name " + state.ScaleIO.StoragePool
-	err = exec.RunCommand(addStoragePoolCmdline, addStoragePoolCheck, "")
+	err = xplatform.GetInstance().Run.Command(addStoragePoolCmdline, addStoragePoolCheck, "")
 	if err != nil {
 		log.Errorln("Add Storage Pool Failed:", err)
 		log.Infoln("InitializeCluster LEAVE")
@@ -438,7 +435,7 @@ func initializeCluster(state *types.ScaleIOFramework) error {
 		addVolumeCmdline := "scli --mdm_ip " + pri.IPAddress + " --add_volume --size_gb 1 " +
 			"--volume_name test --protection_domain_name " + state.ScaleIO.ProtectionDomain +
 			" --storage_pool_name " + state.ScaleIO.StoragePool
-		err = exec.RunCommand(addVolumeCmdline, addVolumeCheck, "")
+		err = xplatform.GetInstance().Run.Command(addVolumeCmdline, addVolumeCheck, "")
 		if err != nil {
 			log.Errorln("Add Test Volume Failed:", err)
 			log.Infoln("InitializeCluster LEAVE")
@@ -475,7 +472,7 @@ func addSdsNodesToCluster(state *types.ScaleIOFramework, needsLogin bool) error 
 			loggedIn = true
 
 			loginCmdline := "scli --login --username admin --password " + state.ScaleIO.AdminPassword
-			err := exec.RunCommand(loginCmdline, loggedInCheck, "")
+			err := xplatform.GetInstance().Run.Command(loginCmdline, loggedInCheck, "")
 			if err != nil {
 				log.Errorln("ScaleIO Login with new Password Failed:", err)
 				log.Infoln("CreateCluster LEAVE")
@@ -492,7 +489,7 @@ func addSdsNodesToCluster(state *types.ScaleIOFramework, needsLogin bool) error 
 			" --device_path " + state.ScaleIO.BlockDevice + " --storage_pool_name " +
 			state.ScaleIO.StoragePool + " --protection_domain_name " +
 			state.ScaleIO.ProtectionDomain + " --sds_name " + generateSdsName(node)
-		err := exec.RunCommand(addSdsCmdline, addSdsCheck, "")
+		err := xplatform.GetInstance().Run.Command(addSdsCmdline, addSdsCheck, "")
 		if err != nil {
 			log.Errorln("Add SDS node Failed:", err)
 			log.Infoln("AddSdsNodesToCluster LEAVE")
@@ -528,8 +525,8 @@ func gatewaySetup(state *types.ScaleIOFramework) (bool, error) {
 	}
 
 	//Install LIA
-	liaVer, liaVerErr := installers.ParseVersionFromFilename(state.ScaleIO.Deb.DebLia)
-	liaInst, liaInstErr := deb.GetInstalledVersion(types.DebLiaPackageName, true)
+	liaVer, liaVerErr := xplatform.GetInstance().Inst.ParseVersionFromFilename(state.ScaleIO.Deb.DebLia)
+	liaInst, liaInstErr := xplatform.GetInstance().Inst.GetInstalledVersion(types.DebLiaPackageName, true)
 	log.Debugln("liaVer:", liaVer)
 	log.Debugln("liaVerErr:", liaVerErr)
 	log.Debugln("liaInst:", liaInst)
@@ -538,7 +535,7 @@ func gatewaySetup(state *types.ScaleIOFramework) (bool, error) {
 	if liaVerErr != nil || liaInstErr != nil || liaVer != liaInst {
 		log.Infoln("Installing", types.DebLiaPackageName)
 
-		localLia, err := installers.DownloadPackage(state.ScaleIO.Deb.DebLia)
+		localLia, err := xplatform.GetInstance().Inst.DownloadPackage(state.ScaleIO.Deb.DebLia)
 		if err != nil {
 			log.Errorln("Error downloading LIA package:", err)
 			log.Infoln("PrimaryMDM LEAVE")
@@ -546,7 +543,7 @@ func gatewaySetup(state *types.ScaleIOFramework) (bool, error) {
 		}
 
 		liaCmdline := "TOKEN=" + state.ScaleIO.AdminPassword + " dpkg -i " + localLia
-		err = exec.RunCommand(liaCmdline, liaInstallCheck, "")
+		err = xplatform.GetInstance().Run.Command(liaCmdline, liaInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install LIA Failed:", err)
 			log.Infoln("GatewaySetup LEAVE")
@@ -554,7 +551,7 @@ func gatewaySetup(state *types.ScaleIOFramework) (bool, error) {
 		}
 
 		installIDCmdline := "scli --query_all | grep \"Installation ID\" | sed -n -e 's/^.*ID: //p'"
-		output, err := exec.RunCommandOutput(installIDCmdline)
+		output, err := xplatform.GetInstance().Run.CommandOutput(installIDCmdline)
 		if err != nil {
 			log.Errorln("Install LIA Failed:", err)
 			log.Infoln("GatewaySetup LEAVE")
@@ -562,7 +559,7 @@ func gatewaySetup(state *types.ScaleIOFramework) (bool, error) {
 		}
 
 		dumpIDCmdline := "echo " + output + " > /opt/emc/scaleio/lia/cfg/installation_id.txt"
-		output, err = exec.RunCommandOutput(dumpIDCmdline)
+		output, err = xplatform.GetInstance().Run.CommandOutput(dumpIDCmdline)
 		if err != nil || len(output) > 0 {
 			log.Errorln("Install LIA Failed:", err)
 			log.Infoln("GatewaySetup LEAVE")
@@ -573,8 +570,8 @@ func gatewaySetup(state *types.ScaleIOFramework) (bool, error) {
 	}
 
 	//Install Gateway
-	gwVer, gwVerErr := installers.ParseVersionFromFilename(state.ScaleIO.Deb.DebGw)
-	gwInst, gwInstErr := deb.GetInstalledVersion(types.DebGwPackageName, true)
+	gwVer, gwVerErr := xplatform.GetInstance().Inst.ParseVersionFromFilename(state.ScaleIO.Deb.DebGw)
+	gwInst, gwInstErr := xplatform.GetInstance().Inst.GetInstalledVersion(types.DebGwPackageName, true)
 	log.Debugln("gwVer:", gwVer)
 	log.Debugln("gwVerErr:", gwVerErr)
 	log.Debugln("gwInst:", gwInst)
@@ -583,7 +580,7 @@ func gatewaySetup(state *types.ScaleIOFramework) (bool, error) {
 	if gwVerErr != nil || gwInstErr != nil || gwVer != gwInst {
 		log.Infoln("Installing", types.DebGwPackageName)
 
-		localGw, err := installers.DownloadPackage(state.ScaleIO.Deb.DebGw)
+		localGw, err := xplatform.GetInstance().Inst.DownloadPackage(state.ScaleIO.Deb.DebGw)
 		if err != nil {
 			log.Errorln("Error downloading Gateway package:", err)
 			log.Infoln("PrimaryMDM LEAVE")
@@ -591,7 +588,7 @@ func gatewaySetup(state *types.ScaleIOFramework) (bool, error) {
 		}
 
 		gwCmdline := "GATEWAY_ADMIN_PASSWORD=" + state.ScaleIO.AdminPassword + " dpkg -i " + localGw
-		err = exec.RunCommand(gwCmdline, gatewayInstallCheck, "")
+		err = xplatform.GetInstance().Run.Command(gwCmdline, gatewayInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install GW Failed:", err)
 			log.Infoln("GatewaySetup LEAVE")
@@ -599,7 +596,7 @@ func gatewaySetup(state *types.ScaleIOFramework) (bool, error) {
 		}
 
 		bypasssecCmdline := "sed -i 's/security.bypass_certificate_check=false/security.bypass_certificate_check=true/' /opt/emc/scaleio/gateway/webapps/ROOT/WEB-INF/classes/gatewayUser.properties"
-		output, err := exec.RunCommandOutput(bypasssecCmdline)
+		output, err := xplatform.GetInstance().Run.CommandOutput(bypasssecCmdline)
 		if err != nil || len(output) > 0 {
 			log.Errorln("Configure By-Pass Security Check Failed:", err)
 			log.Infoln("GatewaySetup LEAVE")
@@ -608,7 +605,7 @@ func gatewaySetup(state *types.ScaleIOFramework) (bool, error) {
 
 		writemdmCmdline := "sed -i 's/mdm.ip.addresses=/mdm.ip.addresses='" + pri.IPAddress +
 			"','" + sec.IPAddress + "'/' /opt/emc/scaleio/gateway/webapps/ROOT/WEB-INF/classes/gatewayUser.properties"
-		output, err = exec.RunCommandOutput(writemdmCmdline)
+		output, err = xplatform.GetInstance().Run.CommandOutput(writemdmCmdline)
 		if err != nil || len(output) > 0 {
 			log.Errorln("Configure MDM to Gateway Failed:", err)
 			log.Infoln("GatewaySetup LEAVE")

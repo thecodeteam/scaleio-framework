@@ -6,19 +6,19 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/codedellemc/scaleio-framework/scaleio-scheduler/native"
+	xplatform "github.com/dvonthenen/goxplatform"
 )
 
 func downloadExecutor(w http.ResponseWriter, r *http.Request, server *RestServer) {
 	path := server.Config.AltExecutorPath
 	if len(path) == 0 {
 		log.Debugln("AltExecutorPath = \"\" BEGIN")
-		pathTmp, err := util.GetFullPath()
+		pathTmp, err := xplatform.GetInstance().Fs.GetFullPath()
 		if err != nil {
 			http.Error(w, "Unable to determine executor location", http.StatusNotFound)
 			return
 		}
-		path = util.AppendSlash(pathTmp) + "scaleio-executor"
+		path = xplatform.GetInstance().Fs.AppendSlash(pathTmp) + "scaleio-executor"
 		log.Debugln("Path:", path)
 		log.Debugln("AltExecutorPath = \"\" END")
 	}
