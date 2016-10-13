@@ -1,4 +1,4 @@
-package core
+package common
 
 import (
 	"time"
@@ -33,7 +33,8 @@ const (
 	PollForChangesInSeconds = 30
 )
 
-type retrievestate func() (*types.ScaleIOFramework, error)
+//RetrieveState is a call back to retrieve an update of the state
+type RetrieveState func() (*types.ScaleIOFramework, error)
 
 func waitForRunState(state *types.ScaleIOFramework, runState int, allNodes bool) bool {
 	for _, node := range state.ScaleIO.Nodes {
@@ -60,7 +61,8 @@ func waitForRunState(state *types.ScaleIOFramework, runState int, allNodes bool)
 	return true
 }
 
-func waitForStableState(getstate retrievestate) *types.ScaleIOFramework {
+//WaitForStableState waits until a state can successfully be retrieved
+func WaitForStableState(getstate RetrieveState) *types.ScaleIOFramework {
 	var err error
 	var state *types.ScaleIOFramework
 	for {
@@ -75,7 +77,7 @@ func waitForStableState(getstate retrievestate) *types.ScaleIOFramework {
 	return state
 }
 
-func waitForState(getstate retrievestate, nodeState int, allNodes bool) *types.ScaleIOFramework {
+func waitForState(getstate RetrieveState, nodeState int, allNodes bool) *types.ScaleIOFramework {
 	var err error
 	var state *types.ScaleIOFramework
 	for {
@@ -95,26 +97,33 @@ func waitForState(getstate retrievestate, nodeState int, allNodes bool) *types.S
 	return state
 }
 
-func waitForPrereqsFinish(getstate retrievestate) *types.ScaleIOFramework {
+//WaitForPrereqsFinish waits until all prereqs have been installed
+func WaitForPrereqsFinish(getstate RetrieveState) *types.ScaleIOFramework {
 	return waitForState(getstate, types.StatePrerequisitesInstalled, false)
 }
 
-func waitForCleanPrereqsReboot(getstate retrievestate) *types.ScaleIOFramework {
+//WaitForCleanPrereqsReboot waits until all systems are ready to reboot
+//after prereq install
+func WaitForCleanPrereqsReboot(getstate RetrieveState) *types.ScaleIOFramework {
 	return waitForState(getstate, types.StateCleanPrereqsReboot, true)
 }
 
-func waitForBaseFinish(getstate retrievestate) *types.ScaleIOFramework {
+//WaitForBaseFinish waits until base ScaleIO components have been installed
+func WaitForBaseFinish(getstate RetrieveState) *types.ScaleIOFramework {
 	return waitForState(getstate, types.StateBasePackagedInstalled, false)
 }
 
-func waitForClusterInstallFinish(getstate retrievestate) *types.ScaleIOFramework {
+//WaitForClusterInstallFinish waits for the cluster to be created
+func WaitForClusterInstallFinish(getstate RetrieveState) *types.ScaleIOFramework {
 	return waitForState(getstate, types.StateInitializeCluster, false)
 }
 
-func waitForClusterInitializeFinish(getstate retrievestate) *types.ScaleIOFramework {
+//WaitForClusterInitializeFinish wait until the cluster has been initialized
+func WaitForClusterInitializeFinish(getstate RetrieveState) *types.ScaleIOFramework {
 	return waitForState(getstate, types.StateInstallRexRay, false)
 }
 
-func waitForCleanInstallReboot(getstate retrievestate) *types.ScaleIOFramework {
+//WaitForCleanInstallReboot waits for reboot of nodes after install
+func WaitForCleanInstallReboot(getstate RetrieveState) *types.ScaleIOFramework {
 	return waitForState(getstate, types.StateCleanInstallReboot, true)
 }

@@ -1,13 +1,15 @@
-package core
+package common
 
 import (
 	"errors"
 	"io/ioutil"
 	"os"
 	"strconv"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 
+	scaleionodes "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/scaleionodes"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
@@ -55,56 +57,6 @@ func nodePreviouslyConfigured() bool {
 		return true
 	}
 	return false
-}
-
-func leaveMarkerFileForConfigured(node *types.ScaleIONode) {
-	err := os.MkdirAll("/etc/scaleio-framework", 0644)
-	if err != nil {
-		log.Errorln("Unable to mkdir:", err)
-	}
-
-	data := []byte(personaToString(node.Persona))
-	err = ioutil.WriteFile("/etc/scaleio-framework/state", data, 0644)
-	if err != nil {
-		log.Errorln("Unable to write to marker file:", err)
-	}
-}
-
-//WhichNode execute commands based on the persona
-func WhichNode(executorID string, getstate retrievestate) error {
-	log.Infoln("WhichNode ENTER")
-
-	if nodePreviouslyConfigured() {
-		log.Infoln("nodePreviouslyConfigured is TRUE. Launching FakeNode.")
-		fakeNode(executorID, getstate)
-		log.Infoln("WhichNode LEAVE")
-		return nil
-	}
-
-	log.Infoln("ScaleIO Executor Retrieve State from Scheduler")
-	state := waitForStableState(getstate)
-
-	log.Infoln("Find Self Node")
-	node := getSelfNode(executorID, state)
-	if node == nil {
-		log.Infoln("GetSelfNode Failed")
-		log.Infoln("WhichNode LEAVE")
-		return ErrFoundSelfFailed
-	}
-
-	switch node.Persona {
-	case types.PersonaMdmPrimary:
-		primaryMDM(executorID, getstate)
-	case types.PersonaMdmSecondary:
-		secondaryMDM(executorID, getstate)
-	case types.PersonaTb:
-		tieBreaker(executorID, getstate)
-	case types.PersonaNode:
-		dataNode(executorID, getstate)
-	}
-
-	log.Infoln("WhichNode LEAVE")
-	return nil
 }
 
 func getSelfNode(executorID string, state *types.ScaleIOFramework) *types.ScaleIONode {
@@ -226,4 +178,110 @@ func getGatewayAddress(state *types.ScaleIOFramework) (string, error) {
 
 	log.Debugln("Determined Gateway:", pri.IPAddress)
 	return pri.IPAddress, nil
+}
+
+func whichNode(executorID string, getstate retrievestate) (*IScaleioNode, error) {
+	log.Infoln("WhichNode ENTER")
+
+	var sionode IScaleioNode
+
+	if nodePreviouslyConfigured() {
+		log.Infoln("nodePreviouslyConfigured is TRUE. Launching FakeNode.")
+		node = scaleionodes.NewFake()
+	} else {
+		log.Infoln("ScaleIO Executor Retrieve State from Scheduler")
+		state := WaitForStableState(getstate)
+
+		log.Infoln("Find Self Node")
+		node := getSelfNode(executorID, state)
+		if node == nil {
+			log.Infoln("GetSelfNode Failed")
+			log.Infoln("WhichNode LEAVE")
+			return nil, ErrFoundSelfFailed
+		}
+
+		switch node.Persona {
+		case types.PersonaMdmPrimary:
+			log.Infoln("Is Primary")
+			sionode = scaleionodes.NewPri()
+		case types.PersonaMdmSecondary:
+			log.Infoln("Is Secondary")
+			sionode = scaleionodes.NewSec()
+		case types.PersonaTb:
+			log.Infoln("Is TieBreaker")
+			sionode = scaleionodes.NewTb()
+		case types.PersonaNode:
+			log.Infoln("Is DataNode")
+			sionode = scaleionodes.NewData()
+		}
+
+		sionode.SetExecutorID(executorID)
+		sionode.SetRetrieveState(getstate)
+		sionode.UpdateScaleIOState()
+	}
+
+	log.Infoln("WhichNode Succeeded")
+	log.Infoln("WhichNode LEAVE")
+	return sionode, nil
+}
+
+//RunExecutor starts the executor
+func RunExecutor(executorID string, getstate retrievestate) error {
+	log.Infoln("RunExecutor ENTER")
+	log.Infoln("executorID:", executorID)
+
+	for {
+		node, err := whichNode(executorID, getstate)
+		if err != nil {
+			log.Errorln("Unable to find Self in node list")
+			errState := nodestate.UpdateNodeState(state.SchedulerAddress, executorID,
+				types.StateFatalInstall)
+			if errState != nil {
+				log.Errorln("Failed to signal state change:", errState)
+			} else {
+				log.Debugln("Signaled StateFatalInstall")
+			}
+			time.Sleep(time.Duration(PollAfterFatalInSeconds) * time.Second)
+			continue
+		}
+
+		switch node.State {
+		case types.StateUnknown:
+			node.RunStateUnknown()
+
+		case types.StateCleanPrereqsReboot:
+			node.RunStateCleanPrereqsReboot()
+
+		case types.StatePrerequisitesInstalled:
+			node.RunStatePrerequisitesInstalled()
+
+		case types.StateBasePackagedInstalled:
+			node.RunStateBasePackagedInstalled()
+
+		case types.StateInitializeCluster:
+			node.RunStateInitializeCluster()
+
+		case types.StateInstallRexRay:
+			node.RunStateInstallRexRay()
+
+		case types.StateCleanInstallReboot:
+			node.RunStateCleanInstallReboot()
+
+		case types.StateSystemReboot:
+			node.RunStateSystemReboot()
+
+		case types.StateFinishInstall:
+			node.RunStateFinishInstall()
+
+		case types.StateUpgradeCluster:
+			node.RunStateUpgradeCluster()
+
+		case types.StateFatalInstall:
+			node.RunStateFatalInstall()
+		}
+	}
+
+	log.Infoln("RunExecutor Succeeded")
+	log.Infoln("RunExecutor LEAVE")
+	return nil
 }
