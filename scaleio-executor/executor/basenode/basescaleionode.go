@@ -44,9 +44,9 @@ func (bsn *BaseScaleioNode) SetRetrieveState(getstate common.RetrieveState) {
 	bsn.GetState = getstate
 }
 
-//GetFrameworkState get state
-func (bsn *BaseScaleioNode) GetFrameworkState() *types.ScaleIOFramework {
-	return bsn.State
+//GetSelfNode get self node
+func (bsn *BaseScaleioNode) GetSelfNode() *types.ScaleIONode {
+	return bsn.Node
 }
 
 //UpdateScaleIOState updates the state of the framework
