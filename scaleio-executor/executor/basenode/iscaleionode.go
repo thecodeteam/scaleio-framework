@@ -1,11 +1,16 @@
 package basenode
 
-import "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
+import (
+	"github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
+
+	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
+)
 
 //IScaleioNode is the interface for implementing a ScaleIO node
 type IScaleioNode interface {
 	SetExecutorID(ID string)
-	SetRetrieveState(getstate RetrieveState)
+	SetRetrieveState(getstate common.RetrieveState)
+	GetFrameworkState() *types.ScaleIOFramework
 	UpdateScaleIOState() *types.ScaleIOFramework
 	LeaveMarkerFileForConfigured()
 	UpdateNodeState(nodeState int) error

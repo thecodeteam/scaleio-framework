@@ -1,4 +1,4 @@
-package core
+package scaleionodes
 
 import (
 	log "github.com/Sirupsen/logrus"
