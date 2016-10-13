@@ -8,6 +8,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
+	basenode "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/basenode"
 	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 	scaleionodes "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/scaleionodes"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
@@ -31,17 +32,17 @@ func nodePreviouslyConfigured() bool {
 	return false
 }
 
-func whichNode(executorID string, getstate retrievestate) (*IScaleioNode, error) {
+func whichNode(executorID string, getstate common.RetrieveState) (*basenode.IScaleioNode, error) {
 	log.Infoln("WhichNode ENTER")
 
-	var sionode IScaleioNode
+	var sionode *basenode.IScaleioNode
 
 	if nodePreviouslyConfigured() {
 		log.Infoln("nodePreviouslyConfigured is TRUE. Launching FakeNode.")
-		node = scaleionodes.NewFake()
+		sionode = scaleionodes.NewFake()
 	} else {
 		log.Infoln("ScaleIO Executor Retrieve State from Scheduler")
-		state := WaitForStableState(getstate)
+		state := common.WaitForStableState(getstate)
 
 		log.Infoln("Find Self Node")
 		node := common.GetSelfNode(executorID, state)
@@ -77,7 +78,7 @@ func whichNode(executorID string, getstate retrievestate) (*IScaleioNode, error)
 }
 
 //RunExecutor starts the executor
-func RunExecutor(executorID string, getstate retrievestate) error {
+func RunExecutor(executorID string, getstate common.RetrieveState) error {
 	log.Infoln("RunExecutor ENTER")
 	log.Infoln("executorID:", executorID)
 
@@ -85,18 +86,17 @@ func RunExecutor(executorID string, getstate retrievestate) error {
 		node, err := whichNode(executorID, getstate)
 		if err != nil {
 			log.Errorln("Unable to find Self in node list")
-			errState := nodestate.UpdateNodeState(state.SchedulerAddress, executorID,
-				types.StateFatalInstall)
+			errState := node.UpdateNodeState(types.StateFatalInstall)
 			if errState != nil {
 				log.Errorln("Failed to signal state change:", errState)
 			} else {
 				log.Debugln("Signaled StateFatalInstall")
 			}
-			time.Sleep(time.Duration(PollAfterFatalInSeconds) * time.Second)
+			time.Sleep(time.Duration(common.PollAfterFatalInSeconds) * time.Second)
 			continue
 		}
 
-		switch node.State {
+		switch node.GetFrameworkState() {
 		case types.StateUnknown:
 			node.RunStateUnknown()
 
