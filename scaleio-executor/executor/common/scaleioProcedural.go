@@ -1,4 +1,4 @@
-package core
+package common
 
 import (
 	"time"
@@ -6,7 +6,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 	xplatform "github.com/dvonthenen/goxplatform"
 
-	nodestate "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/node"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
@@ -496,7 +495,7 @@ func addSdsNodesToCluster(state *types.ScaleIOFramework, needsLogin bool) error 
 			return err
 		}
 
-		errState := nodestate.UpdateAddNode(state.SchedulerAddress, node.ExecutorID)
+		errState := UpdateAddNode(state.SchedulerAddress, node.ExecutorID)
 		if errState != nil {
 			log.Errorln("Failed to signal add node change:", errState)
 		}
