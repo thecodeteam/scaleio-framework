@@ -43,7 +43,7 @@ func (sdn *ScaleioDataNode) RunStateUnknown() {
 		log.Debugln("Signaled StateCleanPrereqsReboot")
 	}
 
-	state = common.WaitForCleanPrereqsReboot(sdn.GetState)
+	sdn.State = common.WaitForCleanPrereqsReboot(sdn.GetState)
 
 	errState = sdn.UpdateNodeState(types.StatePrerequisitesInstalled)
 	if errState != nil {
@@ -58,7 +58,7 @@ func (sdn *ScaleioDataNode) RunStateUnknown() {
 
 		time.Sleep(time.Duration(common.DelayForRebootInSeconds) * time.Second)
 
-		rebootErr := xplatform.GetInstance().Run.Command(common.RebootCmdline, rebootCheck, "")
+		rebootErr := xplatform.GetInstance().Run.Command(common.RebootCmdline, common.RebootCheck, "")
 		if rebootErr != nil {
 			log.Errorln("Install Kernel Failed:", rebootErr)
 		}
@@ -80,7 +80,7 @@ func (sdn *ScaleioDataNode) RunStatePrerequisitesInstalled() {
 		} else {
 			log.Debugln("Signaled StateFatalInstall")
 		}
-		continue
+		return
 	}
 
 	errState := sdn.UpdateNodeState(types.StateInstallRexRay)
@@ -98,7 +98,7 @@ func (sdn *ScaleioDataNode) RunStateInstallRexRay() {
 	} else {
 		//we need to wait because without the gateway, the rexray service restart
 		//will fail
-		state = common.WaitForClusterInitializeFinish(sdn.GetState)
+		sdn.State = common.WaitForClusterInitializeFinish(sdn.GetState)
 	}
 
 	reboot, err := sdn.RexraySetup()
@@ -110,7 +110,7 @@ func (sdn *ScaleioDataNode) RunStateInstallRexRay() {
 		} else {
 			log.Debugln("Signaled StateFatalInstall")
 		}
-		continue
+		return
 	}
 
 	err = sdn.SetupIsolator()
@@ -122,7 +122,7 @@ func (sdn *ScaleioDataNode) RunStateInstallRexRay() {
 		} else {
 			log.Debugln("Signaled StateFatalInstall")
 		}
-		continue
+		return
 	}
 
 	errState := sdn.UpdateNodeState(types.StateCleanInstallReboot)
@@ -132,7 +132,7 @@ func (sdn *ScaleioDataNode) RunStateInstallRexRay() {
 		log.Debugln("Signaled StateCleanInstallReboot")
 	}
 
-	state = common.WaitForCleanInstallReboot(sdn.GetState)
+	sdn.State = common.WaitForCleanInstallReboot(sdn.GetState)
 
 	//requires a reboot?
 	if reboot {
