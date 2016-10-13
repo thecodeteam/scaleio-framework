@@ -7,7 +7,7 @@ import (
 	xplatform "github.com/dvonthenen/goxplatform"
 
 	basenode "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/basenode"
-	procedural "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/procedural"
+	"github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
@@ -24,7 +24,7 @@ func NewPri() *ScaleioPrimaryMdmNode {
 
 //RunStateUnknown default action for StateUnknown
 func (spmn *ScaleioPrimaryMdmNode) RunStateUnknown(state *types.ScaleIOFramework, node *types.ScaleIONode) {
-	reboot, err := procedural.EnvironmentSetup(state)
+	reboot, err := EnvironmentSetup()
 	if err != nil {
 		log.Errorln("EnvironmentSetup Failed:", err)
 		errState := UpdateNodeState(types.StateFatalInstall)
@@ -43,7 +43,7 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateUnknown(state *types.ScaleIOFramework
 		log.Debugln("Signaled StateCleanPrereqsReboot")
 	}
 
-	state = procedural.WaitForCleanPrereqsReboot(spmn.UpdateScaleIOState())
+	state = common.WaitForCleanPrereqsReboot(spmn.UpdateScaleIOState())
 
 	errState = UpdateNodeState(types.StatePrerequisitesInstalled)
 	if errState != nil {
@@ -71,8 +71,8 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateUnknown(state *types.ScaleIOFramework
 
 //RunStatePrerequisitesInstalled default action for StatePrerequisitesInstalled
 func (spmn *ScaleioPrimaryMdmNode) RunStatePrerequisitesInstalled(state *types.ScaleIOFramework, node *types.ScaleIONode) {
-	state = procedural.WaitForPrereqsFinish(spmn.UpdateScaleIOState())
-	err := procedural.ManagementSetup(state, true)
+	state = common.WaitForPrereqsFinish(spmn.UpdateScaleIOState())
+	err := ManagementSetup(state, true)
 	if err != nil {
 		log.Errorln("ManagementSetup Failed:", err)
 		errState := UpdateNodeState(types.StateFatalInstall)
@@ -84,7 +84,7 @@ func (spmn *ScaleioPrimaryMdmNode) RunStatePrerequisitesInstalled(state *types.S
 		return
 	}
 
-	err = procedural.NodeSetup(state)
+	err = NodeSetup(state)
 	if err != nil {
 		log.Errorln("NodeSetup Failed:", err)
 		errState := UpdateNodeState(types.StateFatalInstall)
@@ -106,8 +106,8 @@ func (spmn *ScaleioPrimaryMdmNode) RunStatePrerequisitesInstalled(state *types.S
 
 //RunStateBasePackagedInstalled default action for StateBasePackagedInstalled
 func (spmn *ScaleioPrimaryMdmNode) RunStateBasePackagedInstalled(state *types.ScaleIOFramework, node *types.ScaleIONode) {
-	state = procedural.WaitForBaseFinish(spmn.UpdateScaleIOState())
-	err := procedural.CreateCluster(state)
+	state = common.WaitForBaseFinish(spmn.UpdateScaleIOState())
+	err := CreateCluster(state)
 	if err != nil {
 		log.Errorln("CreateCluster Failed:", err)
 		errState := UpdateNodeState(types.StateFatalInstall)
@@ -129,8 +129,8 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateBasePackagedInstalled(state *types.Sc
 
 //RunStateInitializeCluster default action for StateInitializeCluster
 func (spmn *ScaleioPrimaryMdmNode) RunStateInitializeCluster(state *types.ScaleIOFramework, node *types.ScaleIONode) {
-	state = procedural.WaitForClusterInstallFinish(spmn.UpdateScaleIOState())
-	err := procedural.InitializeCluster(state)
+	state = common.WaitForClusterInstallFinish(spmn.UpdateScaleIOState())
+	err := InitializeCluster(state)
 	if err != nil {
 		log.Errorln("InitializeCluster Failed:", err)
 		errState := UpdateNodeState(types.StateFatalInstall)
@@ -142,7 +142,7 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateInitializeCluster(state *types.ScaleI
 		return
 	}
 
-	reboot, err := procedural.GatewaySetup(state)
+	reboot, err := GatewaySetup(state)
 	if err != nil {
 		log.Errorln("GatewaySetup Failed:", err)
 		errState := UpdateNodeState(types.StateFatalInstall)
@@ -165,8 +165,8 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateInitializeCluster(state *types.ScaleI
 
 //RunStateInstallRexRay default action for StateInstallRexRay
 func (spmn *ScaleioPrimaryMdmNode) RunStateInstallRexRay(state *types.ScaleIOFramework, node *types.ScaleIONode) {
-	state = procedural.WaitForClusterInitializeFinish(spmn.UpdateScaleIOState())
-	reboot, err := procedural.RexraySetup(state)
+	state = common.WaitForClusterInitializeFinish(spmn.UpdateScaleIOState())
+	reboot, err := RexraySetup(state)
 	if err != nil {
 		log.Errorln("REX-Ray setup Failed:", err)
 		errState := UpdateNodeState(types.StateFatalInstall)
@@ -178,7 +178,7 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateInstallRexRay(state *types.ScaleIOFra
 		return
 	}
 
-	err = procedural.SetupIsolator(state)
+	err = SetupIsolator(state)
 	if err != nil {
 		log.Errorln("Mesos Isolator setup Failed:", err)
 		errState := UpdateNodeState(types.StateFatalInstall)
@@ -197,7 +197,7 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateInstallRexRay(state *types.ScaleIOFra
 		log.Debugln("Signaled StateCleanInstallReboot")
 	}
 
-	state = procedural.WaitForCleanInstallReboot(spmn.UpdateScaleIOState())
+	state = common.WaitForCleanInstallReboot(spmn.UpdateScaleIOState())
 
 	//requires a reboot?
 	if spmn.RebootRequired || reboot {
@@ -266,7 +266,7 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateFinishInstall(state *types.ScaleIOFra
 
 	//This is the checkForNewDataNodesToAdd(). Other functionality TBD.
 	//TODO replace this at some point with API calls instead of CLI
-	err := procedural.AddSdsNodesToCluster(state, true)
+	err := AddSdsNodesToCluster(state, true)
 	if err != nil {
 		log.Errorln("Failed to add node to ScaleIO cluster:", err)
 	}
