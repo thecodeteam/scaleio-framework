@@ -12,7 +12,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
+	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
@@ -20,6 +20,9 @@ var (
 	//ErrStateChangeNotAcknowledged failed to find MDM Pair
 	ErrStateChangeNotAcknowledged = errors.New("The node state change was not acknowledged")
 )
+
+//RetrieveState is a call back to retrieve an update of the state
+type RetrieveState func() (*types.ScaleIOFramework, error)
 
 //BaseScaleioNode implementation for base ScaleIO node
 type BaseScaleioNode struct {
