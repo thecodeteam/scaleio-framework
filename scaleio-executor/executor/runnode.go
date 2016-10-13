@@ -32,10 +32,10 @@ func nodePreviouslyConfigured() bool {
 	return false
 }
 
-func whichNode(executorID string, getstate common.RetrieveState) (*basenode.IScaleioNode, error) {
+func whichNode(executorID string, getstate common.RetrieveState) (basenode.IScaleioNode, error) {
 	log.Infoln("WhichNode ENTER")
 
-	var sionode *basenode.IScaleioNode
+	var sionode basenode.IScaleioNode
 
 	if nodePreviouslyConfigured() {
 		log.Infoln("nodePreviouslyConfigured is TRUE. Launching FakeNode.")
@@ -96,7 +96,7 @@ func RunExecutor(executorID string, getstate common.RetrieveState) error {
 			continue
 		}
 
-		switch node.GetFrameworkState() {
+		switch node.GetSelfNode().State {
 		case types.StateUnknown:
 			node.RunStateUnknown()
 

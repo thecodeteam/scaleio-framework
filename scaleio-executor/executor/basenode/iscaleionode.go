@@ -10,7 +10,6 @@ import (
 type IScaleioNode interface {
 	SetExecutorID(ID string)
 	SetRetrieveState(getstate common.RetrieveState)
-	GetFrameworkState() *types.ScaleIOFramework
 	UpdateScaleIOState() *types.ScaleIOFramework
 	LeaveMarkerFileForConfigured()
 	UpdateNodeState(nodeState int) error
