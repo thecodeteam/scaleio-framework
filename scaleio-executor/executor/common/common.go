@@ -24,6 +24,21 @@ var (
 	ErrMdmPairFailed = errors.New("Failed to Find MDM Pair")
 )
 
+//GetSelfNode gets self
+func GetSelfNode(executorID string, state *types.ScaleIOFramework) *types.ScaleIONode {
+	log.Infoln("getSelfNode ENTER")
+	for _, node := range state.ScaleIO.Nodes {
+		if executorID == node.ExecutorID {
+			log.Infoln("getSelfNode Found:", node.ExecutorID)
+			log.Infoln("getSelfNode LEAVE")
+			return node
+		}
+	}
+	log.Infoln("getSelfNode NOT FOUND")
+	log.Infoln("getSelfNode LEAVE")
+	return nil
+}
+
 func getNodeType(state *types.ScaleIOFramework, nodeType int) (*types.ScaleIONode, error) {
 	for _, node := range state.ScaleIO.Nodes {
 		if node.Persona == nodeType {

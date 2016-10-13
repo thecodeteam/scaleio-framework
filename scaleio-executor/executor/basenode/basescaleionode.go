@@ -40,18 +40,22 @@ func (bsn *BaseScaleioNode) SetExecutorID(ID string) {
 }
 
 //SetRetrieveState sets the retrieve state function
-func (bsn *BaseScaleioNode) SetRetrieveState(getstate RetrieveState) {
+func (bsn *BaseScaleioNode) SetRetrieveState(getstate common.RetrieveState) {
 	bsn.getState = getstate
 }
 
 //UpdateScaleIOState updates the state of the framework
 func (bsn *BaseScaleioNode) UpdateScaleIOState() *types.ScaleIOFramework {
-	bsn.State = bsn.getState()
-	bsn.Node = getSelfNode(bsn.executorId, bsn.State)
+	state, err := bsn.getState()
+	if err != nil {
+		log.Warnln("getState() failed:", err)
+	}
+	bsn.State = state
+	bsn.Node = common.GetSelfNode(bsn.executorID, bsn.State)
 	return bsn.State
 }
 
-func (bsn *BaseScaleioNode) personaToString(persona int) string {
+func personaToString(persona int) string {
 	switch persona {
 	case types.PersonaMdmPrimary:
 		return "primary"
@@ -227,66 +231,66 @@ func (bsn *BaseScaleioNode) UpdatePingNode() error {
 //RunStateUnknown default action for StateUnknown
 func (bsn *BaseScaleioNode) RunStateUnknown() {
 	log.Debugln("In StateUnknown. Do nothing.")
-	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.PollStatusInSeconds) * time.Second)
 }
 
 //RunStateCleanPrereqsReboot default action for StateCleanPrereqsReboot
 func (bsn *BaseScaleioNode) RunStateCleanPrereqsReboot() {
 	log.Debugln("In StateCleanPrereqsReboot. Do nothing.")
-	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.PollStatusInSeconds) * time.Second)
 }
 
 //RunStatePrerequisitesInstalled default action for StatePrerequisitesInstalled
 func (bsn *BaseScaleioNode) RunStatePrerequisitesInstalled() {
 	log.Debugln("In StatePrerequisitesInstalled. Do nothing.")
-	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.PollStatusInSeconds) * time.Second)
 }
 
 //RunStateBasePackagedInstalled default action for StateBasePackagedInstalled
 func (bsn *BaseScaleioNode) RunStateBasePackagedInstalled() {
 	log.Debugln("In StateBasePackagedInstalled. Do nothing.")
-	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.PollStatusInSeconds) * time.Second)
 }
 
 //RunStateInitializeCluster default action for StateInitializeCluster
 func (bsn *BaseScaleioNode) RunStateInitializeCluster() {
 	log.Debugln("In StateInitializeCluster. Do nothing.")
-	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.PollStatusInSeconds) * time.Second)
 }
 
 //RunStateInstallRexRay default action for StateInstallRexRay
 func (bsn *BaseScaleioNode) RunStateInstallRexRay() {
 	log.Debugln("In StateInstallRexRay. Do nothing.")
-	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.PollStatusInSeconds) * time.Second)
 }
 
 //RunStateCleanInstallReboot default action for StateCleanInstallReboot
 func (bsn *BaseScaleioNode) RunStateCleanInstallReboot() {
 	log.Debugln("In StateCleanInstallReboot. Do nothing.")
-	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.PollStatusInSeconds) * time.Second)
 }
 
 //RunStateSystemReboot default action for StateSystemReboot
 func (bsn *BaseScaleioNode) RunStateSystemReboot() {
 	log.Debugln("In StateSystemReboot. Do nothing.")
-	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.PollStatusInSeconds) * time.Second)
 }
 
 //RunStateFinishInstall default action for StateFinishInstall
 func (bsn *BaseScaleioNode) RunStateFinishInstall() {
-	log.Debugln("In StateFinishInstall. Wait for", PollForChangesInSeconds,
+	log.Debugln("In StateFinishInstall. Wait for", common.PollForChangesInSeconds,
 		"seconds for changes in the cluster.")
-	time.Sleep(time.Duration(PollForChangesInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.PollForChangesInSeconds) * time.Second)
 }
 
 //RunStateUpgradeCluster default action for StateUpgradeCluster
 func (bsn *BaseScaleioNode) RunStateUpgradeCluster() {
 	log.Debugln("In StateUpgradeCluster. Do nothing.")
-	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.PollStatusInSeconds) * time.Second)
 }
 
 //RunStateFatalInstall default action for StateFatalInstall
 func (bsn *BaseScaleioNode) RunStateFatalInstall() {
-	log.Debugln("Node marked Fatal. Wait for", PollAfterFatalInSeconds, "seconds")
-	time.Sleep(time.Duration(PollAfterFatalInSeconds) * time.Second)
+	log.Debugln("Node marked Fatal. Wait for", common.PollAfterFatalInSeconds, "seconds")
+	time.Sleep(time.Duration(common.PollAfterFatalInSeconds) * time.Second)
 }
