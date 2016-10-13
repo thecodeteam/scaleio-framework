@@ -1,4 +1,4 @@
-package procedural
+package basenode
 
 import (
 	"bufio"
@@ -166,11 +166,11 @@ func doesLineExistInMesosPropertyFile(fullfilename string, needle string) error 
 }
 
 //SetupIsolator procedure for setting up the Isolator
-func SetupIsolator(state *types.ScaleIOFramework) error {
+func (bsn *BaseScaleioNode) SetupIsolator() error {
 	log.Infoln("SetupIsolator ENTER")
 
 	//Mesos Isolator Install
-	isoVer, isoVerErr := parseIsolatorVersionFromFilename(state.Isolator.Binary)
+	isoVer, isoVerErr := parseIsolatorVersionFromFilename(bsn.State.Isolator.Binary)
 	isoInst, isoInstErr := findIsolatorVersionOnFilesystem()
 	log.Debugln("isoVer:", isoVer)
 	log.Debugln("isoVerEr:", isoVerErr)
@@ -180,7 +180,7 @@ func SetupIsolator(state *types.ScaleIOFramework) error {
 	if isoVerErr != nil || isoInstErr != nil || isoVer != isoInst {
 		log.Infoln("Installing Mesos Isolator")
 
-		localIsolator, err := xplatform.GetInstance().Inst.DownloadPackage(state.Isolator.Binary)
+		localIsolator, err := xplatform.GetInstance().Inst.DownloadPackage(bsn.State.Isolator.Binary)
 		if err != nil {
 			log.Errorln("Error downloading Isolator package:", err)
 			log.Infoln("SetupIsolator LEAVE")
