@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	rebootCmdline = "shutdown -r now"
+	//RebootCmdline reboot now
+	RebootCmdline = "shutdown -r now"
 )
 
 var (
