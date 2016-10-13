@@ -1,4 +1,4 @@
-package common
+package basenode
 
 import (
 	"bytes"
@@ -46,6 +46,21 @@ func (bsn *BaseScaleioNode) UpdateScaleIOState() *types.ScaleIOFramework {
 	bsn.State = bsn.getState()
 	bsn.Node = getSelfNode(bsn.executorId, bsn.State)
 	return bsn.State
+}
+
+func (bsn *BaseScaleioNode) personaToString(persona int) string {
+	switch persona {
+	case types.PersonaMdmPrimary:
+		return "primary"
+	case types.PersonaMdmSecondary:
+		return "secondary"
+	case types.PersonaTb:
+		return "tiebreaker"
+	case types.PersonaNode:
+		return "data"
+	default:
+		return "unknown"
+	}
 }
 
 //LeaveMarkerFileForConfigured sets a marker file when in demo mode

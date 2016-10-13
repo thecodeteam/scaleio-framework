@@ -7,7 +7,7 @@ import (
 	xplatform "github.com/dvonthenen/goxplatform"
 
 	basenode "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/basenode"
-	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
+	procedural "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/procedural"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
@@ -24,7 +24,7 @@ func NewData() *ScaleioDataNode {
 
 //RunStateUnknown default action for StateUnknown
 func (sdn *ScaleioDataNode) RunStateUnknown() {
-	reboot, err := environmentSetup(state)
+	reboot, err := procedural.EnvironmentSetup(state)
 	if err != nil {
 		log.Errorln("EnvironmentSetup Failed:", err)
 		errState := UpdateNodeState(types.StateFatalInstall)
@@ -43,7 +43,7 @@ func (sdn *ScaleioDataNode) RunStateUnknown() {
 		log.Debugln("Signaled StateCleanPrereqsReboot")
 	}
 
-	state = common.WaitForCleanPrereqsReboot(sdn.UpdateScaleIOState())
+	state = procedural.WaitForCleanPrereqsReboot(sdn.UpdateScaleIOState())
 
 	errState = UpdateNodeState(types.StatePrerequisitesInstalled)
 	if errState != nil {
@@ -56,14 +56,14 @@ func (sdn *ScaleioDataNode) RunStateUnknown() {
 	if reboot {
 		log.Infoln("Reboot required before StatePrerequisitesInstalled!")
 
-		time.Sleep(time.Duration(common.DelayForRebootInSeconds) * time.Second)
+		time.Sleep(time.Duration(procedural.DelayForRebootInSeconds) * time.Second)
 
 		rebootErr := xplatform.GetInstance().Run.Command(rebootCmdline, rebootCheck, "")
 		if rebootErr != nil {
 			log.Errorln("Install Kernel Failed:", rebootErr)
 		}
 
-		time.Sleep(time.Duration(common.WaitForRebootInSeconds) * time.Second)
+		time.Sleep(time.Duration(procedural.WaitForRebootInSeconds) * time.Second)
 	} else {
 		log.Infoln("No need to reboot while installing prerequisites")
 	}
@@ -71,11 +71,10 @@ func (sdn *ScaleioDataNode) RunStateUnknown() {
 
 //RunStatePrerequisitesInstalled default action for StatePrerequisitesInstalled
 func (sdn *ScaleioDataNode) RunStatePrerequisitesInstalled() {
-	err := nodeSetup(state)
+	err := procedural.NodeSetup(state)
 	if err != nil {
 		log.Errorln("NodeSetup Failed:", err)
-		errState := common.UpdateNodeState(state.SchedulerAddress, node.ExecutorID,
-			types.StateFatalInstall)
+		errState := UpdateNodeState(types.StateFatalInstall)
 		if errState != nil {
 			log.Errorln("Failed to signal state change:", errState)
 		} else {
@@ -84,8 +83,7 @@ func (sdn *ScaleioDataNode) RunStatePrerequisitesInstalled() {
 		continue
 	}
 
-	errState := common.UpdateNodeState(state.SchedulerAddress, node.ExecutorID,
-		types.StateInstallRexRay)
+	errState := UpdateNodeState(types.StateInstallRexRay)
 	if errState != nil {
 		log.Errorln("Failed to signal state change:", errState)
 	} else {
@@ -100,14 +98,13 @@ func (sdn *ScaleioDataNode) RunStateInstallRexRay() {
 	} else {
 		//we need to wait because without the gateway, the rexray service restart
 		//will fail
-		state = common.WaitForClusterInitializeFinish(sdn.UpdateScaleIOState())
+		state = procedural.WaitForClusterInitializeFinish(sdn.UpdateScaleIOState())
 	}
 
-	reboot, err := rexraySetup(state)
+	reboot, err := procedural.RexraySetup(state)
 	if err != nil {
 		log.Errorln("REX-Ray setup Failed:", err)
-		errState := common.UpdateNodeState(state.SchedulerAddress, node.ExecutorID,
-			types.StateFatalInstall)
+		errState := UpdateNodeState(types.StateFatalInstall)
 		if errState != nil {
 			log.Errorln("Failed to signal state change:", errState)
 		} else {
@@ -116,11 +113,10 @@ func (sdn *ScaleioDataNode) RunStateInstallRexRay() {
 		continue
 	}
 
-	err = setupIsolator(state)
+	err = procedural.SetupIsolator(state)
 	if err != nil {
 		log.Errorln("Mesos Isolator setup Failed:", err)
-		errState := common.UpdateNodeState(state.SchedulerAddress, node.ExecutorID,
-			types.StateFatalInstall)
+		errState := UpdateNodeState(types.StateFatalInstall)
 		if errState != nil {
 			log.Errorln("Failed to signal state change:", errState)
 		} else {
@@ -129,15 +125,14 @@ func (sdn *ScaleioDataNode) RunStateInstallRexRay() {
 		continue
 	}
 
-	errState := common.UpdateNodeState(state.SchedulerAddress, node.ExecutorID,
-		types.StateCleanInstallReboot)
+	errState := UpdateNodeState(types.StateCleanInstallReboot)
 	if errState != nil {
 		log.Errorln("Failed to signal state change:", errState)
 	} else {
 		log.Debugln("Signaled StateCleanInstallReboot")
 	}
 
-	state = common.WaitForCleanInstallReboot(sdn.UpdateScaleIOState())
+	state = procedural.WaitForCleanInstallReboot(sdn.UpdateScaleIOState())
 
 	//requires a reboot?
 	if reboot {
@@ -146,8 +141,7 @@ func (sdn *ScaleioDataNode) RunStateInstallRexRay() {
 
 		time.Sleep(time.Duration(DelayForRebootInSeconds) * time.Second)
 
-		errState = common.UpdateNodeState(state.SchedulerAddress, node.ExecutorID,
-			types.StateSystemReboot)
+		errState = UpdateNodeState(types.StateSystemReboot)
 		if errState != nil {
 			log.Errorln("Failed to signal state change:", errState)
 		} else {
@@ -163,8 +157,7 @@ func (sdn *ScaleioDataNode) RunStateInstallRexRay() {
 	} else {
 		log.Infoln("No need to reboot while installing REX-Ray")
 
-		errState = common.UpdateNodeState(state.SchedulerAddress, node.ExecutorID,
-			types.StateFinishInstall)
+		errState = UpdateNodeState(types.StateFinishInstall)
 		if errState != nil {
 			log.Errorln("Failed to signal state change:", errState)
 		} else {
