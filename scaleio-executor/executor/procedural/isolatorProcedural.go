@@ -1,4 +1,4 @@
-package common
+package procedural
 
 import (
 	"bufio"
@@ -165,7 +165,8 @@ func doesLineExistInMesosPropertyFile(fullfilename string, needle string) error 
 	return nil
 }
 
-func setupIsolator(state *types.ScaleIOFramework) error {
+//SetupIsolator procedure for setting up the Isolator
+func SetupIsolator(state *types.ScaleIOFramework) error {
 	log.Infoln("SetupIsolator ENTER")
 
 	//Mesos Isolator Install

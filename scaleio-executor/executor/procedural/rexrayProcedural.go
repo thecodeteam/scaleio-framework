@@ -1,4 +1,4 @@
-package common
+package procedural
 
 import (
 	"bufio"
@@ -9,6 +9,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	xplatform "github.com/dvonthenen/goxplatform"
 
+	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
@@ -77,7 +78,8 @@ func doesSciniExistInRexrayInitD() (bool, error) {
 	return false, nil
 }
 
-func rexraySetup(state *types.ScaleIOFramework) (bool, error) {
+//RexraySetup procedure for setting up REX-Ray
+func RexraySetup(state *types.ScaleIOFramework) (bool, error) {
 	log.Infoln("RexraySetup ENTER")
 
 	//REX-Ray Install
@@ -90,7 +92,7 @@ func rexraySetup(state *types.ScaleIOFramework) (bool, error) {
 	log.Debugln("rrInstErr:", rrInstErr)
 
 	if rrVerErr != nil || rrInstErr != nil || rrVer != rrInst {
-		gateway, err := getGatewayAddress(state)
+		gateway, err := common.getGatewayAddress(state)
 		if err != nil {
 			log.Errorln("Unable to find the Gateway IP Address")
 			log.Infoln("RexraySetup LEAVE")

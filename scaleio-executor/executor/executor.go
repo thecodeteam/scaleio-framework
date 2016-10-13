@@ -15,7 +15,6 @@ import (
 
 	"github.com/codedellemc/scaleio-framework/scaleio-executor/client"
 	"github.com/codedellemc/scaleio-framework/scaleio-executor/config"
-	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 	exec "github.com/codedellemc/scaleio-framework/scaleio-executor/mesos/exec"
 	mesos "github.com/codedellemc/scaleio-framework/scaleio-executor/mesos/v1"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
@@ -224,7 +223,7 @@ func (e *ScaleIOExecutor) handleEvents() {
 
 			go func() {
 				//TODO reminder not to rely on node.LastContact value until we add in pings
-				errNode := common.RunExecutor(e.Config.ExecutorID, e.retrieveState)
+				errNode := RunExecutor(e.Config.ExecutorID, e.retrieveState)
 				if errNode != nil {
 					myErr := e.sendUpdate(task, mesos.TaskState_TASK_ERROR.Enum())
 					if myErr != nil {

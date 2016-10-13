@@ -1,4 +1,4 @@
-package common
+package procedural
 
 import (
 	"time"
@@ -36,7 +36,8 @@ const (
 	addVolumeCheck             = "Successfully created volume of size"
 )
 
-func environmentSetup(state *types.ScaleIOFramework) (bool, error) {
+//EnvironmentSetup for setting up the environment for ScaleIO
+func EnvironmentSetup(state *types.ScaleIOFramework) (bool, error) {
 	log.Infoln("EnvironmentSetup ENTER")
 
 	aioErr := xplatform.GetInstance().Inst.IsInstalled("libaio1")
@@ -90,7 +91,8 @@ func environmentSetup(state *types.ScaleIOFramework) (bool, error) {
 	return false, nil
 }
 
-func managementSetup(state *types.ScaleIOFramework, isPriOrSec bool) error {
+//ManagementSetup for setting up the MDM packages
+func ManagementSetup(state *types.ScaleIOFramework, isPriOrSec bool) error {
 	log.Infoln("ManagementSetup ENTER")
 
 	mdmPair, errBase := createMdmPairString(state)
@@ -142,7 +144,8 @@ func managementSetup(state *types.ScaleIOFramework, isPriOrSec bool) error {
 	return nil
 }
 
-func nodeSetup(state *types.ScaleIOFramework) error {
+//NodeSetup for setting up the SDS and SDC packages
+func NodeSetup(state *types.ScaleIOFramework) error {
 	log.Infoln("NodeSetup ENTER")
 
 	mdmPair, errBase := createMdmPairString(state)
@@ -232,7 +235,8 @@ func isClusterInstalled() error {
 	return nil
 }
 
-func createCluster(state *types.ScaleIOFramework) error {
+//CreateCluster creates the ScaleIO cluster
+func CreateCluster(state *types.ScaleIOFramework) error {
 	log.Infoln("CreateCluster ENTER")
 
 	errCheck := isClusterInstalled()
@@ -371,86 +375,8 @@ func isClusterInitialized() error {
 	return nil
 }
 
-func initializeCluster(state *types.ScaleIOFramework) error {
-	log.Infoln("InitializeCluster ENTER")
-
-	errCheck := isClusterInitialized()
-	if errCheck == nil {
-		log.Infoln("ScaleIO cluster is already initialized")
-		log.Infoln("CreateCluster LEAVE")
-		return nil
-	}
-
-	//Needed to setup cluster
-	pri, err := getPrimaryMdmNode(state)
-	if err != nil {
-		log.Errorln("Unable to find the Primary MDM node")
-		log.Infoln("CreateCluster LEAVE")
-		return err
-	}
-
-	renameCmdline := "scli --mdm_ip " + pri.IPAddress + " --rename_system --new_name scaleio"
-	err = xplatform.GetInstance().Run.Command(renameCmdline, clusterRenameCheck, "")
-	if err != nil {
-		log.Errorln("Cluster Rename Failed:", err)
-		log.Infoln("InitializeCluster LEAVE")
-		return err
-	}
-
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
-
-	addProtectionDomainCmdline := "scli --add_protection_domain --protection_domain_name " +
-		state.ScaleIO.ProtectionDomain
-	err = xplatform.GetInstance().Run.Command(addProtectionDomainCmdline, addProtectionDomainCheck, "")
-	if err != nil {
-		log.Errorln("Add Protection Domain Failed:", err)
-		log.Infoln("InitializeCluster LEAVE")
-		return err
-	}
-
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
-
-	addStoragePoolCmdline := "scli --add_storage_pool --protection_domain_name " +
-		state.ScaleIO.ProtectionDomain + " --storage_pool_name " + state.ScaleIO.StoragePool
-	err = xplatform.GetInstance().Run.Command(addStoragePoolCmdline, addStoragePoolCheck, "")
-	if err != nil {
-		log.Errorln("Add Storage Pool Failed:", err)
-		log.Infoln("InitializeCluster LEAVE")
-		return err
-	}
-
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
-
-	err = addSdsNodesToCluster(state, false)
-	if err != nil {
-		log.Errorln("Failed to add node to ScaleIO cluster:", err)
-		log.Infoln("InitializeCluster LEAVE")
-		return err
-	}
-
-	if state.DemoMode {
-		time.Sleep(time.Duration(DelayOnVolumeCreateInSeconds) * time.Second)
-
-		addVolumeCmdline := "scli --mdm_ip " + pri.IPAddress + " --add_volume --size_gb 1 " +
-			"--volume_name test --protection_domain_name " + state.ScaleIO.ProtectionDomain +
-			" --storage_pool_name " + state.ScaleIO.StoragePool
-		err = xplatform.GetInstance().Run.Command(addVolumeCmdline, addVolumeCheck, "")
-		if err != nil {
-			log.Errorln("Add Test Volume Failed:", err)
-			log.Infoln("InitializeCluster LEAVE")
-			return err
-		}
-	}
-
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
-
-	log.Infoln("InitializeCluster Succeeded")
-	log.Infoln("InitializeCluster LEAVE")
-
-	return nil
-}
-
-func addSdsNodesToCluster(state *types.ScaleIOFramework, needsLogin bool) error {
+//AddSdsNodesToCluster adds mesos nodes to ScaleIO cluster
+func AddSdsNodesToCluster(state *types.ScaleIOFramework, needsLogin bool) error {
 	log.Infoln("AddSdsNodesToCluster ENTER")
 	log.Infoln("needsLogin:", needsLogin)
 
@@ -507,7 +433,88 @@ func addSdsNodesToCluster(state *types.ScaleIOFramework, needsLogin bool) error 
 	return nil
 }
 
-func gatewaySetup(state *types.ScaleIOFramework) (bool, error) {
+//InitializeCluster initializes the ScaleIO cluster
+func InitializeCluster(state *types.ScaleIOFramework) error {
+	log.Infoln("InitializeCluster ENTER")
+
+	errCheck := isClusterInitialized()
+	if errCheck == nil {
+		log.Infoln("ScaleIO cluster is already initialized")
+		log.Infoln("CreateCluster LEAVE")
+		return nil
+	}
+
+	//Needed to setup cluster
+	pri, err := getPrimaryMdmNode(state)
+	if err != nil {
+		log.Errorln("Unable to find the Primary MDM node")
+		log.Infoln("CreateCluster LEAVE")
+		return err
+	}
+
+	renameCmdline := "scli --mdm_ip " + pri.IPAddress + " --rename_system --new_name scaleio"
+	err = xplatform.GetInstance().Run.Command(renameCmdline, clusterRenameCheck, "")
+	if err != nil {
+		log.Errorln("Cluster Rename Failed:", err)
+		log.Infoln("InitializeCluster LEAVE")
+		return err
+	}
+
+	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+
+	addProtectionDomainCmdline := "scli --add_protection_domain --protection_domain_name " +
+		state.ScaleIO.ProtectionDomain
+	err = xplatform.GetInstance().Run.Command(addProtectionDomainCmdline, addProtectionDomainCheck, "")
+	if err != nil {
+		log.Errorln("Add Protection Domain Failed:", err)
+		log.Infoln("InitializeCluster LEAVE")
+		return err
+	}
+
+	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+
+	addStoragePoolCmdline := "scli --add_storage_pool --protection_domain_name " +
+		state.ScaleIO.ProtectionDomain + " --storage_pool_name " + state.ScaleIO.StoragePool
+	err = xplatform.GetInstance().Run.Command(addStoragePoolCmdline, addStoragePoolCheck, "")
+	if err != nil {
+		log.Errorln("Add Storage Pool Failed:", err)
+		log.Infoln("InitializeCluster LEAVE")
+		return err
+	}
+
+	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+
+	err = AddSdsNodesToCluster(state, false)
+	if err != nil {
+		log.Errorln("Failed to add node to ScaleIO cluster:", err)
+		log.Infoln("InitializeCluster LEAVE")
+		return err
+	}
+
+	if state.DemoMode {
+		time.Sleep(time.Duration(DelayOnVolumeCreateInSeconds) * time.Second)
+
+		addVolumeCmdline := "scli --mdm_ip " + pri.IPAddress + " --add_volume --size_gb 1 " +
+			"--volume_name test --protection_domain_name " + state.ScaleIO.ProtectionDomain +
+			" --storage_pool_name " + state.ScaleIO.StoragePool
+		err = xplatform.GetInstance().Run.Command(addVolumeCmdline, addVolumeCheck, "")
+		if err != nil {
+			log.Errorln("Add Test Volume Failed:", err)
+			log.Infoln("InitializeCluster LEAVE")
+			return err
+		}
+	}
+
+	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+
+	log.Infoln("InitializeCluster Succeeded")
+	log.Infoln("InitializeCluster LEAVE")
+
+	return nil
+}
+
+//GatewaySetup for setting up the ScaleIO gateway for API use
+func GatewaySetup(state *types.ScaleIOFramework) (bool, error) {
 	log.Infoln("GatewaySetup ENTER")
 
 	pri, errPri := getPrimaryMdmNode(state)
