@@ -15,7 +15,6 @@ const (
 	aiozipCheck                = "[0-9]+ upgraded|[0-9]+ newly"
 	genericInstallCheck        = "1 upgraded|1 newly"
 	requiredKernelVersionCheck = "4.2.0-30-generic"
-	rebootCheck                = "reboot in 1 minute"
 	mdmInstallCheck            = "mdm start/running"
 	sdsInstallCheck            = "sds start/running"
 	sdcInstallCheck            = "Success configuring module"

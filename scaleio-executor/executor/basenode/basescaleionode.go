@@ -30,28 +30,28 @@ type BaseScaleioNode struct {
 	State          *types.ScaleIOFramework
 	RebootRequired bool
 
-	executorID string
-	getState   common.RetrieveState
+	ExecutorID string
+	GetState   common.RetrieveState
 }
 
 //SetExecutorID sets the ExecutorID
 func (bsn *BaseScaleioNode) SetExecutorID(ID string) {
-	bsn.executorID = ID
+	bsn.ExecutorID = ID
 }
 
 //SetRetrieveState sets the retrieve state function
 func (bsn *BaseScaleioNode) SetRetrieveState(getstate common.RetrieveState) {
-	bsn.getState = getstate
+	bsn.GetState = getstate
 }
 
 //UpdateScaleIOState updates the state of the framework
 func (bsn *BaseScaleioNode) UpdateScaleIOState() *types.ScaleIOFramework {
-	state, err := bsn.getState()
+	state, err := bsn.GetState()
 	if err != nil {
 		log.Warnln("getState() failed:", err)
 	}
 	bsn.State = state
-	bsn.Node = common.GetSelfNode(bsn.executorID, bsn.State)
+	bsn.Node = common.GetSelfNode(bsn.ExecutorID, bsn.State)
 	return bsn.State
 }
 
@@ -94,7 +94,7 @@ func (bsn *BaseScaleioNode) UpdateNodeState(nodeState int) error {
 
 	state := &types.UpdateNode{
 		Acknowledged: false,
-		ExecutorID:   bsn.executorID,
+		ExecutorID:   bsn.ExecutorID,
 		State:        nodeState,
 	}
 
@@ -166,7 +166,7 @@ func (bsn *BaseScaleioNode) UpdatePingNode() error {
 
 	state := &types.PingNode{
 		Acknowledged: false,
-		ExecutorID:   bsn.executorID,
+		ExecutorID:   bsn.ExecutorID,
 	}
 
 	response, err := json.MarshalIndent(state, "", "  ")

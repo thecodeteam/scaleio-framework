@@ -12,6 +12,9 @@ import (
 const (
 	//RebootCmdline reboot now
 	RebootCmdline = "shutdown -r now"
+
+	//RebootCheck check for the reboot
+	RebootCheck = "reboot in 1 minute"
 )
 
 var (
