@@ -92,7 +92,7 @@ func RexraySetup(state *types.ScaleIOFramework) (bool, error) {
 	log.Debugln("rrInstErr:", rrInstErr)
 
 	if rrVerErr != nil || rrInstErr != nil || rrVer != rrInst {
-		gateway, err := common.getGatewayAddress(state)
+		gateway, err := common.GetGatewayAddress(state)
 		if err != nil {
 			log.Errorln("Unable to find the Gateway IP Address")
 			log.Infoln("RexraySetup LEAVE")
@@ -284,7 +284,7 @@ libstorage:
 	file.WriteString(rexrayConfig)
 	file.Close()
 
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
 
 	rexrayStopCmdline := "rexray service stop -l debug"
 	err = xplatform.GetInstance().Run.CommandEx(rexrayStopCmdline, rexrayStopCheck, "", 20)
@@ -292,7 +292,7 @@ libstorage:
 		log.Warnln("REX-Ray stop Failed:", err)
 	}
 
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
 
 	rexrayStartCmdline := "rexray service start -l debug"
 	err = xplatform.GetInstance().Run.CommandEx(rexrayStartCmdline, rexrayStartCheck, "", 20)
@@ -352,7 +352,7 @@ libstorage:
 	file.WriteString(rexrayConfig)
 	file.Close()
 
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
 
 	rexrayStopCmdline := "rexray service stop -l debug"
 	err = xplatform.GetInstance().Run.CommandEx(rexrayStopCmdline, rexrayStopCheck, "", 20)
@@ -360,7 +360,7 @@ libstorage:
 		log.Warnln("REX-Ray stop Failed:", err)
 	}
 
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
 
 	rexrayStartCmdline := "rexray service start -l debug"
 	err = xplatform.GetInstance().Run.CommandEx(rexrayStartCmdline, rexrayStartCheck, "", 20)

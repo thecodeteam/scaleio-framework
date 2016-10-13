@@ -6,6 +6,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	xplatform "github.com/dvonthenen/goxplatform"
 
+	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
@@ -95,7 +96,7 @@ func EnvironmentSetup(state *types.ScaleIOFramework) (bool, error) {
 func ManagementSetup(state *types.ScaleIOFramework, isPriOrSec bool) error {
 	log.Infoln("ManagementSetup ENTER")
 
-	mdmPair, errBase := createMdmPairString(state)
+	mdmPair, errBase := common.CreateMdmPairString(state)
 	if errBase != nil {
 		log.Errorln("Error downloading MDM package:", errBase)
 		log.Infoln("ManagementSetup LEAVE")
@@ -148,7 +149,7 @@ func ManagementSetup(state *types.ScaleIOFramework, isPriOrSec bool) error {
 func NodeSetup(state *types.ScaleIOFramework) error {
 	log.Infoln("NodeSetup ENTER")
 
-	mdmPair, errBase := createMdmPairString(state)
+	mdmPair, errBase := common.CreateMdmPairString(state)
 	if errBase != nil {
 		log.Errorln("Error downloading MDM package:", errBase)
 		log.Infoln("NodeSetup LEAVE")
@@ -247,19 +248,19 @@ func CreateCluster(state *types.ScaleIOFramework) error {
 	}
 
 	//Needed to setup cluster
-	pri, err := getPrimaryMdmNode(state)
+	pri, err := common.GetPrimaryMdmNode(state)
 	if err != nil {
 		log.Errorln("Cannot find Primary MDM node")
 		log.Infoln("CreateCluster LEAVE")
 		return err
 	}
-	sec, err := getSecondaryMdmNode(state)
+	sec, err := common.GetSecondaryMdmNode(state)
 	if err != nil {
 		log.Errorln("Cannot find Secondary MDM node")
 		log.Infoln("CreateCluster LEAVE")
 		return err
 	}
-	tb, err := getTiebreakerMdmNode(state)
+	tb, err := common.GetTiebreakerMdmNode(state)
 	if err != nil {
 		log.Errorln("Cannot find TieBreaker MDM node")
 		log.Infoln("CreateCluster LEAVE")
@@ -276,7 +277,7 @@ func CreateCluster(state *types.ScaleIOFramework) error {
 		return err
 	}
 
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
 
 	loginCmdline := "scli --login --username admin --password admin"
 	err = xplatform.GetInstance().Run.Command(loginCmdline, loggedInCheck, "")
@@ -286,7 +287,7 @@ func CreateCluster(state *types.ScaleIOFramework) error {
 		return err
 	}
 
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
 
 	setPassCmdline := "scli --set_password --old_password admin --new_password " +
 		state.ScaleIO.AdminPassword
@@ -297,7 +298,7 @@ func CreateCluster(state *types.ScaleIOFramework) error {
 		return err
 	}
 
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
 
 	loginCmdline = "scli --login --username admin --password " + state.ScaleIO.AdminPassword
 	err = xplatform.GetInstance().Run.Command(loginCmdline, loggedInCheck, "")
@@ -307,7 +308,7 @@ func CreateCluster(state *types.ScaleIOFramework) error {
 		return err
 	}
 
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
 
 	secondaryCmdline := "scli --add_standby_mdm --new_mdm_ip " + sec.IPAddress +
 		" --mdm_role manager --new_mdm_management_ip " + sec.IPAddress + " --new_mdm_name mdm2"
@@ -318,7 +319,7 @@ func CreateCluster(state *types.ScaleIOFramework) error {
 		return err
 	}
 
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
 
 	tiebreakerCmdline := "scli --add_standby_mdm --new_mdm_ip " + tb.IPAddress +
 		" --mdm_role tb --new_mdm_name tb"
@@ -329,7 +330,7 @@ func CreateCluster(state *types.ScaleIOFramework) error {
 		return err
 	}
 
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
 
 	changeClusterCmdline := "scli --switch_cluster_mode --cluster_mode 3_node " +
 		"--add_slave_mdm_name mdm2 --add_tb_name tb"
@@ -340,7 +341,7 @@ func CreateCluster(state *types.ScaleIOFramework) error {
 		return err
 	}
 
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
 
 	queryCmdline := "scli --query_cluster"
 	err = xplatform.GetInstance().Run.Command(queryCmdline, clusterConfigCheck, "")
@@ -350,7 +351,7 @@ func CreateCluster(state *types.ScaleIOFramework) error {
 		return err
 	}
 
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
 
 	log.Infoln("CreateCluster Succeeded")
 	log.Infoln("CreateCluster LEAVE")
@@ -368,7 +369,7 @@ func isClusterInitialized() error {
 		return err
 	}
 
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
 
 	log.Errorln("Query Cluster Succeeded")
 	log.Infoln("isClusterInitialized LEAVE")
@@ -405,7 +406,7 @@ func AddSdsNodesToCluster(state *types.ScaleIOFramework, needsLogin bool) error 
 			}
 		}
 
-		time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+		time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
 
 		log.Infoln("Adding Node", node.ExecutorID, "/", node.IPAddress,
 			"to the ScaleIO cluster.")
@@ -471,7 +472,7 @@ func InitializeCluster(state *types.ScaleIOFramework) error {
 		return err
 	}
 
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
 
 	addStoragePoolCmdline := "scli --add_storage_pool --protection_domain_name " +
 		state.ScaleIO.ProtectionDomain + " --storage_pool_name " + state.ScaleIO.StoragePool
@@ -482,7 +483,7 @@ func InitializeCluster(state *types.ScaleIOFramework) error {
 		return err
 	}
 
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
 
 	err = AddSdsNodesToCluster(state, false)
 	if err != nil {
@@ -492,7 +493,7 @@ func InitializeCluster(state *types.ScaleIOFramework) error {
 	}
 
 	if state.DemoMode {
-		time.Sleep(time.Duration(DelayOnVolumeCreateInSeconds) * time.Second)
+		time.Sleep(time.Duration(common.DelayOnVolumeCreateInSeconds) * time.Second)
 
 		addVolumeCmdline := "scli --mdm_ip " + pri.IPAddress + " --add_volume --size_gb 1 " +
 			"--volume_name test --protection_domain_name " + state.ScaleIO.ProtectionDomain +
@@ -505,7 +506,7 @@ func InitializeCluster(state *types.ScaleIOFramework) error {
 		}
 	}
 
-	time.Sleep(time.Duration(DelayBetweenCommandsInSeconds) * time.Second)
+	time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
 
 	log.Infoln("InitializeCluster Succeeded")
 	log.Infoln("InitializeCluster LEAVE")
@@ -517,13 +518,13 @@ func InitializeCluster(state *types.ScaleIOFramework) error {
 func GatewaySetup(state *types.ScaleIOFramework) (bool, error) {
 	log.Infoln("GatewaySetup ENTER")
 
-	pri, errPri := getPrimaryMdmNode(state)
+	pri, errPri := common.GetPrimaryMdmNode(state)
 	if errPri != nil {
 		log.Errorln("getPrimaryMdmNode Failed:", errPri)
 		log.Infoln("GatewaySetup LEAVE")
 		return false, errPri
 	}
-	sec, errSec := getSecondaryMdmNode(state)
+	sec, errSec := common.GetSecondaryMdmNode(state)
 	if errSec != nil {
 		log.Errorln("getSecondaryMdmNode Failed:", errSec)
 		log.Infoln("GatewaySetup LEAVE")
