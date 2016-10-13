@@ -1,4 +1,4 @@
-package procedural
+package common
 
 import (
 	"time"
