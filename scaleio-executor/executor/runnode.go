@@ -8,6 +8,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
+	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 	scaleionodes "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/scaleionodes"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
@@ -30,20 +31,6 @@ func nodePreviouslyConfigured() bool {
 	return false
 }
 
-func getSelfNode(executorID string, state *types.ScaleIOFramework) *types.ScaleIONode {
-	log.Infoln("getSelfNode ENTER")
-	for _, node := range state.ScaleIO.Nodes {
-		if executorID == node.ExecutorID {
-			log.Infoln("getSelfNode Found:", node.ExecutorID)
-			log.Infoln("getSelfNode LEAVE")
-			return node
-		}
-	}
-	log.Infoln("getSelfNode NOT FOUND")
-	log.Infoln("getSelfNode LEAVE")
-	return nil
-}
-
 func whichNode(executorID string, getstate retrievestate) (*IScaleioNode, error) {
 	log.Infoln("WhichNode ENTER")
 
@@ -57,7 +44,7 @@ func whichNode(executorID string, getstate retrievestate) (*IScaleioNode, error)
 		state := WaitForStableState(getstate)
 
 		log.Infoln("Find Self Node")
-		node := getSelfNode(executorID, state)
+		node := common.GetSelfNode(executorID, state)
 		if node == nil {
 			log.Infoln("GetSelfNode Failed")
 			log.Infoln("WhichNode LEAVE")
