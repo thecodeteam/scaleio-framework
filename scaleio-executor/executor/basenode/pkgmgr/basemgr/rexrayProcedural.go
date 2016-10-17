@@ -1,4 +1,4 @@
-package basenode
+package basemgr
 
 import (
 	"bufio"
@@ -15,12 +15,6 @@ import (
 
 //constants for verifying that the command lines executed properly
 const (
-	rexrayInstallCheck = "rexray has been installed to"
-	rexrayStopCheck    = "SUCCESS!|os: process already finished|REX-Ray is already stopped"
-	rexrayStartCheck   = "SUCCESS!|REX-Ray already running at"
-	rexrayRunningCheck = "REX-Ray is running at PID"
-	rexrayEnableCheck  = "Adding system startup for"
-
 	rexrayBintrayRootURI = "https://dl.bintray.com/emccode/rexray/"
 )
 
@@ -79,20 +73,19 @@ func doesSciniExistInRexrayInitD() (bool, error) {
 }
 
 //RexraySetup procedure for setting up REX-Ray
-func (bsn *BaseScaleioNode) RexraySetup() (bool, error) {
+func (bm *BaseManager) RexraySetup(state *types.ScaleIOFramework) (bool, error) {
 	log.Infoln("RexraySetup ENTER")
 
 	//REX-Ray Install
-	rrVer, rrVerErr := getRexrayVersionToInstall(bsn.State)
+	rrVer, rrVerErr := getRexrayVersionToInstall(state)
 	rrInst, rrInstErr := xplatform.GetInstance().Inst.GetInstalledVersion(types.RexRayPackageName, false)
-	rrInst = xplatform.GetInstance().Inst.CorrectVersionFromDeb(rrInst)
 	log.Debugln("rrVer:", rrVer)
 	log.Debugln("rrVerErr:", rrVerErr)
 	log.Debugln("rrInst:", rrInst)
 	log.Debugln("rrInstErr:", rrInstErr)
 
 	if rrVerErr != nil || rrInstErr != nil || rrVer != rrInst {
-		gateway, err := common.GetGatewayAddress(bsn.State)
+		gateway, err := common.GetGatewayAddress(state)
 		if err != nil {
 			log.Errorln("Unable to find the Gateway IP Address")
 			log.Infoln("RexraySetup LEAVE")
@@ -102,24 +95,24 @@ func (bsn *BaseScaleioNode) RexraySetup() (bool, error) {
 		//REX-Ray Install
 		rexrayInstallCmdline := "curl -ksSL https://dl.bintray.com/emccode/rexray/install " +
 			"| INSECURE=1 sh -"
-		if strings.Compare(bsn.State.Rexray.Version, "latest") != 0 {
+		if strings.Compare(state.Rexray.Version, "latest") != 0 {
 			rexrayInstallCmdline = "curl -ksSL https://dl.bintray.com/emccode/rexray/install | INSECURE=1 sh -s -- " +
-				bsn.State.Rexray.Branch + " " + bsn.State.Rexray.Version
-		} else if strings.Compare(bsn.State.Rexray.Branch, "stable") != 0 {
+				state.Rexray.Branch + " " + state.Rexray.Version
+		} else if strings.Compare(state.Rexray.Branch, "stable") != 0 {
 			rexrayInstallCmdline = "curl -ksSL https://dl.bintray.com/emccode/rexray/install | INSECURE=1 sh -s -- " +
-				bsn.State.Rexray.Branch
+				state.Rexray.Branch
 		}
 
-		err = xplatform.GetInstance().Run.Command(rexrayInstallCmdline, rexrayInstallCheck, "")
+		err = xplatform.GetInstance().Run.Command(rexrayInstallCmdline, bm.RexrayInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install REX-Ray Failed:", err)
 			log.Infoln("RexraySetup LEAVE")
 			return false, err
 		}
 
-		systemIdenifier := "systemName: " + bsn.State.ScaleIO.ClusterName
-		if bsn.State.ScaleIO.ClusterID != "" {
-			systemIdenifier = "systemId: " + bsn.State.ScaleIO.ClusterID
+		systemIdenifier := "systemName: " + state.ScaleIO.ClusterName
+		if state.ScaleIO.ClusterID != "" {
+			systemIdenifier = "systemId: " + state.ScaleIO.ClusterID
 		}
 
 		rexrayConfig := `rexray:
@@ -149,13 +142,13 @@ libstorage:
 
 		rexrayConfig = strings.Replace(rexrayConfig, "{IP_ADDRESS}", gateway, -1)
 		rexrayConfig = strings.Replace(rexrayConfig, "{PASSWORD}",
-			bsn.State.ScaleIO.AdminPassword, -1)
+			state.ScaleIO.AdminPassword, -1)
 		rexrayConfig = strings.Replace(rexrayConfig, "{SYSTEMIDENTIFIER}",
 			systemIdenifier, -1)
 		rexrayConfig = strings.Replace(rexrayConfig, "{PROTECTIONDOMAINNAME}",
-			bsn.State.ScaleIO.ProtectionDomain, -1)
+			state.ScaleIO.ProtectionDomain, -1)
 		rexrayConfig = strings.Replace(rexrayConfig, "{STORAGEPOOLNAME}",
-			bsn.State.ScaleIO.StoragePool, -1)
+			state.ScaleIO.StoragePool, -1)
 
 		file, err := os.OpenFile("/etc/rexray/config.yml",
 			os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0666)
@@ -211,7 +204,7 @@ libstorage:
 func rexrayServerSetup() error {
 	log.Infoln("RexrayServerSetup ENTER")
 
-	pri, err := getPrimaryMdmNode(bsn.State)
+	pri, err := getPrimaryMdmNode(state)
 	if err != nil {
 		log.Errorln("Unable to find the Primary MDM node")
 		log.Infoln("RexrayServerSetup LEAVE")
@@ -258,20 +251,20 @@ libstorage:
 
 	gatewayIP := pri.IPAddress
 	log.Infoln("Gateway IP to Use:", gatewayIP)
-	if len(bsn.State.ScaleIO.LbGateway) > 0 {
-		gatewayIP = bsn.State.ScaleIO.LbGateway
+	if len(state.ScaleIO.LbGateway) > 0 {
+		gatewayIP = state.ScaleIO.LbGateway
 		log.Infoln("LbGateway Set. Using IP:", gatewayIP)
 	}
 
 	rexrayConfig = strings.Replace(rexrayConfig, "{IP_ADDRESS}", gatewayIP, -1)
 	rexrayConfig = strings.Replace(rexrayConfig, "{PASSWORD}",
-		bsn.State.ScaleIO.AdminPassword, -1)
+		state.ScaleIO.AdminPassword, -1)
 	rexrayConfig = strings.Replace(rexrayConfig, "{SYSTEMNAME}",
-		bsn.State.ScaleIO.ClusterName, -1)
+		state.ScaleIO.ClusterName, -1)
 	rexrayConfig = strings.Replace(rexrayConfig, "{PROTECTIONDOMAINNAME}",
-		bsn.State.ScaleIO.ProtectionDomain, -1)
+		state.ScaleIO.ProtectionDomain, -1)
 	rexrayConfig = strings.Replace(rexrayConfig, "{STORAGEPOOLNAME}",
-		bsn.State.ScaleIO.StoragePool, -1)
+		state.ScaleIO.StoragePool, -1)
 
 	file, err := os.OpenFile("/etc/rexray/config.yml",
 		os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0666)
@@ -307,10 +300,10 @@ libstorage:
 	return nil
 }
 
-func rexrayClientSetup(bsn.State *types.ScaleIOFramework) error {
+func rexrayClientSetup(state *types.ScaleIOFramework) error {
 	log.Infoln("RexrayClientSetup ENTER")
 
-	pri, err := getPrimaryMdmNode(bsn.State)
+	pri, err := getPrimaryMdmNode(state)
 	if err != nil {
 		log.Errorln("Unable to find the Primary MDM node")
 		log.Infoln("RexrayClientSetup LEAVE")
@@ -334,8 +327,8 @@ libstorage:
 
 	gatewayIP := pri.IPAddress
 	log.Infoln("Gateway IP to Use:", gatewayIP)
-	if len(bsn.State.ScaleIO.LbGateway) > 0 {
-		gatewayIP = bsn.State.ScaleIO.LbGateway
+	if len(state.ScaleIO.LbGateway) > 0 {
+		gatewayIP = state.ScaleIO.LbGateway
 		log.Infoln("LbGateway Set. Using IP:", gatewayIP)
 	}
 

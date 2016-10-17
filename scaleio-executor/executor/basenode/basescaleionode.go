@@ -11,7 +11,11 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	xplatform "github.com/dvonthenen/goxplatform"
 
+	basemgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/basenode/pkgmgr/basemgr"
+	debmgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/basenode/pkgmgr/deb"
+	rpmmgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/basenode/pkgmgr/rpm"
 	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
@@ -26,12 +30,12 @@ type RetrieveState func() (*types.ScaleIOFramework, error)
 
 //BaseScaleioNode implementation for base ScaleIO node
 type BaseScaleioNode struct {
+	ExecutorID     string
+	RebootRequired bool
 	Node           *types.ScaleIONode
 	State          *types.ScaleIOFramework
-	RebootRequired bool
-
-	ExecutorID string
-	GetState   common.RetrieveState
+	PkgMgr         *basemgr.IPkgMgr
+	GetState       common.RetrieveState
 }
 
 //SetExecutorID sets the ExecutorID
@@ -57,6 +61,16 @@ func (bsn *BaseScaleioNode) UpdateScaleIOState() *types.ScaleIOFramework {
 	}
 	bsn.State = state
 	bsn.Node = common.GetSelfNode(bsn.ExecutorID, bsn.State)
+
+	var pkgmgr *basemgr.IPkgMgr
+	switch xplatform.GetInstance().Sys.GetOsType() {
+	case xplatform.OsRhel:
+		pkgmgr = rpmmgr.NewRpmPkgMgr()
+	case xplatform.OsUbuntu:
+		pkgmgr = debmgr.NewDebPkgMgr()
+	}
+	bsn.PkgMgr = pkgmgr
+
 	return bsn.State
 }
 
