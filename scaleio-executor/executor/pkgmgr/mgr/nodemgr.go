@@ -1,4 +1,4 @@
-package basemgr
+package mgr
 
 import "errors"
 
@@ -10,8 +10,8 @@ var (
 	ErrStateChangeNotAcknowledged = errors.New("The node state change was not acknowledged")
 )
 
-//BaseManager implementation for Base Package Manager
-type BaseManager struct {
+//NodeManager implementation for Package Manager for ScaleIO Nodes
+type NodeManager struct {
 	//ScaleIO node
 	SdsPackageName     string
 	SdsPackageDownload string

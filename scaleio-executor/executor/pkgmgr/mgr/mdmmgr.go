@@ -1,6 +1,5 @@
-package basemgr
+package mgr
 
-/*
 import (
 	"bytes"
 	"encoding/json"
@@ -12,11 +11,10 @@ import (
 
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
-*/
 
 //MdmManager implementation for MDM Package Manager
 type MdmManager struct {
-	BaseManager
+	NodeManager
 
 	//ScaleIO node
 	MdmPackageName         string
@@ -35,7 +33,6 @@ type MdmManager struct {
 	GatewayRestartCheck    string
 }
 
-/*
 //UpdateAddNode this function tells the scheduler that the executor's ScaleIO
 //components has been to the cluster
 func (msn *MdmManager) UpdateAddNode(schedulerAddress string, executorID string) error {
@@ -108,4 +105,3 @@ func (msn *MdmManager) UpdateAddNode(schedulerAddress string, executorID string)
 	log.Debugln("UpdateAddNode LEAVE")
 	return nil
 }
-*/

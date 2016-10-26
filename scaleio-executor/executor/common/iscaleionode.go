@@ -1,4 +1,4 @@
-package basenode
+package common
 
 import (
 	"github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"

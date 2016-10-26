@@ -4,7 +4,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	xplatform "github.com/dvonthenen/goxplatform"
 
-	basemgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/basenode/pkgmgr/basemgr"
+	mgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/mgr"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
@@ -15,25 +15,8 @@ const (
 	requiredKernelVersionCheck = "4.2.0-30-generic"
 
 	//ScaleIO node
-	mdmInstallCheck          = "mdm start/running"
-	sdsInstallCheck          = "sds start/running"
-	sdcInstallCheck          = "Success configuring module"
-	clusterConfigCheck       = "Mode: 3_node"
-	createClusterCheck       = "Successfully created the MDM Cluster"
-	loggedInCheck            = "Logged in"
-	setPasswordCheck         = "Password changed successfully"
-	addMdmToClusterCheck     = "Successfully added a standby MDM"
-	changeClusterModeCheck   = "Successfully switched the cluster mode"
-	clusterNotInitialedCheck = "Query-all-SDS returned 0 SDS nodes"
-	liaInstallCheck          = "lia start/running"
-	liaRestartCheck          = liaInstallCheck
-	gatewayInstallCheck      = "The EMC ScaleIO Gateway is running"
-	gatewayRestartCheck      = "scaleio-gateway start/running"
-	clusterRenameCheck       = "Successfully renamed system to"
-	addProtectionDomainCheck = "Successfully created protection domain"
-	addStoragePoolCheck      = "Successfully created a storage pool"
-	addSdsCheck              = "Successfully created SDS"
-	addVolumeCheck           = "Successfully created volume of size"
+	sdsInstallCheck = "sds start/running"
+	sdcInstallCheck = "Success configuring module"
 
 	//REX-Ray
 	rexrayInstallCheck = "rexray has been installed to"
@@ -42,13 +25,13 @@ const (
 	dvdcliInstallCheck = "dvdcli has been installed to"
 )
 
-//DebPkgMgr implementation for DebPkgMgr
-type DebPkgMgr struct {
-	*basemgr.BaseManager
+//NodeDebMgr implementation for NodeDebMgr
+type NodeDebMgr struct {
+	*mgr.NodeManager
 }
 
 //EnvironmentSetup for setting up the environment for ScaleIO
-func (dpm *DebPkgMgr) EnvironmentSetup(state *types.ScaleIOFramework) (bool, error) {
+func (dpm *NodeDebMgr) EnvironmentSetup(state *types.ScaleIOFramework) (bool, error) {
 	log.Infoln("EnvironmentSetup ENTER")
 
 	aioErr := xplatform.GetInstance().Inst.IsInstalled("libaio1")
@@ -103,21 +86,15 @@ func (dpm *DebPkgMgr) EnvironmentSetup(state *types.ScaleIOFramework) (bool, err
 	return false, nil
 }
 
-//NewDebPkgMgr generates a DebMgr object
-func NewDebPkgMgr() DebPkgMgr {
-	myBaseMgr := &basemgr.BaseManager{}
-	myDebPkgMgr := DebPkgMgr{myBaseMgr}
+//NewNodeDebMgr generates a NodeDebMgr object
+func NewNodeDebMgr() NodeDebMgr {
+	myNodeMgr := &mgr.NodeManager{}
+	myNodeDebMgr := myNodeDebMgr{myNodeMgr}
 
-	myDebPkgMgr.BaseManager.RexrayInstallCheck = rexrayInstallCheck
-	myDebPkgMgr.BaseManager.DvdcliInstallCheck = dvdcliInstallCheck
+	myNodeDebMgr.NodeManager.RexrayInstallCheck = rexrayInstallCheck
+	myNodeDebMgr.NodeManager.DvdcliInstallCheck = dvdcliInstallCheck
 
-	/*
-		mdmCmdline := "MDM_ROLE_IS_MANAGER=" + strPriOrSec + " dpkg -i " + localMdm
-		sdsCmdline := "dpkg -i " + localSds
-		sdcCmdline := "MDM_IP=" + mdmPair + " dpkg -i " + localSdc
-		liaCmdline := "TOKEN=" + state.ScaleIO.AdminPassword + " dpkg -i " + localLia
-		gwCmdline := "GATEWAY_ADMIN_PASSWORD=" + state.ScaleIO.AdminPassword + " dpkg -i " + localGw
-	*/
+	//TODO
 
-	return myDebPkgMgr
+	return myNodeDebMgr
 }

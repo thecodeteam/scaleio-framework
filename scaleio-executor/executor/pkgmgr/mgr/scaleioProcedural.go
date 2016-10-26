@@ -79,7 +79,7 @@ func (mm *MdmManager) ManagementSetup(state *types.ScaleIOFramework, isPriOrSec 
 }
 
 //NodeSetup for setting up the SDS and SDC packages
-func (bm *BaseManager) NodeSetup(state *types.ScaleIOFramework) error {
+func (nm *NodeManager) NodeSetup(state *types.ScaleIOFramework) error {
 	log.Infoln("NodeSetup ENTER")
 
 	mdmPair, errBase := common.CreateMdmPairString(state)
@@ -91,24 +91,24 @@ func (bm *BaseManager) NodeSetup(state *types.ScaleIOFramework) error {
 	log.Infoln("MDM Pair String:", mdmPair)
 
 	//SDS Install
-	sdsVer, sdsVerErr := xplatform.GetInstance().Inst.ParseVersionFromFilename(bm.SdsPackageDownload)
-	sdsInst, sdsInstErr := xplatform.GetInstance().Inst.GetInstalledVersion(bm.SdsPackageName, true)
+	sdsVer, sdsVerErr := xplatform.GetInstance().Inst.ParseVersionFromFilename(nm.SdsPackageDownload)
+	sdsInst, sdsInstErr := xplatform.GetInstance().Inst.GetInstalledVersion(nm.SdsPackageName, true)
 	log.Debugln("sdsVer:", sdsVer)
 	log.Debugln("sdsVerErr:", sdsVerErr)
 	log.Debugln("sdsInst:", sdsInst)
 	log.Debugln("sdsInstErr:", sdsInstErr)
 
 	if sdsVerErr != nil || sdsInstErr != nil || sdsVer != sdsInst {
-		log.Infoln("Installing", bm.SdsPackageName)
+		log.Infoln("Installing", nm.SdsPackageName)
 
-		localSds, err := xplatform.GetInstance().Inst.DownloadPackage(bm.SdsPackageDownload)
+		localSds, err := xplatform.GetInstance().Inst.DownloadPackage(nm.SdsPackageDownload)
 		if err != nil {
 			log.Errorln("Error downloading SDS package:", err)
 			log.Infoln("NodeSetup LEAVE")
 			return err
 		}
 
-		err = xplatform.GetInstance().Run.Command(bm.SdsInstallCmd, bm.SdsInstallCheck, "")
+		err = xplatform.GetInstance().Run.Command(nm.SdsInstallCmd, nm.SdsInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install SDS Failed:", err)
 			log.Infoln("NodeSetup LEAVE")
@@ -119,31 +119,31 @@ func (bm *BaseManager) NodeSetup(state *types.ScaleIOFramework) error {
 	}
 
 	//SDC Install
-	sdcVer, sdcVerErr := xplatform.GetInstance().Inst.ParseVersionFromFilename(bm.SdcPackageDownload)
-	sdcInst, sdcInstErr := xplatform.GetInstance().Inst.GetInstalledVersion(bm.SdcPackageName, true)
+	sdcVer, sdcVerErr := xplatform.GetInstance().Inst.ParseVersionFromFilename(nm.SdcPackageDownload)
+	sdcInst, sdcInstErr := xplatform.GetInstance().Inst.GetInstalledVersion(nm.SdcPackageName, true)
 	log.Debugln("sdcVer:", sdcVer)
 	log.Debugln("sdcVerErr:", sdcVerErr)
 	log.Debugln("sdcInst:", sdcInst)
 	log.Debugln("sdcInstErr:", sdcInstErr)
 
 	if sdcVerErr != nil || sdcInstErr != nil || sdcVer != sdcInst {
-		log.Infoln("Installing", bm.SdcPackageName)
+		log.Infoln("Installing", nm.SdcPackageName)
 
-		localSdc, err := xplatform.GetInstance().Inst.DownloadPackage(bm.SdcPackageDownload)
+		localSdc, err := xplatform.GetInstance().Inst.DownloadPackage(nm.SdcPackageDownload)
 		if err != nil {
 			log.Errorln("Error downloading SDC package:", err)
 			log.Infoln("NodeSetup LEAVE")
 			return err
 		}
 
-		err = xplatform.GetInstance().Run.Command(bm.SdcInstallCmd, bm.SdcInstallCheck, "")
+		err = xplatform.GetInstance().Run.Command(nm.SdcInstallCmd, nm.SdcInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install SDC Failed:", err)
 			log.Infoln("NodeSetup LEAVE")
 			return err
 		}
 	} else {
-		log.Infoln(bm.SdcPackageName, "is already installed")
+		log.Infoln(nm.SdcPackageName, "is already installed")
 	}
 
 	log.Infoln("NodeSetup Succeeded")

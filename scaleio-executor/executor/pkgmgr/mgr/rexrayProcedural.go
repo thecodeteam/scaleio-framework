@@ -73,7 +73,7 @@ func doesSciniExistInRexrayInitD() (bool, error) {
 }
 
 //RexraySetup procedure for setting up REX-Ray
-func (bm *BaseManager) RexraySetup(state *types.ScaleIOFramework) (bool, error) {
+func (nm *NodeManager) RexraySetup(state *types.ScaleIOFramework) (bool, error) {
 	log.Infoln("BaseManager::RexraySetup ENTER")
 
 	//REX-Ray Install
@@ -103,7 +103,7 @@ func (bm *BaseManager) RexraySetup(state *types.ScaleIOFramework) (bool, error) 
 				state.Rexray.Branch
 		}
 
-		err = xplatform.GetInstance().Run.Command(rexrayInstallCmdline, bm.RexrayInstallCheck, "")
+		err = xplatform.GetInstance().Run.Command(rexrayInstallCmdline, nm.RexrayInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install REX-Ray Failed:", err)
 			log.Infoln("BaseManager::RexraySetup LEAVE")

@@ -1,11 +1,11 @@
-package basemgr
+package mgr
 
 import (
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
-//IBaseMgr abstracts the Base Package Manager on the platform
-type IBaseMgr interface {
+//INodeMgr abstracts the Package Manager for ScaleIO node on the platform
+type INodeMgr interface {
 	EnvironmentSetup(state *types.ScaleIOFramework) (bool, error)
 	NodeSetup(state *types.ScaleIOFramework) error
 

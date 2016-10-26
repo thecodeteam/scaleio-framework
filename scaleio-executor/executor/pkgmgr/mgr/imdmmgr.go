@@ -1,12 +1,12 @@
-package basemgr
+package mgr
 
 import (
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
-//IMdmMgr abstracts the MDM Package Manager on the platform
+//IMdmMgr abstracts the Package Manager for MDM nodes on the platform
 type IMdmMgr interface {
-	IBaseMgr
+	INodeMgr
 
 	ManagementSetup(state *types.ScaleIOFramework, isPriOrSec bool) error
 	CreateCluster(state *types.ScaleIOFramework) error

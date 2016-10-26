@@ -1,4 +1,4 @@
-package basemgr
+package mgr
 
 import (
 	"bufio"
@@ -163,7 +163,7 @@ func doesLineExistInMesosPropertyFile(fullfilename string, needle string) error 
 }
 
 //SetupIsolator procedure for setting up the Isolator
-func (bm *BaseManager) SetupIsolator(state *types.ScaleIOFramework) error {
+func (nm *NodeManager) SetupIsolator(state *types.ScaleIOFramework) error {
 	log.Infoln("BaseManager::SetupIsolator ENTER")
 
 	//Mesos Isolator Install
@@ -282,7 +282,7 @@ func (bm *BaseManager) SetupIsolator(state *types.ScaleIOFramework) error {
 	if dcVerErr != nil || dcInstErr != nil || dcVer != dcInst {
 		dvdcliInstallCmdline := "curl -ksSL https://dl.bintray.com/emccode/dvdcli/install " +
 			"| INSECURE=1 sh -"
-		err := xplatform.GetInstance().Run.Command(dvdcliInstallCmdline, bm.DvdcliInstallCheck, "")
+		err := xplatform.GetInstance().Run.Command(dvdcliInstallCmdline, nm.DvdcliInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install DVDCLI Failed:", err)
 			log.Infoln("BaseManager::SetupIsolator LEAVE")

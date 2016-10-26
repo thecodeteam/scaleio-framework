@@ -1,4 +1,4 @@
-package basenode
+package common
 
 import (
 	"bytes"
@@ -35,7 +35,6 @@ type BaseScaleioNode struct {
 	RebootRequired bool
 	Node           *types.ScaleIONode
 	State          *types.ScaleIOFramework
-	PkgMgr         basemgr.IPkgMgr
 	GetState       common.RetrieveState
 }
 
