@@ -169,12 +169,12 @@ func isClusterInstalled() error {
 
 //CreateCluster creates the ScaleIO cluster
 func (mm *MdmManager) CreateCluster(state *types.ScaleIOFramework) error {
-	log.Infoln("BaseManager::CreateCluster ENTER")
+	log.Infoln("CreateCluster ENTER")
 
 	errCheck := isClusterInstalled()
 	if errCheck == nil {
 		log.Infoln("ScaleIO cluster is already installed")
-		log.Infoln("BaseManager::CreateCluster LEAVE")
+		log.Infoln("CreateCluster LEAVE")
 		return nil
 	}
 
@@ -182,19 +182,19 @@ func (mm *MdmManager) CreateCluster(state *types.ScaleIOFramework) error {
 	pri, err := common.GetPrimaryMdmNode(state)
 	if err != nil {
 		log.Errorln("Cannot find Primary MDM node")
-		log.Infoln("BaseManager::CreateCluster LEAVE")
+		log.Infoln("CreateCluster LEAVE")
 		return err
 	}
 	sec, err := common.GetSecondaryMdmNode(state)
 	if err != nil {
 		log.Errorln("Cannot find Secondary MDM node")
-		log.Infoln("BaseManager::CreateCluster LEAVE")
+		log.Infoln("CreateCluster LEAVE")
 		return err
 	}
 	tb, err := common.GetTiebreakerMdmNode(state)
 	if err != nil {
 		log.Errorln("Cannot find TieBreaker MDM node")
-		log.Infoln("BaseManager::CreateCluster LEAVE")
+		log.Infoln("CreateCluster LEAVE")
 		return err
 	}
 
@@ -204,7 +204,7 @@ func (mm *MdmManager) CreateCluster(state *types.ScaleIOFramework) error {
 	err = xplatform.GetInstance().Run.Command(createCmdline, createClusterCheck, "")
 	if err != nil {
 		log.Errorln("Init First Node Failed:", err)
-		log.Infoln("BaseManager::CreateCluster LEAVE")
+		log.Infoln("CreateCluster LEAVE")
 		return err
 	}
 
@@ -214,7 +214,7 @@ func (mm *MdmManager) CreateCluster(state *types.ScaleIOFramework) error {
 	err = xplatform.GetInstance().Run.Command(loginCmdline, loggedInCheck, "")
 	if err != nil {
 		log.Errorln("ScaleIO Login Failed:", err)
-		log.Infoln("BaseManager::CreateCluster LEAVE")
+		log.Infoln("CreateCluster LEAVE")
 		return err
 	}
 
@@ -225,7 +225,7 @@ func (mm *MdmManager) CreateCluster(state *types.ScaleIOFramework) error {
 	err = xplatform.GetInstance().Run.Command(setPassCmdline, setPasswordCheck, "")
 	if err != nil {
 		log.Errorln("ScaleIO Set Password Failed:", err)
-		log.Infoln("BaseManager::CreateCluster LEAVE")
+		log.Infoln("CreateCluster LEAVE")
 		return err
 	}
 
@@ -235,7 +235,7 @@ func (mm *MdmManager) CreateCluster(state *types.ScaleIOFramework) error {
 	err = xplatform.GetInstance().Run.Command(loginCmdline, loggedInCheck, "")
 	if err != nil {
 		log.Errorln("ScaleIO Login with new Password Failed:", err)
-		log.Infoln("BaseManager::CreateCluster LEAVE")
+		log.Infoln("CreateCluster LEAVE")
 		return err
 	}
 
@@ -246,7 +246,7 @@ func (mm *MdmManager) CreateCluster(state *types.ScaleIOFramework) error {
 	err = xplatform.GetInstance().Run.Command(secondaryCmdline, addMdmToClusterCheck, "")
 	if err != nil {
 		log.Errorln("Add Secondary MDM Failed:", err)
-		log.Infoln("BaseManager::CreateCluster LEAVE")
+		log.Infoln("CreateCluster LEAVE")
 		return err
 	}
 
@@ -257,7 +257,7 @@ func (mm *MdmManager) CreateCluster(state *types.ScaleIOFramework) error {
 	err = xplatform.GetInstance().Run.Command(tiebreakerCmdline, addMdmToClusterCheck, "")
 	if err != nil {
 		log.Errorln("Add Tiebreaker MDM Failed:", err)
-		log.Infoln("BaseManager::CreateCluster LEAVE")
+		log.Infoln("CreateCluster LEAVE")
 		return err
 	}
 
@@ -268,7 +268,7 @@ func (mm *MdmManager) CreateCluster(state *types.ScaleIOFramework) error {
 	err = xplatform.GetInstance().Run.Command(changeClusterCmdline, changeClusterModeCheck, "")
 	if err != nil {
 		log.Errorln("Change ScaleIO to 3 Node Cluster Failed:", err)
-		log.Infoln("BaseManager::CreateCluster LEAVE")
+		log.Infoln("CreateCluster LEAVE")
 		return err
 	}
 
@@ -278,7 +278,7 @@ func (mm *MdmManager) CreateCluster(state *types.ScaleIOFramework) error {
 	err = xplatform.GetInstance().Run.Command(queryCmdline, clusterConfigCheck, "")
 	if err != nil {
 		log.Errorln("Query Cluster Failed:", err)
-		log.Infoln("BaseManager::CreateCluster LEAVE")
+		log.Infoln("CreateCluster LEAVE")
 		return err
 	}
 

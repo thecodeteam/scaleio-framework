@@ -6,14 +6,15 @@ import (
 	log "github.com/Sirupsen/logrus"
 	xplatform "github.com/dvonthenen/goxplatform"
 
-	basenode "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/basenode"
 	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
+	mgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/mgr"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
 //ScaleioTieBreakerMdmNode implementation for ScaleIO TieBreaker MDM Node
 type ScaleioTieBreakerMdmNode struct {
-	basenode.MdmScaleioNode
+	common.ScaleioNode
+	pkgMgr mgr.IMdmMgr
 }
 
 //NewTb generates a TieBreaker MDM Node object

@@ -25,8 +25,8 @@ var (
 //RetrieveState is a call back to retrieve an update of the state
 type RetrieveState func() (*types.ScaleIOFramework, error)
 
-//BaseScaleioNode implementation for base ScaleIO node
-type BaseScaleioNode struct {
+//ScaleioNode implementation for ScaleIO Node
+type ScaleioNode struct {
 	ExecutorID     string
 	RebootRequired bool
 	Node           *types.ScaleIONode
@@ -35,22 +35,22 @@ type BaseScaleioNode struct {
 }
 
 //SetExecutorID sets the ExecutorID
-func (bsn *BaseScaleioNode) SetExecutorID(ID string) {
+func (bsn *ScaleioNode) SetExecutorID(ID string) {
 	bsn.ExecutorID = ID
 }
 
 //SetRetrieveState sets the retrieve state function
-func (bsn *BaseScaleioNode) SetRetrieveState(getstate RetrieveState) {
+func (bsn *ScaleioNode) SetRetrieveState(getstate RetrieveState) {
 	bsn.GetState = getstate
 }
 
 //GetSelfNode get self node
-func (bsn *BaseScaleioNode) GetSelfNode() *types.ScaleIONode {
+func (bsn *ScaleioNode) GetSelfNode() *types.ScaleIONode {
 	return bsn.Node
 }
 
 //UpdateScaleIOState updates the state of the framework
-func (bsn *BaseScaleioNode) UpdateScaleIOState() *types.ScaleIOFramework {
+func (bsn *ScaleioNode) UpdateScaleIOState() *types.ScaleIOFramework {
 	state, err := bsn.GetState()
 	if err != nil {
 		log.Warnln("getState() failed:", err)
@@ -86,7 +86,7 @@ func personaToString(persona int) string {
 }
 
 //LeaveMarkerFileForConfigured sets a marker file when in demo mode
-func (bsn *BaseScaleioNode) LeaveMarkerFileForConfigured() {
+func (bsn *ScaleioNode) LeaveMarkerFileForConfigured() {
 	err := os.MkdirAll("/etc/scaleio-framework", 0644)
 	if err != nil {
 		log.Errorln("Unable to mkdir:", err)
@@ -101,7 +101,7 @@ func (bsn *BaseScaleioNode) LeaveMarkerFileForConfigured() {
 
 //UpdateNodeState this function tells the scheduler that the executor's state
 //has changed
-func (bsn *BaseScaleioNode) UpdateNodeState(nodeState int) error {
+func (bsn *ScaleioNode) UpdateNodeState(nodeState int) error {
 	log.Debugln("NotifyNodeState ENTER")
 	log.Debugln("State:", nodeState)
 
@@ -174,7 +174,7 @@ func (bsn *BaseScaleioNode) UpdateNodeState(nodeState int) error {
 }
 
 //UpdatePingNode this function tells the scheduler that "I am still here"
-func (bsn *BaseScaleioNode) UpdatePingNode() error {
+func (bsn *ScaleioNode) UpdatePingNode() error {
 	log.Debugln("UpdatePingNode ENTER")
 
 	url := bsn.State.SchedulerAddress + "/api/node/ping"
@@ -244,68 +244,68 @@ func (bsn *BaseScaleioNode) UpdatePingNode() error {
 }
 
 //RunStateUnknown default action for StateUnknown
-func (bsn *BaseScaleioNode) RunStateUnknown() {
+func (bsn *ScaleioNode) RunStateUnknown() {
 	log.Debugln("In StateUnknown. Do nothing.")
 	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
 }
 
 //RunStateCleanPrereqsReboot default action for StateCleanPrereqsReboot
-func (bsn *BaseScaleioNode) RunStateCleanPrereqsReboot() {
+func (bsn *ScaleioNode) RunStateCleanPrereqsReboot() {
 	log.Debugln("In StateCleanPrereqsReboot. Do nothing.")
 	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
 }
 
 //RunStatePrerequisitesInstalled default action for StatePrerequisitesInstalled
-func (bsn *BaseScaleioNode) RunStatePrerequisitesInstalled() {
+func (bsn *ScaleioNode) RunStatePrerequisitesInstalled() {
 	log.Debugln("In StatePrerequisitesInstalled. Do nothing.")
 	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
 }
 
 //RunStateBasePackagedInstalled default action for StateBasePackagedInstalled
-func (bsn *BaseScaleioNode) RunStateBasePackagedInstalled() {
+func (bsn *ScaleioNode) RunStateBasePackagedInstalled() {
 	log.Debugln("In StateBasePackagedInstalled. Do nothing.")
 	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
 }
 
 //RunStateInitializeCluster default action for StateInitializeCluster
-func (bsn *BaseScaleioNode) RunStateInitializeCluster() {
+func (bsn *ScaleioNode) RunStateInitializeCluster() {
 	log.Debugln("In StateInitializeCluster. Do nothing.")
 	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
 }
 
 //RunStateInstallRexRay default action for StateInstallRexRay
-func (bsn *BaseScaleioNode) RunStateInstallRexRay() {
+func (bsn *ScaleioNode) RunStateInstallRexRay() {
 	log.Debugln("In StateInstallRexRay. Do nothing.")
 	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
 }
 
 //RunStateCleanInstallReboot default action for StateCleanInstallReboot
-func (bsn *BaseScaleioNode) RunStateCleanInstallReboot() {
+func (bsn *ScaleioNode) RunStateCleanInstallReboot() {
 	log.Debugln("In StateCleanInstallReboot. Do nothing.")
 	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
 }
 
 //RunStateSystemReboot default action for StateSystemReboot
-func (bsn *BaseScaleioNode) RunStateSystemReboot() {
+func (bsn *ScaleioNode) RunStateSystemReboot() {
 	log.Debugln("In StateSystemReboot. Do nothing.")
 	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
 }
 
 //RunStateFinishInstall default action for StateFinishInstall
-func (bsn *BaseScaleioNode) RunStateFinishInstall() {
+func (bsn *ScaleioNode) RunStateFinishInstall() {
 	log.Debugln("In StateFinishInstall. Wait for", PollForChangesInSeconds,
 		"seconds for changes in the cluster.")
 	time.Sleep(time.Duration(PollForChangesInSeconds) * time.Second)
 }
 
 //RunStateUpgradeCluster default action for StateUpgradeCluster
-func (bsn *BaseScaleioNode) RunStateUpgradeCluster() {
+func (bsn *ScaleioNode) RunStateUpgradeCluster() {
 	log.Debugln("In StateUpgradeCluster. Do nothing.")
 	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
 }
 
 //RunStateFatalInstall default action for StateFatalInstall
-func (bsn *BaseScaleioNode) RunStateFatalInstall() {
+func (bsn *ScaleioNode) RunStateFatalInstall() {
 	log.Debugln("Node marked Fatal. Wait for", PollAfterFatalInSeconds, "seconds")
 	time.Sleep(time.Duration(PollAfterFatalInSeconds) * time.Second)
 }

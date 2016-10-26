@@ -6,14 +6,15 @@ import (
 	log "github.com/Sirupsen/logrus"
 	xplatform "github.com/dvonthenen/goxplatform"
 
-	basenode "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/basenode"
-	"github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
+	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
+	mgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/mgr"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
 //ScaleioPrimaryMdmNode implementation for ScaleIO Primary MDM Node
 type ScaleioPrimaryMdmNode struct {
-	basenode.MdmScaleioNode
+	common.ScaleioNode
+	pkgMgr mgr.IMdmMgr
 }
 
 //NewPri generates a Primary MDM Node object

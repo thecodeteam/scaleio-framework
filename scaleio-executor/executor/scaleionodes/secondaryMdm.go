@@ -6,14 +6,15 @@ import (
 	log "github.com/Sirupsen/logrus"
 	xplatform "github.com/dvonthenen/goxplatform"
 
-	basenode "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/basenode"
 	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
+	mgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/mgr"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
 //ScaleioSecondaryMdmNode implementation for ScaleIO Secondary MDM Node
 type ScaleioSecondaryMdmNode struct {
-	basenode.MdmScaleioNode
+	common.ScaleioNode
+	pkgMgr mgr.IMdmMgr
 }
 
 //NewSec generates a Secondary MDM Node object

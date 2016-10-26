@@ -3,13 +3,13 @@ package scaleionodes
 import (
 	log "github.com/Sirupsen/logrus"
 
-	basenode "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/basenode"
+	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 	"github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
 //ScaleioFakeNode implementation for ScaleIO Fake Node
 type ScaleioFakeNode struct {
-	basenode.BaseScaleioNode
+	common.ScaleioNode
 }
 
 //NewFake generates a Fake Node object

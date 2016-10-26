@@ -6,14 +6,15 @@ import (
 	log "github.com/Sirupsen/logrus"
 	xplatform "github.com/dvonthenen/goxplatform"
 
-	basenode "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/basenode"
-	"github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
+	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
+	mgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/mgr"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
 //ScaleioDataNode implementation for ScaleIO Fake Node
 type ScaleioDataNode struct {
-	basenode.BaseScaleioNode
+	common.ScaleioNode
+	pkgMgr mgr.INodeMgr
 }
 
 //NewData generates a Data Node object

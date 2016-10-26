@@ -74,7 +74,7 @@ func doesSciniExistInRexrayInitD() (bool, error) {
 
 //RexraySetup procedure for setting up REX-Ray
 func (nm *NodeManager) RexraySetup(state *types.ScaleIOFramework) (bool, error) {
-	log.Infoln("BaseManager::RexraySetup ENTER")
+	log.Infoln("RexraySetup ENTER")
 
 	//REX-Ray Install
 	rrVer, rrVerErr := getRexrayVersionToInstall(state)
@@ -88,7 +88,7 @@ func (nm *NodeManager) RexraySetup(state *types.ScaleIOFramework) (bool, error) 
 		gateway, err := common.GetGatewayAddress(state)
 		if err != nil {
 			log.Errorln("Unable to find the Gateway IP Address")
-			log.Infoln("BaseManager::RexraySetup LEAVE")
+			log.Infoln("RexraySetup LEAVE")
 			return false, err
 		}
 
@@ -106,7 +106,7 @@ func (nm *NodeManager) RexraySetup(state *types.ScaleIOFramework) (bool, error) 
 		err = xplatform.GetInstance().Run.Command(rexrayInstallCmdline, nm.RexrayInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install REX-Ray Failed:", err)
-			log.Infoln("BaseManager::RexraySetup LEAVE")
+			log.Infoln("RexraySetup LEAVE")
 			return false, err
 		}
 
@@ -154,7 +154,7 @@ libstorage:
 			os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0666)
 		if err != nil {
 			log.Errorln("Writing Config File Failed:", err)
-			log.Infoln("BaseManager::RexraySetup LEAVE")
+			log.Infoln("RexraySetup LEAVE")
 			return false, err
 		}
 
@@ -174,7 +174,7 @@ libstorage:
 				output, errScini := xplatform.GetInstance().Run.CommandOutput(writeSciniCmdline)
 				if errScini != nil || len(output) > 0 {
 					log.Errorln("Failed to add Scini dependency:", errScini)
-					log.Infoln("BaseManager::RexraySetup LEAVE")
+					log.Infoln("RexraySetup LEAVE")
 					return false, errScini
 				}
 			} else {
@@ -182,7 +182,7 @@ libstorage:
 			}
 		} else {
 			log.Infoln("doesSciniExistInRexrayInitD failed:", errInitd)
-			log.Infoln("BaseManager::RexraySetup LEAVE")
+			log.Infoln("RexraySetup LEAVE")
 			return false, errInitd
 		}
 	} else {
@@ -192,12 +192,12 @@ libstorage:
 	if rrInst == "" && rrInstErr == nil {
 		log.Debugln("No previous install of", types.RexRayPackageName,
 			"exists. Reboot required!")
-		log.Infoln("BaseManager::RexraySetup LEAVE")
+		log.Infoln("RexraySetup LEAVE")
 		return true, nil
 	}
 
-	log.Infoln("BaseManager::RexraySetup Succeeded")
-	log.Infoln("BaseManager::RexraySetup LEAVE")
+	log.Infoln("RexraySetup Succeeded")
+	log.Infoln("RexraySetup LEAVE")
 	return false, nil
 }
 

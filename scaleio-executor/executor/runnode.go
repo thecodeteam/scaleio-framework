@@ -8,7 +8,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
-	basenode "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/basenode"
 	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 	scaleionodes "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/scaleionodes"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
