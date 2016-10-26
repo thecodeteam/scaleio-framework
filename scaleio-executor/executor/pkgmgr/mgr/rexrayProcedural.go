@@ -1,4 +1,4 @@
-package basemgr
+package mgr
 
 import (
 	"bufio"
