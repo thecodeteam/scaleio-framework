@@ -20,15 +20,15 @@ type ScaleioDataNode struct {
 }
 
 //NewData generates a Data Node object
-func NewData() *ScaleioDataNode {
+func NewData(state *types.ScaleIOFramework) *ScaleioDataNode {
 	myNode := &ScaleioDataNode{}
 
 	var pkgmgr mgr.IPkgMgr
 	switch xplatform.GetInstance().Sys.GetOsType() {
 	case xplatformsys.OsRhel:
-		pkgmgr = rpmmgr.NewNodeRpmMgr()
+		pkgmgr = rpmmgr.NewNodeRpmMgr(state)
 	case xplatformsys.OsUbuntu:
-		pkgmgr = debmgr.NewNodeDebMgr()
+		pkgmgr = debmgr.NewNodeDebMgr(state)
 	}
 	myNode.PkgMgr = pkgmgr
 
@@ -37,7 +37,7 @@ func NewData() *ScaleioDataNode {
 
 //RunStateUnknown default action for StateUnknown
 func (sdn *ScaleioDataNode) RunStateUnknown() {
-	reboot, err := sdn.EnvironmentSetup()
+	reboot, err := sdn.PkgMgr.EnvironmentSetup(sdn.State)
 	if err != nil {
 		log.Errorln("EnvironmentSetup Failed:", err)
 		errState := sdn.UpdateNodeState(types.StateFatalInstall)
@@ -84,7 +84,7 @@ func (sdn *ScaleioDataNode) RunStateUnknown() {
 
 //RunStatePrerequisitesInstalled default action for StatePrerequisitesInstalled
 func (sdn *ScaleioDataNode) RunStatePrerequisitesInstalled() {
-	err := sdn.NodeSetup()
+	err := sdn.PkgMgr.NodeSetup(sdn.State)
 	if err != nil {
 		log.Errorln("NodeSetup Failed:", err)
 		errState := sdn.UpdateNodeState(types.StateFatalInstall)
@@ -114,7 +114,7 @@ func (sdn *ScaleioDataNode) RunStateInstallRexRay() {
 		sdn.State = common.WaitForClusterInitializeFinish(sdn.GetState)
 	}
 
-	reboot, err := sdn.RexraySetup()
+	reboot, err := sdn.PkgMgr.RexraySetup(sdn.State)
 	if err != nil {
 		log.Errorln("REX-Ray setup Failed:", err)
 		errState := sdn.UpdateNodeState(types.StateFatalInstall)
@@ -126,7 +126,7 @@ func (sdn *ScaleioDataNode) RunStateInstallRexRay() {
 		return
 	}
 
-	err = sdn.SetupIsolator()
+	err = sdn.PkgMgr.SetupIsolator(sdn.State)
 	if err != nil {
 		log.Errorln("Mesos Isolator setup Failed:", err)
 		errState := sdn.UpdateNodeState(types.StateFatalInstall)

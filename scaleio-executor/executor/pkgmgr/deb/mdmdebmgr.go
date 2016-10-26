@@ -15,25 +15,13 @@ const (
 	requiredKernelVersionCheck = "4.2.0-30-generic"
 
 	//ScaleIO node
-	mdmInstallCheck          = "mdm start/running"
-	sdsInstallCheck          = "sds start/running"
-	sdcInstallCheck          = "Success configuring module"
-	clusterConfigCheck       = "Mode: 3_node"
-	createClusterCheck       = "Successfully created the MDM Cluster"
-	loggedInCheck            = "Logged in"
-	setPasswordCheck         = "Password changed successfully"
-	addMdmToClusterCheck     = "Successfully added a standby MDM"
-	changeClusterModeCheck   = "Successfully switched the cluster mode"
-	clusterNotInitialedCheck = "Query-all-SDS returned 0 SDS nodes"
-	liaInstallCheck          = "lia start/running"
-	liaRestartCheck          = liaInstallCheck
-	gatewayInstallCheck      = "The EMC ScaleIO Gateway is running"
-	gatewayRestartCheck      = "scaleio-gateway start/running"
-	clusterRenameCheck       = "Successfully renamed system to"
-	addProtectionDomainCheck = "Successfully created protection domain"
-	addStoragePoolCheck      = "Successfully created a storage pool"
-	addSdsCheck              = "Successfully created SDS"
-	addVolumeCheck           = "Successfully created volume of size"
+	mdmInstallCheck     = "mdm start/running"
+	sdsInstallCheck     = "sds start/running"
+	sdcInstallCheck     = "Success configuring module"
+	liaInstallCheck     = "lia start/running"
+	liaRestartCheck     = liaInstallCheck
+	gatewayInstallCheck = "The EMC ScaleIO Gateway is running"
+	gatewayRestartCheck = "scaleio-gateway start/running"
 
 	//REX-Ray
 	rexrayInstallCheck = "rexray has been installed to"
@@ -104,20 +92,39 @@ func (mdm *MdmDebMgr) EnvironmentSetup(state *types.ScaleIOFramework) (bool, err
 }
 
 //NewMdmDebMgr generates a MdmDebMgr object
-func NewMdmDebMgr() MdmDebMgr {
+func NewMdmDebMgr(state *types.ScaleIOFramework) MdmDebMgr {
 	myMdmMgr := &mgr.MdmManager{}
 	myMdmDebMgr := MdmDebMgr{myMdmMgr}
 
-	myMdmDebMgr.BaseManager.RexrayInstallCheck = rexrayInstallCheck
-	myMdmDebMgr.BaseManager.DvdcliInstallCheck = dvdcliInstallCheck
+	//ScaleIO node
+	myMdmDebMgr.MdmManager.SdsPackageName = types.DebSdsPackageName
+	myMdmDebMgr.MdmManager.SdsPackageDownload = state.ScaleIO.Deb.DebSds
+	myMdmDebMgr.MdmManager.SdsInstallCmd = "dpkg -i {LocalSds}"
+	myMdmDebMgr.MdmManager.SdsInstallCheck = sdsInstallCheck
+	myMdmDebMgr.MdmManager.SdcPackageName = types.DebSdcPackageName
+	myMdmDebMgr.MdmManager.SdcPackageDownload = state.ScaleIO.Deb.DebSdc
+	myMdmDebMgr.MdmManager.SdcInstallCmd = "MDM_IP={MdmPair} dpkg -i {LocalSdc}"
+	myMdmDebMgr.MdmManager.SdcInstallCheck = sdcInstallCheck
+	myMdmDebMgr.MdmManager.MdmPackageName = types.DebMdmPackageName
+	myMdmDebMgr.MdmManager.MdmPackageDownload = state.ScaleIO.Deb.DebMdm
+	myMdmDebMgr.MdmManager.MdmInstallCmd = "MDM_ROLE_IS_MANAGER={PriOrSec} dpkg -i {LocalMdm}"
+	myMdmDebMgr.MdmManager.MdmInstallCheck = mdmInstallCheck
+	myMdmDebMgr.MdmManager.LiaPackageName = types.DebLiaPackageName
+	myMdmDebMgr.MdmManager.LiaPackageDownload = state.ScaleIO.Deb.DebLia
+	myMdmDebMgr.MdmManager.LiaInstallCmd = "TOKEN=" + state.ScaleIO.AdminPassword + " dpkg -i {LocalLia}"
+	myMdmDebMgr.MdmManager.LiaInstallCheck = liaInstallCheck
+	myMdmDebMgr.MdmManager.LiaRestartCheck = liaRestartCheck
+	myMdmDebMgr.MdmManager.GatewayPackageName = types.DebGwPackageName
+	myMdmDebMgr.MdmManager.GatewayPackageDownload = state.ScaleIO.Deb.DebGw
+	myMdmDebMgr.MdmManager.GatewayInstallCmd = "GATEWAY_ADMIN_PASSWORD=" + state.ScaleIO.AdminPassword + " dpkg -i {LocalGw}"
+	myMdmDebMgr.MdmManager.GatewayInstallCheck = gatewayInstallCheck
+	myMdmDebMgr.MdmManager.GatewayRestartCheck = gatewayRestartCheck
 
-	/*
-		mdmCmdline := "MDM_ROLE_IS_MANAGER=" + strPriOrSec + " dpkg -i " + localMdm
-		sdsCmdline := "dpkg -i " + localSds
-		sdcCmdline := "MDM_IP=" + mdmPair + " dpkg -i " + localSdc
-		liaCmdline := "TOKEN=" + state.ScaleIO.AdminPassword + " dpkg -i " + localLia
-		gwCmdline := "GATEWAY_ADMIN_PASSWORD=" + state.ScaleIO.AdminPassword + " dpkg -i " + localGw
-	*/
+	//REX-Ray
+	myMdmDebMgr.BaseManager.RexrayInstallCheck = rexrayInstallCheck
+
+	//Isolator
+	myMdmDebMgr.BaseManager.DvdcliInstallCheck = dvdcliInstallCheck
 
 	return myMdmDebMgr
 }

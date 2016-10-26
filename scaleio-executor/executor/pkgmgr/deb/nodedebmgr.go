@@ -87,14 +87,25 @@ func (dpm *NodeDebMgr) EnvironmentSetup(state *types.ScaleIOFramework) (bool, er
 }
 
 //NewNodeDebMgr generates a NodeDebMgr object
-func NewNodeDebMgr() NodeDebMgr {
+func NewNodeDebMgr(state *types.ScaleIOFramework) NodeDebMgr {
 	myNodeMgr := &mgr.NodeManager{}
 	myNodeDebMgr := myNodeDebMgr{myNodeMgr}
 
-	myNodeDebMgr.NodeManager.RexrayInstallCheck = rexrayInstallCheck
-	myNodeDebMgr.NodeManager.DvdcliInstallCheck = dvdcliInstallCheck
+	//ScaleIO node
+	myNodeDebMgr.BaseManager.SdsPackageName = types.DebSdsPackageName
+	myNodeDebMgr.BaseManager.SdsPackageDownload = state.ScaleIO.Deb.DebSds
+	myNodeDebMgr.BaseManager.SdsInstallCmd = "dpkg -i {LocalSds}"
+	myNodeDebMgr.BaseManager.SdsInstallCheck = sdsInstallCheck
+	myNodeDebMgr.BaseManager.SdcPackageName = types.DebSdcPackageName
+	myNodeDebMgr.BaseManager.SdcPackageDownload = state.ScaleIO.Deb.DebSdc
+	myNodeDebMgr.BaseManager.SdcInstallCmd = "MDM_IP={MdmPair} dpkg -i {LocalSdc}"
+	myNodeDebMgr.BaseManager.SdcInstallCheck = sdcInstallCheck
 
-	//TODO
+	//REX-Ray
+	myNodeDebMgr.BaseManager.RexrayInstallCheck = rexrayInstallCheck
+
+	//Isolator
+	myNodeDebMgr.BaseManager.DvdcliInstallCheck = dvdcliInstallCheck
 
 	return myNodeDebMgr
 }

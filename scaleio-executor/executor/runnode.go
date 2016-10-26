@@ -54,16 +54,16 @@ func whichNode(executorID string, getstate common.RetrieveState) (basenode.IScal
 		switch node.Persona {
 		case types.PersonaMdmPrimary:
 			log.Infoln("Is Primary")
-			sionode = scaleionodes.NewPri()
+			sionode = scaleionodes.NewPri(state)
 		case types.PersonaMdmSecondary:
 			log.Infoln("Is Secondary")
-			sionode = scaleionodes.NewSec()
+			sionode = scaleionodes.NewSec(state)
 		case types.PersonaTb:
 			log.Infoln("Is TieBreaker")
-			sionode = scaleionodes.NewTb()
+			sionode = scaleionodes.NewTb(state)
 		case types.PersonaNode:
 			log.Infoln("Is DataNode")
-			sionode = scaleionodes.NewData()
+			sionode = scaleionodes.NewData(state)
 		}
 
 		sionode.SetExecutorID(executorID)

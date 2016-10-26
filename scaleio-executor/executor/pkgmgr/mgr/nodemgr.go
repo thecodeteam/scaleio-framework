@@ -22,7 +22,7 @@ type NodeManager struct {
 	SdcInstallCmd      string
 	SdcInstallCheck    string
 
-	//Rexray
+	//REX-Ray
 	RexrayInstallCheck string
 
 	//Isolator

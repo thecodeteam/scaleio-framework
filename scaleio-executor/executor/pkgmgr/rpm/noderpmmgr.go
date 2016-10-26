@@ -1,6 +1,9 @@
 package rpm
 
-import mgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/mgr"
+import (
+	mgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/mgr"
+	"github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
+)
 
 const (
 	rexrayInstallCheck = "rexray has been installed to"
@@ -13,7 +16,7 @@ type NodeRpmMgr struct {
 }
 
 //NewNodeRpmMgr generates a NodeRpmMgr object
-func NewNodeRpmMgr() NodeRpmMgr {
+func NewNodeRpmMgr(state *types.ScaleIOFramework) NodeRpmMgr {
 	myNodeMgr := &mgr.NodeManager{}
 	myNodeRpmMgr := NodeRpmMgr{myNodeMgr}
 

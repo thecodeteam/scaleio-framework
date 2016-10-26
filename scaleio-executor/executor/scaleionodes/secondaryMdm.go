@@ -18,15 +18,15 @@ type ScaleioSecondaryMdmNode struct {
 }
 
 //NewSec generates a Secondary MDM Node object
-func NewSec() *ScaleioSecondaryMdmNode {
+func NewSec(state *types.ScaleIOFramework) *ScaleioSecondaryMdmNode {
 	myNode := &ScaleioSecondaryMdmNode{}
 
 	var pkgmgr mgr.IPkgMgr
 	switch xplatform.GetInstance().Sys.GetOsType() {
 	case xplatformsys.OsRhel:
-		pkgmgr = rpmmgr.NewMdmRpmMgr()
+		pkgmgr = rpmmgr.NewMdmRpmMgr(state)
 	case xplatformsys.OsUbuntu:
-		pkgmgr = debmgr.NewMdmDebMgr()
+		pkgmgr = debmgr.NewMdmDebMgr(state)
 	}
 	myNode.PkgMgr = pkgmgr
 

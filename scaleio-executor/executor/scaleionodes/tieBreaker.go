@@ -18,15 +18,15 @@ type ScaleioTieBreakerMdmNode struct {
 }
 
 //NewTb generates a TieBreaker MDM Node object
-func NewTb() *ScaleioTieBreakerMdmNode {
+func NewTb(state *types.ScaleIOFramework) *ScaleioTieBreakerMdmNode {
 	myNode := &ScaleioTieBreakerMdmNode{}
 
 	var pkgmgr mgr.IPkgMgr
 	switch xplatform.GetInstance().Sys.GetOsType() {
 	case xplatformsys.OsRhel:
-		pkgmgr = rpmmgr.NewMdmRpmMgr()
+		pkgmgr = rpmmgr.NewMdmRpmMgr(state)
 	case xplatformsys.OsUbuntu:
-		pkgmgr = debmgr.NewMdmDebMgr()
+		pkgmgr = debmgr.NewMdmDebMgr(state)
 	}
 	myNode.PkgMgr = pkgmgr
 
@@ -35,7 +35,7 @@ func NewTb() *ScaleioTieBreakerMdmNode {
 
 //RunStateUnknown default action for StateUnknown
 func (stbmn *ScaleioTieBreakerMdmNode) RunStateUnknown() {
-	reboot, err := stbmn.EnvironmentSetup()
+	reboot, err := stbmn.PkgMgr.EnvironmentSetup(stbmn.State)
 	if err != nil {
 		log.Errorln("EnvironmentSetup Failed:", err)
 		errState := stbmn.UpdateNodeState(types.StateFatalInstall)
@@ -83,7 +83,7 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateUnknown() {
 //RunStatePrerequisitesInstalled default action for StatePrerequisitesInstalled
 func (stbmn *ScaleioTieBreakerMdmNode) RunStatePrerequisitesInstalled() {
 	stbmn.State = common.WaitForPrereqsFinish(stbmn.GetState)
-	err := stbmn.ManagementSetup(false)
+	err := stbmn.PkgMgr.ManagementSetup(stbmn.State, false)
 	if err != nil {
 		log.Errorln("ManagementSetup Failed:", err)
 		errState := stbmn.UpdateNodeState(types.StateFatalInstall)
@@ -95,7 +95,7 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStatePrerequisitesInstalled() {
 		return
 	}
 
-	err = stbmn.NodeSetup()
+	err = stbmn.PkgMgr.NodeSetup(stbmn.State)
 	if err != nil {
 		log.Errorln("NodeSetup Failed:", err)
 		errState := stbmn.UpdateNodeState(types.StateFatalInstall)
@@ -130,7 +130,7 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateBasePackagedInstalled() {
 //RunStateInitializeCluster default action for StateInitializeCluster
 func (stbmn *ScaleioTieBreakerMdmNode) RunStateInitializeCluster() {
 	stbmn.State = common.WaitForClusterInstallFinish(stbmn.GetState)
-	reboot, err := stbmn.GatewaySetup()
+	reboot, err := stbmn.PkgMgr.GatewaySetup(stbmn.State)
 	if err != nil {
 		log.Errorln("GatewaySetup Failed:", err)
 		errState := stbmn.UpdateNodeState(types.StateFatalInstall)
@@ -154,7 +154,7 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateInitializeCluster() {
 //RunStateInstallRexRay default action for StateInstallRexRay
 func (stbmn *ScaleioTieBreakerMdmNode) RunStateInstallRexRay() {
 	stbmn.State = common.WaitForClusterInitializeFinish(stbmn.GetState)
-	reboot, err := stbmn.RexraySetup()
+	reboot, err := stbmn.PkgMgr.RexraySetup(stbmn.State)
 	if err != nil {
 		log.Errorln("REX-Ray setup Failed:", err)
 		errState := stbmn.UpdateNodeState(types.StateFatalInstall)
@@ -166,7 +166,7 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateInstallRexRay() {
 		return
 	}
 
-	err = stbmn.SetupIsolator()
+	err = stbmn.PkgMgr.SetupIsolator(stbmn.State)
 	if err != nil {
 		log.Errorln("Mesos Isolator setup Failed:", err)
 		errState := stbmn.UpdateNodeState(types.StateFatalInstall)
@@ -264,7 +264,7 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateFinishInstall() {
 		if (pri.LastContact+common.OfflineTimeForMdmNodesInSeconds) < time.Now().Unix() &&
 			(sec.LastContact+common.OfflineTimeForMdmNodesInSeconds) < time.Now().Unix() {
 			//This is the checkForNewDataNodesToAdd(). Other functionality TBD.
-			err := stbmn.AddSdsNodesToCluster(true)
+			err := stbmn.AddSdsNodesToCluster(stbmn.State, true)
 			if err != nil {
 				log.Errorln("Failed to add node to ScaleIO cluster:", err)
 			}
