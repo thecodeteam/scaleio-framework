@@ -1,3 +1,5 @@
+package none
+/*
 package basenode
 
 import (
@@ -16,3 +18,4 @@ func (bsn *BaseScaleioNode) IsolatorSetup(state *types.ScaleIOFramework) error {
 
 	return err
 }
+*/

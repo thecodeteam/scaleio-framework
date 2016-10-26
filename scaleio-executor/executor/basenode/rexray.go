@@ -1,3 +1,5 @@
+package none
+/*
 package basenode
 
 import (
@@ -16,3 +18,4 @@ func (bsn *BaseScaleioNode) RexraySetup(state *types.ScaleIOFramework) (bool, er
 	log.Infoln("BaseScaleioNode RexraySetup LEAVE")
 	return reboot, err
 }
+*/
