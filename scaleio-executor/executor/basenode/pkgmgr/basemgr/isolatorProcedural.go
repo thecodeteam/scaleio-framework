@@ -164,7 +164,7 @@ func doesLineExistInMesosPropertyFile(fullfilename string, needle string) error 
 
 //SetupIsolator procedure for setting up the Isolator
 func (bm *BaseManager) SetupIsolator(state *types.ScaleIOFramework) error {
-	log.Infoln("SetupIsolator ENTER")
+	log.Infoln("BaseManager::SetupIsolator ENTER")
 
 	//Mesos Isolator Install
 	isoVer, isoVerErr := parseIsolatorVersionFromFilename(state.Isolator.Binary)
@@ -180,7 +180,7 @@ func (bm *BaseManager) SetupIsolator(state *types.ScaleIOFramework) error {
 		localIsolator, err := xplatform.GetInstance().Inst.DownloadPackage(state.Isolator.Binary)
 		if err != nil {
 			log.Errorln("Error downloading Isolator package:", err)
-			log.Infoln("SetupIsolator LEAVE")
+			log.Infoln("BaseManager::SetupIsolator LEAVE")
 			return err
 		}
 
@@ -189,7 +189,7 @@ func (bm *BaseManager) SetupIsolator(state *types.ScaleIOFramework) error {
 		err = xplatform.GetInstance().Fs.FileCopy(localIsolator, dstFullPath)
 		if err != nil {
 			log.Errorln("Failed to Copy isolator to Dst:", err)
-			log.Infoln("SetupIsolator LEAVE")
+			log.Infoln("BaseManager::SetupIsolator LEAVE")
 			return err
 		}
 
@@ -213,7 +213,7 @@ func (bm *BaseManager) SetupIsolator(state *types.ScaleIOFramework) error {
 				os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0666)
 			if errWrite != nil {
 				log.Errorln("Writing Isolation File Failed:", errWrite)
-				log.Infoln("SetupIsolator LEAVE")
+				log.Infoln("BaseManager::SetupIsolator LEAVE")
 				return errWrite
 			}
 
@@ -228,7 +228,7 @@ func (bm *BaseManager) SetupIsolator(state *types.ScaleIOFramework) error {
 			os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0666)
 		if err != nil {
 			log.Errorln("Writing Modules File Failed:", err)
-			log.Infoln("SetupIsolator LEAVE")
+			log.Infoln("BaseManager::SetupIsolator LEAVE")
 			return err
 		}
 
@@ -261,7 +261,7 @@ func (bm *BaseManager) SetupIsolator(state *types.ScaleIOFramework) error {
 			os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0666)
 		if err != nil {
 			log.Errorln("Writing dvdi-mod.json File Failed:", err)
-			log.Infoln("SetupIsolator LEAVE")
+			log.Infoln("BaseManager::SetupIsolator LEAVE")
 			return err
 		}
 
@@ -285,14 +285,14 @@ func (bm *BaseManager) SetupIsolator(state *types.ScaleIOFramework) error {
 		err := xplatform.GetInstance().Run.Command(dvdcliInstallCmdline, bm.DvdcliInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install DVDCLI Failed:", err)
-			log.Infoln("RexraySetup LEAVE")
+			log.Infoln("BaseManager::SetupIsolator LEAVE")
 			return err
 		}
 	} else {
 		log.Infoln("DVDCLI is already installed")
 	}
 
-	log.Infoln("SetupIsolator Succeeded")
-	log.Infoln("SetupIsolator LEAVE")
+	log.Infoln("BaseManager::SetupIsolator Succeeded")
+	log.Infoln("BaseManager::SetupIsolator LEAVE")
 	return nil
 }

@@ -1,24 +1,24 @@
 package rpm
 
-import (
-	basemgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/basenode/pkgmgr/basemgr"
-)
+import basemgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/basenode/pkgmgr/basemgr"
 
 const (
 	rexrayInstallCheck = "rexray has been installed to"
 	dvdcliInstallCheck = "dvdcli has been installed to"
 )
 
-//RpmMgr implementation for RpmPkgMgr
-type RpmMgr struct {
+//RpmPkgMgr implementation for RpmPkgMgr
+type RpmPkgMgr struct {
 	*basemgr.BaseManager
 }
 
-//NewRpmMgr generates a RpmMgr object
-func NewRpmMgr() RpmMgr {
+//NewRpmPkgMgr generates a RpmMgr object
+func NewRpmPkgMgr() RpmPkgMgr {
 	myBaseMgr := &basemgr.BaseManager{}
-	myRpmMgr := RpmMgr{myBaseMgr}
-	myRpmMgr.BaseManager.RexrayInstallCheck = rexrayInstallCheck
-	myRpmMgr.BaseManager.DvdcliInstallCheck = dvdcliInstallCheck
-	return myRpmMgr
+	myRpmPkgMgr := RpmPkgMgr{myBaseMgr}
+
+	myRpmPkgMgr.BaseManager.RexrayInstallCheck = rexrayInstallCheck
+	myRpmPkgMgr.BaseManager.DvdcliInstallCheck = dvdcliInstallCheck
+
+	return myRpmPkgMgr
 }

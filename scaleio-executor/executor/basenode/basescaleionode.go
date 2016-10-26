@@ -66,9 +66,9 @@ func (bsn *BaseScaleioNode) UpdateScaleIOState() *types.ScaleIOFramework {
 	var pkgmgr basemgr.IPkgMgr
 	switch xplatform.GetInstance().Sys.GetOsType() {
 	case xplatformsys.OsRhel:
-		pkgmgr = rpmmgr.NewRpmMgr()
+		pkgmgr = rpmmgr.NewRpmPkgMgr()
 	case xplatformsys.OsUbuntu:
-		pkgmgr = debmgr.NewDebMgr()
+		pkgmgr = debmgr.NewDebPkgMgr()
 	}
 	bsn.PkgMgr = pkgmgr
 
