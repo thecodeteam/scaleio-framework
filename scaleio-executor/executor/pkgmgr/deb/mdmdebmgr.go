@@ -105,8 +105,8 @@ func (mdm *MdmDebMgr) EnvironmentSetup(state *types.ScaleIOFramework) (bool, err
 
 //NewMdmDebMgr generates a MdmDebMgr object
 func NewMdmDebMgr() MdmDebMgr {
-	myMdmMgr := &basemgr.MdmManager{}
-	myMdmDebMgr := MdmDebMgr{myBaseMgr}
+	myMdmMgr := &mgr.MdmManager{}
+	myMdmDebMgr := MdmDebMgr{myMdmMgr}
 
 	myMdmDebMgr.BaseManager.RexrayInstallCheck = rexrayInstallCheck
 	myMdmDebMgr.BaseManager.DvdcliInstallCheck = dvdcliInstallCheck
