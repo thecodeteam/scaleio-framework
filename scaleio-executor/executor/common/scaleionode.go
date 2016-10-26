@@ -11,8 +11,6 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	xplatform "github.com/dvonthenen/goxplatform"
-	xplatformsys "github.com/dvonthenen/goxplatform/sys"
 
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
@@ -21,9 +19,6 @@ var (
 	//ErrStateChangeNotAcknowledged failed to find MDM Pair
 	ErrStateChangeNotAcknowledged = errors.New("The node state change was not acknowledged")
 )
-
-//RetrieveState is a call back to retrieve an update of the state
-type RetrieveState func() (*types.ScaleIOFramework, error)
 
 //ScaleioNode implementation for ScaleIO Node
 type ScaleioNode struct {
@@ -57,15 +52,6 @@ func (bsn *ScaleioNode) UpdateScaleIOState() *types.ScaleIOFramework {
 	}
 	bsn.State = state
 	bsn.Node = GetSelfNode(bsn.ExecutorID, bsn.State)
-
-	var pkgmgr basemgr.IPkgMgr
-	switch xplatform.GetInstance().Sys.GetOsType() {
-	case xplatformsys.OsRhel:
-		pkgmgr = rpmmgr.NewRpmPkgMgr()
-	case xplatformsys.OsUbuntu:
-		pkgmgr = debmgr.NewDebPkgMgr()
-	}
-	bsn.PkgMgr = pkgmgr
 
 	return bsn.State
 }

@@ -2,14 +2,12 @@ package common
 
 import (
 	"github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
-
-	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 )
 
 //IScaleioNode is the interface for implementing a ScaleIO node
 type IScaleioNode interface {
 	SetExecutorID(ID string)
-	SetRetrieveState(getstate common.RetrieveState)
+	SetRetrieveState(getstate RetrieveState)
 	GetSelfNode() *types.ScaleIONode
 	UpdateScaleIOState() *types.ScaleIOFramework
 	LeaveMarkerFileForConfigured()
