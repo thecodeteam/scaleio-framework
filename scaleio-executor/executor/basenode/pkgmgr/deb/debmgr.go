@@ -9,15 +9,15 @@ const (
 	dvdcliInstallCheck = "dvdcli has been installed to"
 )
 
-//DebPkgMgr implementation for DebPkgMgr
-type DebPkgMgr struct {
+//DebMgr implementation for DebPkgMgr
+type DebMgr struct {
 	*basemgr.BaseManager
 }
 
-//NewDebPkgMgr generates a DebPkgMgr object
-func NewDebPkgMgr() *DebPkgMgr {
+//NewDebMgr generates a DebMgr object
+func NewDebMgr() DebMgr {
 	myBaseMgr := &basemgr.BaseManager{}
-	myDebPkgMgr := &DebPkgMgr{myBaseMgr}
+	myDebPkgMgr := DebMgr{myBaseMgr}
 	myDebPkgMgr.BaseManager.RexrayInstallCheck = rexrayInstallCheck
 	myDebPkgMgr.BaseManager.DvdcliInstallCheck = dvdcliInstallCheck
 	return myDebPkgMgr

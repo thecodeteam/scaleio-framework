@@ -12,6 +12,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	xplatform "github.com/dvonthenen/goxplatform"
+	xplatformsys "github.com/dvonthenen/goxplatform/sys"
 
 	basemgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/basenode/pkgmgr/basemgr"
 	debmgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/basenode/pkgmgr/deb"
@@ -34,7 +35,7 @@ type BaseScaleioNode struct {
 	RebootRequired bool
 	Node           *types.ScaleIONode
 	State          *types.ScaleIOFramework
-	PkgMgr         *basemgr.IPkgMgr
+	PkgMgr         basemgr.IPkgMgr
 	GetState       common.RetrieveState
 }
 
@@ -62,12 +63,12 @@ func (bsn *BaseScaleioNode) UpdateScaleIOState() *types.ScaleIOFramework {
 	bsn.State = state
 	bsn.Node = common.GetSelfNode(bsn.ExecutorID, bsn.State)
 
-	var pkgmgr *basemgr.IPkgMgr
+	var pkgmgr basemgr.IPkgMgr
 	switch xplatform.GetInstance().Sys.GetOsType() {
-	case xplatform.OsRhel:
-		pkgmgr = rpmmgr.NewRpmPkgMgr()
-	case xplatform.OsUbuntu:
-		pkgmgr = debmgr.NewDebPkgMgr()
+	case xplatformsys.OsRhel:
+		pkgmgr = rpmmgr.NewRpmMgr()
+	case xplatformsys.OsUbuntu:
+		pkgmgr = debmgr.NewDebMgr()
 	}
 	bsn.PkgMgr = pkgmgr
 

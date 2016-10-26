@@ -9,16 +9,16 @@ const (
 	dvdcliInstallCheck = "dvdcli has been installed to"
 )
 
-//RpmPkgMgr implementation for RpmPkgMgr
-type RpmPkgMgr struct {
+//RpmMgr implementation for RpmPkgMgr
+type RpmMgr struct {
 	*basemgr.BaseManager
 }
 
-//NewRpmPkgMgr generates a RpmPkgMgr object
-func NewRpmPkgMgr() *RpmPkgMgr {
+//NewRpmMgr generates a RpmMgr object
+func NewRpmMgr() RpmMgr {
 	myBaseMgr := &basemgr.BaseManager{}
-	myRpmPkgMgr := &RpmPkgMgr{myBaseMgr}
-	myRpmPkgMgr.BaseManager.RexrayInstallCheck = rexrayInstallCheck
-	myRpmPkgMgr.BaseManager.DvdcliInstallCheck = dvdcliInstallCheck
-	return myRpmPkgMgr
+	myRpmMgr := RpmMgr{myBaseMgr}
+	myRpmMgr.BaseManager.RexrayInstallCheck = rexrayInstallCheck
+	myRpmMgr.BaseManager.DvdcliInstallCheck = dvdcliInstallCheck
+	return myRpmMgr
 }
