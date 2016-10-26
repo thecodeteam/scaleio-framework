@@ -7,19 +7,31 @@ import (
 	xplatform "github.com/dvonthenen/goxplatform"
 
 	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
+	debmgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/deb"
 	mgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/mgr"
+	rpmmgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/rpm"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
 //ScaleioDataNode implementation for ScaleIO Fake Node
 type ScaleioDataNode struct {
 	common.ScaleioNode
-	pkgMgr mgr.INodeMgr
+	PkgMgr mgr.INodeMgr
 }
 
 //NewData generates a Data Node object
 func NewData() *ScaleioDataNode {
 	myNode := &ScaleioDataNode{}
+
+	var pkgmgr mgr.IPkgMgr
+	switch xplatform.GetInstance().Sys.GetOsType() {
+	case xplatformsys.OsRhel:
+		pkgmgr = rpmmgr.NewNodeRpmMgr()
+	case xplatformsys.OsUbuntu:
+		pkgmgr = debmgr.NewNodeDebMgr()
+	}
+	myNode.PkgMgr = pkgmgr
+
 	return myNode
 }
 

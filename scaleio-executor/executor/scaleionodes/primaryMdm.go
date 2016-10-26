@@ -14,12 +14,22 @@ import (
 //ScaleioPrimaryMdmNode implementation for ScaleIO Primary MDM Node
 type ScaleioPrimaryMdmNode struct {
 	common.ScaleioNode
-	pkgMgr mgr.IMdmMgr
+	PkgMgr mgr.IMdmMgr
 }
 
 //NewPri generates a Primary MDM Node object
 func NewPri() *ScaleioPrimaryMdmNode {
 	myNode := &ScaleioPrimaryMdmNode{}
+
+	var pkgmgr mgr.IPkgMgr
+	switch xplatform.GetInstance().Sys.GetOsType() {
+	case xplatformsys.OsRhel:
+		pkgmgr = rpmmgr.NewMdmRpmMgr()
+	case xplatformsys.OsUbuntu:
+		pkgmgr = debmgr.NewMdmDebMgr()
+	}
+	myNode.PkgMgr = pkgmgr
+
 	return myNode
 }
 

@@ -14,12 +14,22 @@ import (
 //ScaleioSecondaryMdmNode implementation for ScaleIO Secondary MDM Node
 type ScaleioSecondaryMdmNode struct {
 	common.ScaleioNode
-	pkgMgr mgr.IMdmMgr
+	PkgMgr mgr.IMdmMgr
 }
 
 //NewSec generates a Secondary MDM Node object
 func NewSec() *ScaleioSecondaryMdmNode {
 	myNode := &ScaleioSecondaryMdmNode{}
+
+	var pkgmgr mgr.IPkgMgr
+	switch xplatform.GetInstance().Sys.GetOsType() {
+	case xplatformsys.OsRhel:
+		pkgmgr = rpmmgr.NewMdmRpmMgr()
+	case xplatformsys.OsUbuntu:
+		pkgmgr = debmgr.NewMdmDebMgr()
+	}
+	myNode.PkgMgr = pkgmgr
+
 	return myNode
 }
 

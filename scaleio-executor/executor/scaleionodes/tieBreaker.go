@@ -14,12 +14,22 @@ import (
 //ScaleioTieBreakerMdmNode implementation for ScaleIO TieBreaker MDM Node
 type ScaleioTieBreakerMdmNode struct {
 	common.ScaleioNode
-	pkgMgr mgr.IMdmMgr
+	PkgMgr mgr.IMdmMgr
 }
 
 //NewTb generates a TieBreaker MDM Node object
 func NewTb() *ScaleioTieBreakerMdmNode {
 	myNode := &ScaleioTieBreakerMdmNode{}
+
+	var pkgmgr mgr.IPkgMgr
+	switch xplatform.GetInstance().Sys.GetOsType() {
+	case xplatformsys.OsRhel:
+		pkgmgr = rpmmgr.NewMdmRpmMgr()
+	case xplatformsys.OsUbuntu:
+		pkgmgr = debmgr.NewMdmDebMgr()
+	}
+	myNode.PkgMgr = pkgmgr
+
 	return myNode
 }
 
