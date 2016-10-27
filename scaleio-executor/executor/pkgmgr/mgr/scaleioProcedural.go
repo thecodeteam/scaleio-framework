@@ -148,7 +148,7 @@ func (nm *NodeManager) NodeSetup(state *types.ScaleIOFramework) error {
 		sdcInstallCmd = strings.Replace(sdcInstallCmd, "{LocalSdc}", localSdc, -1)
 		log.Infoln("sdcInstallCmd:", sdcInstallCmd)
 
-		err = xplatform.GetInstance().Run.Command(nm.SdcInstallCmd, nm.SdcInstallCheck, "")
+		err = xplatform.GetInstance().Run.Command(sdcInstallCmd, nm.SdcInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install SDC Failed:", err)
 			log.Infoln("NodeSetup LEAVE")
