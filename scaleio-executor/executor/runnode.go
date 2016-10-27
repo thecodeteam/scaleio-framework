@@ -8,7 +8,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
-	basenode "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/basenode"
 	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 	scaleionodes "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/scaleionodes"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
@@ -32,10 +31,10 @@ func nodePreviouslyConfigured() bool {
 	return false
 }
 
-func whichNode(executorID string, getstate common.RetrieveState) (basenode.IScaleioNode, error) {
+func whichNode(executorID string, getstate common.RetrieveState) (common.IScaleioNode, error) {
 	log.Infoln("WhichNode ENTER")
 
-	var sionode basenode.IScaleioNode
+	var sionode common.IScaleioNode
 
 	if nodePreviouslyConfigured() {
 		log.Infoln("nodePreviouslyConfigured is TRUE. Launching FakeNode.")
@@ -55,16 +54,16 @@ func whichNode(executorID string, getstate common.RetrieveState) (basenode.IScal
 		switch node.Persona {
 		case types.PersonaMdmPrimary:
 			log.Infoln("Is Primary")
-			sionode = scaleionodes.NewPri()
+			sionode = scaleionodes.NewPri(state)
 		case types.PersonaMdmSecondary:
 			log.Infoln("Is Secondary")
-			sionode = scaleionodes.NewSec()
+			sionode = scaleionodes.NewSec(state)
 		case types.PersonaTb:
 			log.Infoln("Is TieBreaker")
-			sionode = scaleionodes.NewTb()
+			sionode = scaleionodes.NewTb(state)
 		case types.PersonaNode:
 			log.Infoln("Is DataNode")
-			sionode = scaleionodes.NewData()
+			sionode = scaleionodes.NewData(state)
 		}
 
 		sionode.SetExecutorID(executorID)

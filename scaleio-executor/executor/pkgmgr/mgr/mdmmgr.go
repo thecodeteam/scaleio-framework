@@ -1,4 +1,4 @@
-package basenode
+package mgr
 
 import (
 	"bytes"
@@ -12,18 +12,35 @@ import (
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
-//MdmScaleioNode implementation for an MDM ScaleIO node
-type MdmScaleioNode struct {
-	BaseScaleioNode
+//MdmManager implementation for MDM Package Manager
+type MdmManager struct {
+	NodeManager
+
+	//ScaleIO node
+	MdmPackageName         string
+	MdmPackageDownload     string
+	MdmInstallCmd          string
+	MdmInstallCheck        string
+	LiaPackageName         string
+	LiaPackageDownload     string
+	LiaInstallCmd          string
+	LiaInstallCheck        string
+	LiaRestartCheck        string
+	GatewayPackageName     string
+	GatewayPackageDownload string
+	GatewayInstallCmd      string
+	GatewayInstallCheck    string
+	GatewayRestartCheck    string
 }
 
 //UpdateAddNode this function tells the scheduler that the executor's ScaleIO
 //components has been to the cluster
-func (msn *MdmScaleioNode) UpdateAddNode(executorID string) error {
+func (msn *MdmManager) UpdateAddNode(schedulerAddress string, executorID string) error {
 	log.Debugln("UpdateAddNode ENTER")
+	log.Debugln("SchedulerAddress:", schedulerAddress)
 	log.Debugln("ExecutorID:", executorID)
 
-	url := msn.State.SchedulerAddress + "/api/node/cluster"
+	url := schedulerAddress + "/api/node/cluster"
 
 	state := &types.AddNode{
 		Acknowledged: false,

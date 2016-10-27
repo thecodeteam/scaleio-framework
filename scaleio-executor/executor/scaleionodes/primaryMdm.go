@@ -5,26 +5,40 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	xplatform "github.com/dvonthenen/goxplatform"
+	xplatformsys "github.com/dvonthenen/goxplatform/sys"
 
-	basenode "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/basenode"
-	"github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
+	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
+	debmgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/deb"
+	mgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/mgr"
+	rpmmgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/rpm"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
 //ScaleioPrimaryMdmNode implementation for ScaleIO Primary MDM Node
 type ScaleioPrimaryMdmNode struct {
-	basenode.MdmScaleioNode
+	common.ScaleioNode
+	PkgMgr mgr.IMdmMgr
 }
 
 //NewPri generates a Primary MDM Node object
-func NewPri() *ScaleioPrimaryMdmNode {
+func NewPri(state *types.ScaleIOFramework) *ScaleioPrimaryMdmNode {
 	myNode := &ScaleioPrimaryMdmNode{}
+
+	var pkgmgr mgr.IMdmMgr
+	switch xplatform.GetInstance().Sys.GetOsType() {
+	case xplatformsys.OsRhel:
+		pkgmgr = rpmmgr.NewMdmRpmMgr(state)
+	case xplatformsys.OsUbuntu:
+		pkgmgr = debmgr.NewMdmDebMgr(state)
+	}
+	myNode.PkgMgr = pkgmgr
+
 	return myNode
 }
 
 //RunStateUnknown default action for StateUnknown
 func (spmn *ScaleioPrimaryMdmNode) RunStateUnknown() {
-	reboot, err := spmn.EnvironmentSetup()
+	reboot, err := spmn.PkgMgr.EnvironmentSetup(spmn.State)
 	if err != nil {
 		log.Errorln("EnvironmentSetup Failed:", err)
 		errState := spmn.UpdateNodeState(types.StateFatalInstall)
@@ -72,7 +86,7 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateUnknown() {
 //RunStatePrerequisitesInstalled default action for StatePrerequisitesInstalled
 func (spmn *ScaleioPrimaryMdmNode) RunStatePrerequisitesInstalled() {
 	spmn.State = common.WaitForPrereqsFinish(spmn.GetState)
-	err := spmn.ManagementSetup(true)
+	err := spmn.PkgMgr.ManagementSetup(spmn.State, true)
 	if err != nil {
 		log.Errorln("ManagementSetup Failed:", err)
 		errState := spmn.UpdateNodeState(types.StateFatalInstall)
@@ -84,7 +98,7 @@ func (spmn *ScaleioPrimaryMdmNode) RunStatePrerequisitesInstalled() {
 		return
 	}
 
-	err = spmn.NodeSetup()
+	err = spmn.PkgMgr.NodeSetup(spmn.State)
 	if err != nil {
 		log.Errorln("NodeSetup Failed:", err)
 		errState := spmn.UpdateNodeState(types.StateFatalInstall)
@@ -107,7 +121,7 @@ func (spmn *ScaleioPrimaryMdmNode) RunStatePrerequisitesInstalled() {
 //RunStateBasePackagedInstalled default action for StateBasePackagedInstalled
 func (spmn *ScaleioPrimaryMdmNode) RunStateBasePackagedInstalled() {
 	spmn.State = common.WaitForBaseFinish(spmn.GetState)
-	err := spmn.CreateCluster()
+	err := spmn.PkgMgr.CreateCluster(spmn.State)
 	if err != nil {
 		log.Errorln("CreateCluster Failed:", err)
 		errState := spmn.UpdateNodeState(types.StateFatalInstall)
@@ -130,7 +144,7 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateBasePackagedInstalled() {
 //RunStateInitializeCluster default action for StateInitializeCluster
 func (spmn *ScaleioPrimaryMdmNode) RunStateInitializeCluster() {
 	spmn.State = common.WaitForClusterInstallFinish(spmn.GetState)
-	err := spmn.InitializeCluster()
+	err := spmn.PkgMgr.InitializeCluster(spmn.State)
 	if err != nil {
 		log.Errorln("InitializeCluster Failed:", err)
 		errState := spmn.UpdateNodeState(types.StateFatalInstall)
@@ -142,7 +156,7 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateInitializeCluster() {
 		return
 	}
 
-	reboot, err := spmn.GatewaySetup()
+	reboot, err := spmn.PkgMgr.GatewaySetup(spmn.State)
 	if err != nil {
 		log.Errorln("GatewaySetup Failed:", err)
 		errState := spmn.UpdateNodeState(types.StateFatalInstall)
@@ -166,7 +180,7 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateInitializeCluster() {
 //RunStateInstallRexRay default action for StateInstallRexRay
 func (spmn *ScaleioPrimaryMdmNode) RunStateInstallRexRay() {
 	spmn.State = common.WaitForClusterInitializeFinish(spmn.GetState)
-	reboot, err := spmn.RexraySetup()
+	reboot, err := spmn.PkgMgr.RexraySetup(spmn.State)
 	if err != nil {
 		log.Errorln("REX-Ray setup Failed:", err)
 		errState := spmn.UpdateNodeState(types.StateFatalInstall)
@@ -178,7 +192,7 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateInstallRexRay() {
 		return
 	}
 
-	err = spmn.SetupIsolator()
+	err = spmn.PkgMgr.SetupIsolator(spmn.State)
 	if err != nil {
 		log.Errorln("Mesos Isolator setup Failed:", err)
 		errState := spmn.UpdateNodeState(types.StateFatalInstall)
@@ -266,7 +280,7 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateFinishInstall() {
 
 	//This is the checkForNewDataNodesToAdd(). Other functionality TBD.
 	//TODO replace this at some point with API calls instead of CLI
-	err := spmn.AddSdsNodesToCluster(true)
+	err := spmn.PkgMgr.AddSdsNodesToCluster(spmn.State, true)
 	if err != nil {
 		log.Errorln("Failed to add node to ScaleIO cluster:", err)
 	}
