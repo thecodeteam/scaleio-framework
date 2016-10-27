@@ -76,6 +76,8 @@ func (s *ScaleIOScheduler) offers(event *sched.Event) {
 		node := findScaleIONodeByHostname(s.Server.State.ScaleIO.Nodes, offer.GetHostname())
 		if node == nil {
 			log.Errorln("Unable to find node by Hostname:", offer.GetHostname())
+			message := generateDeclineCall(s.Config, offer)
+			s.send(message)
 			continue
 		}
 
@@ -85,12 +87,20 @@ func (s *ScaleIOScheduler) offers(event *sched.Event) {
 				config.MemPerMdmExecutor >= (mems*s.Config.ExecutorMemoryFactor) {
 				log.Warnln("Does not have enough resources to install ScaleIO (MDM) on node",
 					offer.GetId().GetValue(), ",", offer.GetHostname())
+				log.Warnln("CPU Required:", config.CPUPerMdmExecutor, "CPU Available:", cpus*s.Config.ExecutorCPUFactor)
+				log.Warnln("MEM Required:", config.MemPerMdmExecutor, "MEM Available:", mems*s.Config.ExecutorMemoryFactor)
+				message := generateDeclineCall(s.Config, offer)
+				s.send(message)
 				continue
 			}
 		} else {
 			if config.CPUPerNonExecutor >= cpus || config.MemPerNonExecutor >= mems {
 				log.Warnln("Does not have enough resources to install ScaleIO (Non-MDM) on node",
 					offer.GetId().GetValue(), ",", offer.GetHostname())
+				log.Warnln("CPU Required:", config.CPUPerMdmExecutor, "CPU Available:", cpus*s.Config.ExecutorCPUFactor)
+				log.Warnln("MEM Required:", config.MemPerMdmExecutor, "MEM Available:", mems*s.Config.ExecutorMemoryFactor)
+				message := generateDeclineCall(s.Config, offer)
+				s.send(message)
 				continue
 			}
 		}
