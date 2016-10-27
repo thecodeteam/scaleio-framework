@@ -1,6 +1,7 @@
 package mgr
 
 import (
+	"strings"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -63,7 +64,11 @@ func (mm *MdmManager) ManagementSetup(state *types.ScaleIOFramework, isPriOrSec 
 			strPriOrSec = "0"
 		}
 
-		err = xplatform.GetInstance().Run.Command(mm.MdmInstallCmd, mm.MdmInstallCheck, "")
+		mdmInstallCmd := strings.Replace(mm.MdmInstallCmd, "{PriOrSec}", strPriOrSec, -1)
+		mdmInstallCmd = strings.Replace(mdmInstallCmd, "{LocalMdm}", localMdm, -1)
+		log.Infoln("mdmInstallCmd:", mdmInstallCmd)
+
+		err = xplatform.GetInstance().Run.Command(mdmInstallCmd, mm.MdmInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install MDM Failed:", err)
 			log.Infoln("ManagementSetup LEAVE")
@@ -108,7 +113,10 @@ func (nm *NodeManager) NodeSetup(state *types.ScaleIOFramework) error {
 			return err
 		}
 
-		err = xplatform.GetInstance().Run.Command(nm.SdsInstallCmd, nm.SdsInstallCheck, "")
+		sdsInstallCmd := strings.Replace(nm.SdsInstallCmd, "{LocalSds}", localSds, -1)
+		log.Infoln("sdsInstallCmd:", sdsInstallCmd)
+
+		err = xplatform.GetInstance().Run.Command(sdsInstallCmd, nm.SdsInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install SDS Failed:", err)
 			log.Infoln("NodeSetup LEAVE")
@@ -135,6 +143,10 @@ func (nm *NodeManager) NodeSetup(state *types.ScaleIOFramework) error {
 			log.Infoln("NodeSetup LEAVE")
 			return err
 		}
+
+		sdcInstallCmd := strings.Replace(nm.SdcInstallCmd, "{MdmPair}", mdmPair, -1)
+		sdcInstallCmd = strings.Replace(sdcInstallCmd, "{LocalSdc}", localSdc, -1)
+		log.Infoln("sdcInstallCmd:", sdcInstallCmd)
 
 		err = xplatform.GetInstance().Run.Command(nm.SdcInstallCmd, nm.SdcInstallCheck, "")
 		if err != nil {
@@ -480,7 +492,10 @@ func (mm *MdmManager) GatewaySetup(state *types.ScaleIOFramework) (bool, error) 
 			return false, err
 		}
 
-		err = xplatform.GetInstance().Run.Command(mm.LiaInstallCmd, mm.LiaInstallCheck, "")
+		liaInstallCmd := strings.Replace(mm.LiaInstallCmd, "{LocalLia}", localLia, -1)
+		log.Infoln("liaInstallCmd:", liaInstallCmd)
+
+		err = xplatform.GetInstance().Run.Command(liaInstallCmd, mm.LiaInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install LIA Failed:", err)
 			log.Infoln("GatewaySetup LEAVE")
@@ -524,7 +539,9 @@ func (mm *MdmManager) GatewaySetup(state *types.ScaleIOFramework) (bool, error) 
 			return false, err
 		}
 
-		err = xplatform.GetInstance().Run.Command(mm.GatewayInstallCmd, mm.GatewayInstallCheck, "")
+		gatewayInstallCmd := strings.Replace(mm.GatewayInstallCmd, "{LocalGw}", localGw, -1)
+
+		err = xplatform.GetInstance().Run.Command(gatewayInstallCmd, mm.GatewayInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install GW Failed:", err)
 			log.Infoln("GatewaySetup LEAVE")
