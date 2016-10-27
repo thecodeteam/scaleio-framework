@@ -127,11 +127,11 @@ func (cfg *Config) AddFlags(fs *flag.FlagSet) {
 		"CPU resources to consume per-executor on Non-MDM nodes")
 	fs.Float64Var(&cfg.ExecutorCPUFactor, "executor.cpufactor", cfg.ExecutorCPUFactor,
 		"Fudge factor for effective CPU available. This allows overhead/reserve.")
-	fs.Float64Var(&cfg.ExecutorMdmMemory, "executor.memory.mdm", cfg.ExecutorMdmMemory,
+	fs.Float64Var(&cfg.ExecutorMdmMemory, "executor.mem.mdm", cfg.ExecutorMdmMemory,
 		"Memory resources (MB) to consume per-executor on MDM nodes")
-	fs.Float64Var(&cfg.ExecutorNonMemory, "executor.memory.non", cfg.ExecutorNonMemory,
+	fs.Float64Var(&cfg.ExecutorNonMemory, "executor.mem.non", cfg.ExecutorNonMemory,
 		"Memory resources (MB) to consume per-executor on Non-MDM nodes")
-	fs.Float64Var(&cfg.ExecutorMemoryFactor, "executor.memoryfactor", cfg.ExecutorMemoryFactor,
+	fs.Float64Var(&cfg.ExecutorMemoryFactor, "executor.memfactor", cfg.ExecutorMemoryFactor,
 		"Fudge factor for effective memory available. This allows overhead/reserve.")
 	fs.StringVar(&cfg.User, "user", cfg.User, "The User account the framework is running under")
 	fs.StringVar(&cfg.Hostname, "hostname", cfg.Hostname, "The Hostname where the framework runs")
