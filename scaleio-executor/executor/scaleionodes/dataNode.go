@@ -5,6 +5,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	xplatform "github.com/dvonthenen/goxplatform"
+	xplatformsys "github.com/dvonthenen/goxplatform/sys"
 
 	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 	debmgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/deb"
