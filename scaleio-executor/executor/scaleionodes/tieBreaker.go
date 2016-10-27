@@ -8,7 +8,9 @@ import (
 	xplatformsys "github.com/dvonthenen/goxplatform/sys"
 
 	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
+	debmgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/deb"
 	mgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/mgr"
+	rpmmgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/rpm"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
@@ -265,7 +267,7 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateFinishInstall() {
 		if (pri.LastContact+common.OfflineTimeForMdmNodesInSeconds) < time.Now().Unix() &&
 			(sec.LastContact+common.OfflineTimeForMdmNodesInSeconds) < time.Now().Unix() {
 			//This is the checkForNewDataNodesToAdd(). Other functionality TBD.
-			err := stbmn.AddSdsNodesToCluster(stbmn.State, true)
+			err := stbmn.PkgMgr.AddSdsNodesToCluster(stbmn.State, true)
 			if err != nil {
 				log.Errorln("Failed to add node to ScaleIO cluster:", err)
 			}

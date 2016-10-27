@@ -8,7 +8,9 @@ import (
 	xplatformsys "github.com/dvonthenen/goxplatform/sys"
 
 	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
+	debmgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/deb"
 	mgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/mgr"
+	rpmmgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/rpm"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
@@ -96,7 +98,7 @@ func (spmn *ScaleioPrimaryMdmNode) RunStatePrerequisitesInstalled() {
 		return
 	}
 
-	err = spmn.PkrMgr.NodeSetup(spmn.State)
+	err = spmn.PkgMgr.NodeSetup(spmn.State)
 	if err != nil {
 		log.Errorln("NodeSetup Failed:", err)
 		errState := spmn.UpdateNodeState(types.StateFatalInstall)
