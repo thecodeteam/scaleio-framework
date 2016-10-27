@@ -8,23 +8,6 @@ import (
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
-const (
-	//Environment
-	aiozipCheck                = "[0-9]+ upgraded|[0-9]+ newly"
-	genericInstallCheck        = "1 upgraded|1 newly"
-	requiredKernelVersionCheck = "4.2.0-30-generic"
-
-	//ScaleIO node
-	sdsInstallCheck = "sds start/running"
-	sdcInstallCheck = "Success configuring module"
-
-	//REX-Ray
-	rexrayInstallCheck = "rexray has been installed to"
-
-	//Isolator
-	dvdcliInstallCheck = "dvdcli has been installed to"
-)
-
 //NodeDebMgr implementation for NodeDebMgr
 type NodeDebMgr struct {
 	*mgr.NodeManager
@@ -89,23 +72,23 @@ func (dpm *NodeDebMgr) EnvironmentSetup(state *types.ScaleIOFramework) (bool, er
 //NewNodeDebMgr generates a NodeDebMgr object
 func NewNodeDebMgr(state *types.ScaleIOFramework) NodeDebMgr {
 	myNodeMgr := &mgr.NodeManager{}
-	myNodeDebMgr := myNodeDebMgr{myNodeMgr}
+	myNodeDebMgr := NodeDebMgr{myNodeMgr}
 
 	//ScaleIO node
-	myNodeDebMgr.BaseManager.SdsPackageName = types.DebSdsPackageName
-	myNodeDebMgr.BaseManager.SdsPackageDownload = state.ScaleIO.Deb.DebSds
-	myNodeDebMgr.BaseManager.SdsInstallCmd = "dpkg -i {LocalSds}"
-	myNodeDebMgr.BaseManager.SdsInstallCheck = sdsInstallCheck
-	myNodeDebMgr.BaseManager.SdcPackageName = types.DebSdcPackageName
-	myNodeDebMgr.BaseManager.SdcPackageDownload = state.ScaleIO.Deb.DebSdc
-	myNodeDebMgr.BaseManager.SdcInstallCmd = "MDM_IP={MdmPair} dpkg -i {LocalSdc}"
-	myNodeDebMgr.BaseManager.SdcInstallCheck = sdcInstallCheck
+	myNodeDebMgr.NodeManager.SdsPackageName = types.DebSdsPackageName
+	myNodeDebMgr.NodeManager.SdsPackageDownload = state.ScaleIO.Deb.DebSds
+	myNodeDebMgr.NodeManager.SdsInstallCmd = "dpkg -i {LocalSds}"
+	myNodeDebMgr.NodeManager.SdsInstallCheck = sdsInstallCheck
+	myNodeDebMgr.NodeManager.SdcPackageName = types.DebSdcPackageName
+	myNodeDebMgr.NodeManager.SdcPackageDownload = state.ScaleIO.Deb.DebSdc
+	myNodeDebMgr.NodeManager.SdcInstallCmd = "MDM_IP={MdmPair} dpkg -i {LocalSdc}"
+	myNodeDebMgr.NodeManager.SdcInstallCheck = sdcInstallCheck
 
 	//REX-Ray
-	myNodeDebMgr.BaseManager.RexrayInstallCheck = rexrayInstallCheck
+	myNodeDebMgr.NodeManager.RexrayInstallCheck = rexrayInstallCheck
 
 	//Isolator
-	myNodeDebMgr.BaseManager.DvdcliInstallCheck = dvdcliInstallCheck
+	myNodeDebMgr.NodeManager.DvdcliInstallCheck = dvdcliInstallCheck
 
 	return myNodeDebMgr
 }

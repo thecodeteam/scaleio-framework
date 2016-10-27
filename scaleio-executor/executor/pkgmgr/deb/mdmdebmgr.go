@@ -8,28 +8,6 @@ import (
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
-const (
-	//Environment
-	aiozipCheck                = "[0-9]+ upgraded|[0-9]+ newly"
-	genericInstallCheck        = "1 upgraded|1 newly"
-	requiredKernelVersionCheck = "4.2.0-30-generic"
-
-	//ScaleIO node
-	mdmInstallCheck     = "mdm start/running"
-	sdsInstallCheck     = "sds start/running"
-	sdcInstallCheck     = "Success configuring module"
-	liaInstallCheck     = "lia start/running"
-	liaRestartCheck     = liaInstallCheck
-	gatewayInstallCheck = "The EMC ScaleIO Gateway is running"
-	gatewayRestartCheck = "scaleio-gateway start/running"
-
-	//REX-Ray
-	rexrayInstallCheck = "rexray has been installed to"
-
-	//Isolator
-	dvdcliInstallCheck = "dvdcli has been installed to"
-)
-
 //MdmDebMgr implementation for MdmDebMgr
 type MdmDebMgr struct {
 	*mgr.MdmManager
@@ -121,10 +99,10 @@ func NewMdmDebMgr(state *types.ScaleIOFramework) MdmDebMgr {
 	myMdmDebMgr.MdmManager.GatewayRestartCheck = gatewayRestartCheck
 
 	//REX-Ray
-	myMdmDebMgr.BaseManager.RexrayInstallCheck = rexrayInstallCheck
+	myMdmDebMgr.MdmManager.RexrayInstallCheck = rexrayInstallCheck
 
 	//Isolator
-	myMdmDebMgr.BaseManager.DvdcliInstallCheck = dvdcliInstallCheck
+	myMdmDebMgr.MdmManager.DvdcliInstallCheck = dvdcliInstallCheck
 
 	return myMdmDebMgr
 }

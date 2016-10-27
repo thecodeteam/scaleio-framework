@@ -5,11 +5,6 @@ import (
 	"github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
-const (
-	rexrayInstallCheck = "rexray has been installed to"
-	dvdcliInstallCheck = "dvdcli has been installed to"
-)
-
 //NodeRpmMgr implementation for NodeRpmMgr
 type NodeRpmMgr struct {
 	*mgr.NodeManager
@@ -20,8 +15,8 @@ func NewNodeRpmMgr(state *types.ScaleIOFramework) NodeRpmMgr {
 	myNodeMgr := &mgr.NodeManager{}
 	myNodeRpmMgr := NodeRpmMgr{myNodeMgr}
 
-	myNodeRpmMgr.BaseManager.RexrayInstallCheck = rexrayInstallCheck
-	myNodeRpmMgr.BaseManager.DvdcliInstallCheck = dvdcliInstallCheck
+	myNodeRpmMgr.NodeManager.RexrayInstallCheck = rexrayInstallCheck
+	myNodeRpmMgr.NodeManager.DvdcliInstallCheck = dvdcliInstallCheck
 
 	//TODO pending
 
