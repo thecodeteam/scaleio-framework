@@ -70,9 +70,9 @@ func (dpm *NodeDebMgr) EnvironmentSetup(state *types.ScaleIOFramework) (bool, er
 }
 
 //NewNodeDebMgr generates a NodeDebMgr object
-func NewNodeDebMgr(state *types.ScaleIOFramework) NodeDebMgr {
+func NewNodeDebMgr(state *types.ScaleIOFramework) *NodeDebMgr {
 	myNodeMgr := &mgr.NodeManager{}
-	myNodeDebMgr := NodeDebMgr{myNodeMgr}
+	myNodeDebMgr := &NodeDebMgr{myNodeMgr}
 
 	//ScaleIO node
 	myNodeDebMgr.NodeManager.SdsPackageName = types.DebSdsPackageName

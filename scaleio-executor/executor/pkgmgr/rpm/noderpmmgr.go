@@ -13,7 +13,7 @@ type NodeRpmMgr struct {
 }
 
 //EnvironmentSetup for setting up the environment for ScaleIO
-func (mdm *NodeRpmMgr) EnvironmentSetup(state *types.ScaleIOFramework) (bool, error) {
+func (npm *NodeRpmMgr) EnvironmentSetup(state *types.ScaleIOFramework) (bool, error) {
 	log.Infoln("EnvironmentSetup ENTER")
 
 	//TODO
@@ -24,9 +24,9 @@ func (mdm *NodeRpmMgr) EnvironmentSetup(state *types.ScaleIOFramework) (bool, er
 }
 
 //NewNodeRpmMgr generates a NodeRpmMgr object
-func NewNodeRpmMgr(state *types.ScaleIOFramework) NodeRpmMgr {
+func NewNodeRpmMgr(state *types.ScaleIOFramework) *NodeRpmMgr {
 	myNodeMgr := &mgr.NodeManager{}
-	myNodeRpmMgr := NodeRpmMgr{myNodeMgr}
+	myNodeRpmMgr := &NodeRpmMgr{myNodeMgr}
 
 	myNodeRpmMgr.NodeManager.RexrayInstallCheck = rexrayInstallCheck
 	myNodeRpmMgr.NodeManager.DvdcliInstallCheck = dvdcliInstallCheck

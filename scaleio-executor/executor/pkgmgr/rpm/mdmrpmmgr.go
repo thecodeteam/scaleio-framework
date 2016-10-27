@@ -24,9 +24,9 @@ func (mdm *MdmRpmMgr) EnvironmentSetup(state *types.ScaleIOFramework) (bool, err
 }
 
 //NewMdmRpmMgr generates a MdmRpmMgr object
-func NewMdmRpmMgr(state *types.ScaleIOFramework) MdmRpmMgr {
+func NewMdmRpmMgr(state *types.ScaleIOFramework) *MdmRpmMgr {
 	myMdmMgr := &mgr.MdmManager{}
-	myMdmRpmMgr := MdmRpmMgr{myMdmMgr}
+	myMdmRpmMgr := &MdmRpmMgr{myMdmMgr}
 
 	myMdmRpmMgr.MdmManager.RexrayInstallCheck = rexrayInstallCheck
 	myMdmRpmMgr.MdmManager.DvdcliInstallCheck = dvdcliInstallCheck

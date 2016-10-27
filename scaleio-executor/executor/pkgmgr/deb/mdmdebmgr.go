@@ -70,9 +70,9 @@ func (mdm *MdmDebMgr) EnvironmentSetup(state *types.ScaleIOFramework) (bool, err
 }
 
 //NewMdmDebMgr generates a MdmDebMgr object
-func NewMdmDebMgr(state *types.ScaleIOFramework) MdmDebMgr {
+func NewMdmDebMgr(state *types.ScaleIOFramework) *MdmDebMgr {
 	myMdmMgr := &mgr.MdmManager{}
-	myMdmDebMgr := MdmDebMgr{myMdmMgr}
+	myMdmDebMgr := &MdmDebMgr{myMdmMgr}
 
 	//ScaleIO node
 	myMdmDebMgr.MdmManager.SdsPackageName = types.DebSdsPackageName
