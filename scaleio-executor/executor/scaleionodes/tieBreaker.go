@@ -21,7 +21,7 @@ type ScaleioTieBreakerMdmNode struct {
 func NewTb(state *types.ScaleIOFramework) *ScaleioTieBreakerMdmNode {
 	myNode := &ScaleioTieBreakerMdmNode{}
 
-	var pkgmgr mgr.IPkgMgr
+	var pkgmgr mgr.IMdmMgr
 	switch xplatform.GetInstance().Sys.GetOsType() {
 	case xplatformsys.OsRhel:
 		pkgmgr = rpmmgr.NewMdmRpmMgr(state)

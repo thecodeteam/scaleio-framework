@@ -21,7 +21,7 @@ type ScaleioPrimaryMdmNode struct {
 func NewPri(state *types.ScaleIOFramework) *ScaleioPrimaryMdmNode {
 	myNode := &ScaleioPrimaryMdmNode{}
 
-	var pkgmgr mgr.IPkgMgr
+	var pkgmgr mgr.IMdmMgr
 	switch xplatform.GetInstance().Sys.GetOsType() {
 	case xplatformsys.OsRhel:
 		pkgmgr = rpmmgr.NewMdmRpmMgr(state)

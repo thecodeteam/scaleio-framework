@@ -23,7 +23,7 @@ type ScaleioDataNode struct {
 func NewData(state *types.ScaleIOFramework) *ScaleioDataNode {
 	myNode := &ScaleioDataNode{}
 
-	var pkgmgr mgr.IPkgMgr
+	var pkgmgr mgr.INodeMgr
 	switch xplatform.GetInstance().Sys.GetOsType() {
 	case xplatformsys.OsRhel:
 		pkgmgr = rpmmgr.NewNodeRpmMgr(state)
