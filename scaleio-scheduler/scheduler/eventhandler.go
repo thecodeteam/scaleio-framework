@@ -3,7 +3,6 @@ package scheduler
 import (
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/codedellemc/scaleio-framework/scaleio-scheduler/config"
 	sched "github.com/codedellemc/scaleio-framework/scaleio-scheduler/mesos/sched"
 	mesos "github.com/codedellemc/scaleio-framework/scaleio-scheduler/mesos/v1"
 )
@@ -83,22 +82,22 @@ func (s *ScaleIOScheduler) offers(event *sched.Event) {
 
 		//if node is an MDM node
 		if IsNodeAnMDMNode(node) {
-			if config.CPUPerMdmExecutor >= (cpus*s.Config.ExecutorCPUFactor) ||
-				config.MemPerMdmExecutor >= (mems*s.Config.ExecutorMemoryFactor) {
+			if s.Config.ExecutorMdmCPU >= (cpus*s.Config.ExecutorCPUFactor) ||
+				s.Config.ExecutorMdmMemory >= (mems*s.Config.ExecutorMemoryFactor) {
 				log.Warnln("Does not have enough resources to install ScaleIO (MDM) on node",
 					offer.GetId().GetValue(), ",", offer.GetHostname())
-				log.Warnln("CPU Required:", config.CPUPerMdmExecutor, "CPU Available:", cpus*s.Config.ExecutorCPUFactor)
-				log.Warnln("MEM Required:", config.MemPerMdmExecutor, "MEM Available:", mems*s.Config.ExecutorMemoryFactor)
+				log.Warnln("CPU Required:", s.Config.ExecutorMdmCPU, "CPU Available:", cpus*s.Config.ExecutorCPUFactor)
+				log.Warnln("MEM Required:", s.Config.ExecutorMdmMemory, "MEM Available:", mems*s.Config.ExecutorMemoryFactor)
 				message := generateDeclineCall(s.Config, offer)
 				s.send(message)
 				continue
 			}
 		} else {
-			if config.CPUPerNonExecutor >= cpus || config.MemPerNonExecutor >= mems {
+			if s.Config.ExecutorNonCPU >= cpus || s.Config.ExecutorNonMemory >= mems {
 				log.Warnln("Does not have enough resources to install ScaleIO (Non-MDM) on node",
 					offer.GetId().GetValue(), ",", offer.GetHostname())
-				log.Warnln("CPU Required:", config.CPUPerMdmExecutor, "CPU Available:", cpus*s.Config.ExecutorCPUFactor)
-				log.Warnln("MEM Required:", config.MemPerMdmExecutor, "MEM Available:", mems*s.Config.ExecutorMemoryFactor)
+				log.Warnln("CPU Required:", s.Config.ExecutorNonCPU, "CPU Available:", cpus*s.Config.ExecutorCPUFactor)
+				log.Warnln("MEM Required:", s.Config.ExecutorNonMemory, "MEM Available:", mems*s.Config.ExecutorMemoryFactor)
 				message := generateDeclineCall(s.Config, offer)
 				s.send(message)
 				continue
