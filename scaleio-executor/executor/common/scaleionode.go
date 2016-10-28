@@ -12,7 +12,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
-	"github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
@@ -47,7 +46,7 @@ func (bsn *ScaleioNode) GetSelfNode() *types.ScaleIONode {
 
 //UpdateScaleIOState updates the state of the framework
 func (bsn *ScaleioNode) UpdateScaleIOState() *types.ScaleIOFramework {
-	bsn.State = common.WaitForStableState(bsn.GetState)
+	bsn.State = WaitForStableState(bsn.GetState)
 	bsn.Node = GetSelfNode(bsn.ExecutorID, bsn.State)
 	return bsn.State
 }
