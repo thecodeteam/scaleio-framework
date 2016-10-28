@@ -93,14 +93,13 @@ func RunExecutor(executorID string, getstate common.RetrieveState) error {
 
 		if node.GetSelfNode() == nil {
 			log.Errorln("Unable to find Self in node list")
-			errState := nodestate.UpdateNodeState(state.SchedulerAddress, executorID,
-				types.StateFatalInstall)
+			errState := node.UpdateNodeState(types.StateFatalInstall)
 			if errState != nil {
 				log.Errorln("Failed to signal state change:", errState)
 			} else {
 				log.Debugln("Signaled StateFatalInstall")
 			}
-			time.Sleep(time.Duration(PollAfterFatalInSeconds) * time.Second)
+			time.Sleep(time.Duration(common.PollAfterFatalInSeconds) * time.Second)
 			continue
 		}
 
