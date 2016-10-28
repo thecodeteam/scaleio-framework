@@ -55,7 +55,7 @@ func NewScaleIOExecutor(cfg *config.Config) *ScaleIOExecutor {
 //Start kicks off the executor workflow
 func (e *ScaleIOExecutor) Start() <-chan struct{} {
 	if err := e.subscribe(); err != nil {
-		log.Fatal(err)
+		log.Errorln(err)
 	}
 	go e.handleEvents()
 	return e.DoneChan
@@ -218,7 +218,7 @@ func (e *ScaleIOExecutor) handleEvents() {
 
 			err := e.sendUpdate(task, mesos.TaskState_TASK_RUNNING.Enum())
 			if err != nil {
-				log.Fatal("Failed while sending update:", err)
+				log.Errorln("Failed while sending update:", err)
 			}
 
 			go func() {
@@ -227,7 +227,7 @@ func (e *ScaleIOExecutor) handleEvents() {
 				if errNode != nil {
 					myErr := e.sendUpdate(task, mesos.TaskState_TASK_ERROR.Enum())
 					if myErr != nil {
-						log.Fatal("Failed while sending update:", myErr)
+						log.Errorln("Failed while sending update:", myErr)
 					}
 				}
 			}()
