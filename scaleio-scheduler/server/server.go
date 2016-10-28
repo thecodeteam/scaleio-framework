@@ -28,6 +28,7 @@ func NewRestServer(cfg *config.Config) *RestServer {
 		SchedulerAddress: fmt.Sprintf("http://%s:%d", cfg.RestAddress, cfg.RestPort),
 		LogLevel:         cfg.LogLevel,
 		DemoMode:         cfg.DemoMode,
+		Debug:            cfg.Debug,
 		Experimental:     cfg.Experimental,
 		ScaleIO: types.ScaleIOConfig{
 			ClusterID:        cfg.ClusterID,

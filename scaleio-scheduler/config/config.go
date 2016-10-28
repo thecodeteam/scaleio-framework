@@ -54,6 +54,7 @@ const (
 type Config struct {
 	LogLevel     string
 	DemoMode     bool
+	Debug        bool
 	Experimental bool
 
 	RexrayBranch  string
@@ -104,6 +105,8 @@ func (cfg *Config) AddFlags(fs *flag.FlagSet) {
 		"Set the logging level for the application")
 	fs.BoolVar(&cfg.DemoMode, "demomode", cfg.DemoMode,
 		"Sets the application to demo mode")
+	fs.BoolVar(&cfg.Debug, "debug", cfg.Debug,
+		"Debug more prevents the reboot so the logs dont get cycled")
 	fs.BoolVar(&cfg.Experimental, "experimental", cfg.Experimental,
 		"Sets the application to experimental mode")
 
@@ -182,6 +185,7 @@ func NewConfig() *Config {
 	return &Config{
 		LogLevel:             env("LOG_LEVEL", "info"),
 		DemoMode:             envBool("DEMO_MODE", "false"),
+		Debug:                envBool("DEBUG", "false"),
 		Experimental:         envBool("EXPERIMENTAL", "false"),
 		RexrayBranch:         env("REXRAY_BRANCH", "stable"),
 		RexrayVersion:        env("REXRAY_VERSION", "latest"),
