@@ -70,14 +70,18 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateUnknown() {
 	if reboot {
 		log.Infoln("Reboot required before StatePrerequisitesInstalled!")
 
-		time.Sleep(time.Duration(common.DelayForRebootInSeconds) * time.Second)
+		if stbmn.State.Debug {
+			log.Infoln("Skipping the reboot since Debug is TRUE")
+		} else {
+			time.Sleep(time.Duration(common.DelayForRebootInSeconds) * time.Second)
 
-		rebootErr := xplatform.GetInstance().Run.Command(common.RebootCmdline, common.RebootCheck, "")
-		if rebootErr != nil {
-			log.Errorln("Install Kernel Failed:", rebootErr)
+			rebootErr := xplatform.GetInstance().Run.Command(common.RebootCmdline, common.RebootCheck, "")
+			if rebootErr != nil {
+				log.Errorln("Install Kernel Failed:", rebootErr)
+			}
+
+			time.Sleep(time.Duration(common.WaitForRebootInSeconds) * time.Second)
 		}
-
-		time.Sleep(time.Duration(common.WaitForRebootInSeconds) * time.Second)
 	} else {
 		log.Infoln("No need to reboot while installing prerequisites")
 	}
@@ -205,12 +209,16 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateInstallRexRay() {
 			log.Debugln("Signaled StateSystemReboot")
 		}
 
-		rebootErr := xplatform.GetInstance().Run.Command(common.RebootCmdline, common.RebootCheck, "")
-		if rebootErr != nil {
-			log.Errorln("Install Kernel Failed:", rebootErr)
-		}
+		if stbmn.State.Debug {
+			log.Infoln("Skipping the reboot since Debug is TRUE")
+		} else {
+			rebootErr := xplatform.GetInstance().Run.Command(common.RebootCmdline, common.RebootCheck, "")
+			if rebootErr != nil {
+				log.Errorln("Install Kernel Failed:", rebootErr)
+			}
 
-		time.Sleep(time.Duration(common.WaitForRebootInSeconds) * time.Second)
+			time.Sleep(time.Duration(common.WaitForRebootInSeconds) * time.Second)
+		}
 	} else {
 		log.Infoln("No need to reboot while installing REX-Ray")
 
