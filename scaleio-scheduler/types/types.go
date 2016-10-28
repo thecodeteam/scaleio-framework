@@ -161,6 +161,7 @@ type ScaleIOFramework struct {
 	SchedulerAddress string            `json:"scheduleraddress"`
 	LogLevel         string            `json:"loglevel"`
 	DemoMode         bool              `json:"demomode"`
+	Debug            bool              `json:"debug"`
 	Experimental     bool              `json:"experimental"`
 	KeyValue         map[string]string `json:"keyvalue,omitempty"`
 	ScaleIO          ScaleIOConfig
