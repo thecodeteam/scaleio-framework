@@ -123,7 +123,7 @@ func (nm *NodeManager) NodeSetup(state *types.ScaleIOFramework) error {
 			return err
 		}
 	} else {
-		log.Infoln(types.DebSdsPackageName, "is already installed")
+		log.Infoln(nm.SdsPackageName, "is already installed")
 	}
 
 	//SDC Install
@@ -530,7 +530,7 @@ func (mm *MdmManager) GatewaySetup(state *types.ScaleIOFramework) (bool, error) 
 	log.Debugln("gwInstErr:", gwInstErr)
 
 	if gwVerErr != nil || gwInstErr != nil || gwVer != gwInst {
-		log.Infoln("Installing", types.DebGwPackageName)
+		log.Infoln("Installing", mm.GatewayPackageName)
 
 		localGw, err := xplatform.GetInstance().Inst.DownloadPackage(mm.GatewayPackageDownload)
 		if err != nil {
@@ -569,7 +569,7 @@ func (mm *MdmManager) GatewaySetup(state *types.ScaleIOFramework) (bool, error) 
 	}
 
 	if gwInst == "" && gwInstErr == nil {
-		log.Debugln("No previous install of", types.DebGwPackageName,
+		log.Debugln("No previous install of", mm.GatewayPackageName,
 			"exists. Reboot required!")
 		log.Infoln("GatewaySetup LEAVE")
 		return true, nil

@@ -4,7 +4,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 
 	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
-	"github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
+	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
 //ScaleioFakeNode implementation for ScaleIO Fake Node

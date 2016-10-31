@@ -45,19 +45,19 @@ func NewRestServer(cfg *config.Config) *RestServer {
 				TieBreakerMdmAddress: cfg.TieBreakerMdmAddress,
 				GatewayAddress:       cfg.GatewayAddress,
 			},
-			Deb: types.DebPackages{
-				DebMdm: cfg.DebMdm,
-				DebSds: cfg.DebSds,
-				DebSdc: cfg.DebSdc,
-				DebLia: cfg.DebLia,
-				DebGw:  cfg.DebGw,
+			Ubuntu14: types.Ubuntu14Packages{
+				Mdm: cfg.DebMdm,
+				Sds: cfg.DebSds,
+				Sdc: cfg.DebSdc,
+				Lia: cfg.DebLia,
+				Gw:  cfg.DebGw,
 			},
-			Rpm: types.RpmPackages{
-				RpmMdm: cfg.RpmMdm,
-				RpmSds: cfg.RpmSds,
-				RpmSdc: cfg.RpmSdc,
-				RpmLia: cfg.RpmLia,
-				RpmGw:  cfg.RpmGw,
+			Rhel7: types.Rhel7Packages{
+				Mdm: cfg.RpmMdm,
+				Sds: cfg.RpmSds,
+				Sdc: cfg.RpmSdc,
+				Lia: cfg.RpmLia,
+				Gw:  cfg.RpmGw,
 			},
 		},
 		Rexray: types.RexrayConfig{

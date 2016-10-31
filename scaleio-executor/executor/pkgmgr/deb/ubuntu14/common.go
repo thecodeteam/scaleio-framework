@@ -1,4 +1,4 @@
-package deb
+package ubuntu14
 
 const (
 	//Environment
@@ -11,9 +11,7 @@ const (
 	sdsInstallCheck     = "sds start/running"
 	sdcInstallCheck     = "Success configuring module"
 	liaInstallCheck     = "lia start/running"
-	liaRestartCheck     = liaInstallCheck
 	gatewayInstallCheck = "The EMC ScaleIO Gateway is running"
-	gatewayRestartCheck = "scaleio-gateway start/running"
 
 	//REX-Ray
 	rexrayInstallCheck = "rexray has been installed to"
