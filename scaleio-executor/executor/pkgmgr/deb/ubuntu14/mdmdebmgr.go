@@ -1,4 +1,4 @@
-package deb
+package ubuntu14
 
 import (
 	log "github.com/Sirupsen/logrus"
@@ -9,12 +9,12 @@ import (
 )
 
 //MdmDebMgr implementation for MdmDebMgr
-type MdmDebMgr struct {
+type MdmDebUbuntu14Mgr struct {
 	*mgr.MdmManager
 }
 
 //EnvironmentSetup for setting up the environment for ScaleIO
-func (mdm *MdmDebMgr) EnvironmentSetup(state *types.ScaleIOFramework) (bool, error) {
+func (mdm *MdmDebUbuntu14Mgr) EnvironmentSetup(state *types.ScaleIOFramework) (bool, error) {
 	log.Infoln("EnvironmentSetup ENTER")
 
 	aioErr := xplatform.GetInstance().Inst.IsInstalled("libaio1")
@@ -69,40 +69,38 @@ func (mdm *MdmDebMgr) EnvironmentSetup(state *types.ScaleIOFramework) (bool, err
 	return false, nil
 }
 
-//NewMdmDebMgr generates a MdmDebMgr object
-func NewMdmDebMgr(state *types.ScaleIOFramework) *MdmDebMgr {
+//NewMdmDebUbuntu14Mgr generates a MdmDebMgr object
+func NewMdmDebUbuntu14Mgr(state *types.ScaleIOFramework) *MdmDebUbuntu14Mgr {
 	myMdmMgr := &mgr.MdmManager{}
-	myMdmDebMgr := &MdmDebMgr{myMdmMgr}
+	myMdmDebUbuntu14Mgr := &MdmDebUbuntu14Mgr{myMdmMgr}
 
 	//ScaleIO node
-	myMdmDebMgr.MdmManager.SdsPackageName = types.DebSdsPackageName
-	myMdmDebMgr.MdmManager.SdsPackageDownload = state.ScaleIO.Deb.DebSds
-	myMdmDebMgr.MdmManager.SdsInstallCmd = "dpkg -i {LocalSds}"
-	myMdmDebMgr.MdmManager.SdsInstallCheck = sdsInstallCheck
-	myMdmDebMgr.MdmManager.SdcPackageName = types.DebSdcPackageName
-	myMdmDebMgr.MdmManager.SdcPackageDownload = state.ScaleIO.Deb.DebSdc
-	myMdmDebMgr.MdmManager.SdcInstallCmd = "MDM_IP={MdmPair} dpkg -i {LocalSdc}"
-	myMdmDebMgr.MdmManager.SdcInstallCheck = sdcInstallCheck
-	myMdmDebMgr.MdmManager.MdmPackageName = types.DebMdmPackageName
-	myMdmDebMgr.MdmManager.MdmPackageDownload = state.ScaleIO.Deb.DebMdm
-	myMdmDebMgr.MdmManager.MdmInstallCmd = "MDM_ROLE_IS_MANAGER={PriOrSec} dpkg -i {LocalMdm}"
-	myMdmDebMgr.MdmManager.MdmInstallCheck = mdmInstallCheck
-	myMdmDebMgr.MdmManager.LiaPackageName = types.DebLiaPackageName
-	myMdmDebMgr.MdmManager.LiaPackageDownload = state.ScaleIO.Deb.DebLia
-	myMdmDebMgr.MdmManager.LiaInstallCmd = "TOKEN=" + state.ScaleIO.AdminPassword + " dpkg -i {LocalLia}"
-	myMdmDebMgr.MdmManager.LiaInstallCheck = liaInstallCheck
-	myMdmDebMgr.MdmManager.LiaRestartCheck = liaRestartCheck
-	myMdmDebMgr.MdmManager.GatewayPackageName = types.DebGwPackageName
-	myMdmDebMgr.MdmManager.GatewayPackageDownload = state.ScaleIO.Deb.DebGw
-	myMdmDebMgr.MdmManager.GatewayInstallCmd = "GATEWAY_ADMIN_PASSWORD=" + state.ScaleIO.AdminPassword + " dpkg -i {LocalGw}"
-	myMdmDebMgr.MdmManager.GatewayInstallCheck = gatewayInstallCheck
-	myMdmDebMgr.MdmManager.GatewayRestartCheck = gatewayRestartCheck
+	myMdmDebUbuntu14Mgr.MdmManager.SdsPackageName = types.Ubuntu14SdsPackageName
+	myMdmDebUbuntu14Mgr.MdmManager.SdsPackageDownload = state.ScaleIO.Ubuntu14.Sds
+	myMdmDebUbuntu14Mgr.MdmManager.SdsInstallCmd = "dpkg -i {LocalSds}"
+	myMdmDebUbuntu14Mgr.MdmManager.SdsInstallCheck = sdsInstallCheck
+	myMdmDebUbuntu14Mgr.MdmManager.SdcPackageName = types.Ubuntu14SdcPackageName
+	myMdmDebUbuntu14Mgr.MdmManager.SdcPackageDownload = state.ScaleIO.Ubuntu14.Sdc
+	myMdmDebUbuntu14Mgr.MdmManager.SdcInstallCmd = "MDM_IP={MdmPair} dpkg -i {LocalSdc}"
+	myMdmDebUbuntu14Mgr.MdmManager.SdcInstallCheck = sdcInstallCheck
+	myMdmDebUbuntu14Mgr.MdmManager.MdmPackageName = types.Ubuntu14MdmPackageName
+	myMdmDebUbuntu14Mgr.MdmManager.MdmPackageDownload = state.ScaleIO.Ubuntu14.Mdm
+	myMdmDebUbuntu14Mgr.MdmManager.MdmInstallCmd = "MDM_ROLE_IS_MANAGER={PriOrSec} dpkg -i {LocalMdm}"
+	myMdmDebUbuntu14Mgr.MdmManager.MdmInstallCheck = mdmInstallCheck
+	myMdmDebUbuntu14Mgr.MdmManager.LiaPackageName = types.Ubuntu14LiaPackageName
+	myMdmDebUbuntu14Mgr.MdmManager.LiaPackageDownload = state.ScaleIO.Ubuntu14.Lia
+	myMdmDebUbuntu14Mgr.MdmManager.LiaInstallCmd = "TOKEN=" + state.ScaleIO.AdminPassword + " dpkg -i {LocalLia}"
+	myMdmDebUbuntu14Mgr.MdmManager.LiaInstallCheck = liaInstallCheck
+	myMdmDebUbuntu14Mgr.MdmManager.GatewayPackageName = types.Ubuntu14GwPackageName
+	myMdmDebUbuntu14Mgr.MdmManager.GatewayPackageDownload = state.ScaleIO.Ubuntu14.Gw
+	myMdmDebUbuntu14Mgr.MdmManager.GatewayInstallCmd = "GATEWAY_ADMIN_PASSWORD=" + state.ScaleIO.AdminPassword + " dpkg -i {LocalGw}"
+	myMdmDebUbuntu14Mgr.MdmManager.GatewayInstallCheck = gatewayInstallCheck
 
 	//REX-Ray
-	myMdmDebMgr.MdmManager.RexrayInstallCheck = rexrayInstallCheck
+	myMdmDebUbuntu14Mgr.MdmManager.RexrayInstallCheck = rexrayInstallCheck
 
 	//Isolator
-	myMdmDebMgr.MdmManager.DvdcliInstallCheck = dvdcliInstallCheck
+	myMdmDebUbuntu14Mgr.MdmManager.DvdcliInstallCheck = dvdcliInstallCheck
 
-	return myMdmDebMgr
+	return myMdmDebUbuntu14Mgr
 }

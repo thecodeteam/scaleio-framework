@@ -1,4 +1,4 @@
-package deb
+package ubuntu14
 
 import (
 	log "github.com/Sirupsen/logrus"
@@ -8,13 +8,13 @@ import (
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
-//NodeDebMgr implementation for NodeDebMgr
-type NodeDebMgr struct {
+//NodeDebUbuntu14Mgr implementation for NodeDebUbuntu14Mgr
+type NodeDebUbuntu14Mgr struct {
 	*mgr.NodeManager
 }
 
 //EnvironmentSetup for setting up the environment for ScaleIO
-func (dpm *NodeDebMgr) EnvironmentSetup(state *types.ScaleIOFramework) (bool, error) {
+func (dpm *NodeDebUbuntu14Mgr) EnvironmentSetup(state *types.ScaleIOFramework) (bool, error) {
 	log.Infoln("EnvironmentSetup ENTER")
 
 	aioErr := xplatform.GetInstance().Inst.IsInstalled("libaio1")
@@ -69,26 +69,26 @@ func (dpm *NodeDebMgr) EnvironmentSetup(state *types.ScaleIOFramework) (bool, er
 	return false, nil
 }
 
-//NewNodeDebMgr generates a NodeDebMgr object
-func NewNodeDebMgr(state *types.ScaleIOFramework) *NodeDebMgr {
+//NewNodeDebUbuntu14Mgr generates a NodeDebMgr object
+func NewNodeDebUbuntu14Mgr(state *types.ScaleIOFramework) *NodeDebUbuntu14Mgr {
 	myNodeMgr := &mgr.NodeManager{}
-	myNodeDebMgr := &NodeDebMgr{myNodeMgr}
+	myNodeDebUbuntu14Mgr := &NodeDebUbuntu14Mgr{myNodeMgr}
 
 	//ScaleIO node
-	myNodeDebMgr.NodeManager.SdsPackageName = types.DebSdsPackageName
-	myNodeDebMgr.NodeManager.SdsPackageDownload = state.ScaleIO.Deb.DebSds
-	myNodeDebMgr.NodeManager.SdsInstallCmd = "dpkg -i {LocalSds}"
-	myNodeDebMgr.NodeManager.SdsInstallCheck = sdsInstallCheck
-	myNodeDebMgr.NodeManager.SdcPackageName = types.DebSdcPackageName
-	myNodeDebMgr.NodeManager.SdcPackageDownload = state.ScaleIO.Deb.DebSdc
-	myNodeDebMgr.NodeManager.SdcInstallCmd = "MDM_IP={MdmPair} dpkg -i {LocalSdc}"
-	myNodeDebMgr.NodeManager.SdcInstallCheck = sdcInstallCheck
+	myNodeDebUbuntu14Mgr.NodeManager.SdsPackageName = types.Ubuntu14SdsPackageName
+	myNodeDebUbuntu14Mgr.NodeManager.SdsPackageDownload = state.ScaleIO.Ubuntu14.Sds
+	myNodeDebUbuntu14Mgr.NodeManager.SdsInstallCmd = "dpkg -i {LocalSds}"
+	myNodeDebUbuntu14Mgr.NodeManager.SdsInstallCheck = sdsInstallCheck
+	myNodeDebUbuntu14Mgr.NodeManager.SdcPackageName = types.Ubuntu14SdcPackageName
+	myNodeDebUbuntu14Mgr.NodeManager.SdcPackageDownload = state.ScaleIO.Ubuntu14.Sdc
+	myNodeDebUbuntu14Mgr.NodeManager.SdcInstallCmd = "MDM_IP={MdmPair} dpkg -i {LocalSdc}"
+	myNodeDebUbuntu14Mgr.NodeManager.SdcInstallCheck = sdcInstallCheck
 
 	//REX-Ray
-	myNodeDebMgr.NodeManager.RexrayInstallCheck = rexrayInstallCheck
+	myNodeDebUbuntu14Mgr.NodeManager.RexrayInstallCheck = rexrayInstallCheck
 
 	//Isolator
-	myNodeDebMgr.NodeManager.DvdcliInstallCheck = dvdcliInstallCheck
+	myNodeDebUbuntu14Mgr.NodeManager.DvdcliInstallCheck = dvdcliInstallCheck
 
-	return myNodeDebMgr
+	return myNodeDebUbuntu14Mgr
 }

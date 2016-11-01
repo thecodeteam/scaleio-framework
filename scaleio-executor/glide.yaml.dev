@@ -1,0 +1,16 @@
+package: github.com/codedellemc/scaleio-framework/scaleio-executor
+import:
+- package: github.com/Sirupsen/logrus
+  ref:     v0.10.0
+  vcs:     git
+- package: github.com/stretchr/testify
+  ref:     v1.1.3
+  vcs:     git
+- package: github.com/twinj/uuid
+  vcs:     git
+- package: github.com/dvonthenen/goxplatform
+  vcs:     git
+- package: github.com/codedellemc/scaleio-framework
+  ref:     fca7496ab1500e86ced2845c12c2ebdb799998c0
+  vcs:     git
+  repo:    https://github.com/dvonthenen/scaleio-framework

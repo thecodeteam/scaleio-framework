@@ -8,9 +8,9 @@ import (
 	xplatformsys "github.com/dvonthenen/goxplatform/sys"
 
 	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
-	debmgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/deb"
+	ubuntu14 "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/deb/ubuntu14"
 	mgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/mgr"
-	rpmmgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/rpm"
+	rhel7 "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/rpm/rhel7"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
@@ -27,9 +27,9 @@ func NewData(state *types.ScaleIOFramework) *ScaleioDataNode {
 	var pkgmgr mgr.INodeMgr
 	switch xplatform.GetInstance().Sys.GetOsType() {
 	case xplatformsys.OsRhel:
-		pkgmgr = rpmmgr.NewNodeRpmMgr(state)
+		pkgmgr = rhel7.NewNodeRpmRhel7Mgr(state)
 	case xplatformsys.OsUbuntu:
-		pkgmgr = debmgr.NewNodeDebMgr(state)
+		pkgmgr = ubuntu14.NewNodeDebUbuntu14Mgr(state)
 	}
 	myNode.PkgMgr = pkgmgr
 

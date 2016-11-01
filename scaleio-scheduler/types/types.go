@@ -1,25 +1,40 @@
 package types
 
 const (
-	//DebMdmPackageName MDM package name for DEB
-	DebMdmPackageName = "emc-scaleio-mdm"
+	//Ubuntu14MdmPackageName MDM package name for Ubuntu14
+	Ubuntu14MdmPackageName = "emc-scaleio-mdm"
 
-	//DebSdsPackageName SDS package name for DEB
-	DebSdsPackageName = "emc-scaleio-sds"
+	//Ubuntu14SdsPackageName SDS package name for Ubuntu14
+	Ubuntu14SdsPackageName = "emc-scaleio-sds"
 
-	//DebSdcPackageName SDC package name for DEB
-	DebSdcPackageName = "emc-scaleio-sdc"
+	//Ubuntu14SdcPackageName SDC package name for Ubuntu14
+	Ubuntu14SdcPackageName = "emc-scaleio-sdc"
 
-	//DebLiaPackageName LIA package name for DEB
-	DebLiaPackageName = "emc-scaleio-lia"
+	//Ubuntu14LiaPackageName LIA package name for Ubuntu14
+	Ubuntu14LiaPackageName = "emc-scaleio-lia"
 
-	//DebGwPackageName GW package name for DEB
-	DebGwPackageName = "emc-scaleio-gateway"
+	//Ubuntu14GwPackageName GW package name for Ubuntu14
+	Ubuntu14GwPackageName = "emc-scaleio-gateway"
 
-	//RexRayPackageName rexray package name for DEB
+	//Rhel7MdmPackageName MDM package name for RHEL7
+	Rhel7MdmPackageName = "EMC-ScaleIO-mdm-2.0-10000.2072.el7.x86_64"
+
+	//Rhel7SdsPackageName SDS package name for RHEL7
+	Rhel7SdsPackageName = "EMC-ScaleIO-sds-2.0-10000.2072.el7.x86_64"
+
+	//Rhel7SdcPackageName SDC package name for RHEL7
+	Rhel7SdcPackageName = "EMC-ScaleIO-sdc-2.0-10000.2072.el7.x86_64"
+
+	//Rhel7LiaPackageName LIA package name for RHEL7
+	Rhel7LiaPackageName = "EMC-ScaleIO-lia-2.0-10000.2072.el7.x86_64"
+
+	//Rhel7GwPackageName GW package name for RHEL7
+	Rhel7GwPackageName = "EMC-ScaleIO-gateway-2.0-10000.2072.x86_64"
+
+	//RexRayPackageName rexray package name
 	RexRayPackageName = "rexray"
 
-	//DvdcliPackageName DVDCLI package name for DEB
+	//DvdcliPackageName DVDCLI package name
 	DvdcliPackageName = "dvdcli"
 )
 
@@ -81,22 +96,22 @@ type Version struct {
 	KeyValue   map[string]string `json:"keyvalue,omitempty"`
 }
 
-//DebPackages describes the download URIs for Ubuntu install packages
-type DebPackages struct {
-	DebMdm string `json:"debmdm"`
-	DebSds string `json:"debsds"`
-	DebSdc string `json:"debsdc"`
-	DebLia string `json:"deblia"`
-	DebGw  string `json:"debgw"`
+//Ubuntu14Packages describes the download URIs for Ubuntu install packages
+type Ubuntu14Packages struct {
+	Mdm string `json:"ubuntu14mdm"`
+	Sds string `json:"ubuntu14sds"`
+	Sdc string `json:"ubuntu14sdc"`
+	Lia string `json:"ubuntu14lia"`
+	Gw  string `json:"ubuntu14gw"`
 }
 
-//RpmPackages describes the download URIs for CentOS install packages
-type RpmPackages struct {
-	RpmMdm string `json:"rpmmdm"`
-	RpmSds string `json:"rpmsds"`
-	RpmSdc string `json:"rpmsdc"`
-	RpmLia string `json:"rpmlia"`
-	RpmGw  string `json:"rpmgw"`
+//Rhel7Packages describes the download URIs for CentOS install packages
+type Rhel7Packages struct {
+	Mdm string `json:"rhel7mdm"`
+	Sds string `json:"rhel7sds"`
+	Sdc string `json:"rhel7sdc"`
+	Lia string `json:"rhel7lia"`
+	Gw  string `json:"rhel7gw"`
 }
 
 //ScaleIONode node definition
@@ -140,8 +155,8 @@ type ScaleIOConfig struct {
 	KeyValue         map[string]string `json:"keyvalue,omitempty"`
 	Nodes            ScaleIONodes
 	Preconfig        ScaleIOPreConfig
-	Deb              DebPackages
-	Rpm              RpmPackages
+	Ubuntu14         Ubuntu14Packages
+	Rhel7            Rhel7Packages
 }
 
 //IsolatorConfig describes the configuration for the mesos isolator

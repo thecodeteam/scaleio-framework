@@ -25,12 +25,10 @@ type MdmManager struct {
 	LiaPackageDownload     string
 	LiaInstallCmd          string
 	LiaInstallCheck        string
-	LiaRestartCheck        string
 	GatewayPackageName     string
 	GatewayPackageDownload string
 	GatewayInstallCmd      string
 	GatewayInstallCheck    string
-	GatewayRestartCheck    string
 }
 
 //UpdateAddNode this function tells the scheduler that the executor's ScaleIO
