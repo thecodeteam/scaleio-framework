@@ -17,19 +17,19 @@ const (
 	Ubuntu14GwPackageName = "emc-scaleio-gateway"
 
 	//Rhel7MdmPackageName MDM package name for RHEL7
-	Rhel7MdmPackageName = "EMC-ScaleIO-mdm-2.0-10000.2072.el7.x86_64"
+	Rhel7MdmPackageName = "EMC-ScaleIO-mdm"
 
 	//Rhel7SdsPackageName SDS package name for RHEL7
-	Rhel7SdsPackageName = "EMC-ScaleIO-sds-2.0-10000.2072.el7.x86_64"
+	Rhel7SdsPackageName = "EMC-ScaleIO-sds"
 
 	//Rhel7SdcPackageName SDC package name for RHEL7
-	Rhel7SdcPackageName = "EMC-ScaleIO-sdc-2.0-10000.2072.el7.x86_64"
+	Rhel7SdcPackageName = "EMC-ScaleIO-sdc"
 
 	//Rhel7LiaPackageName LIA package name for RHEL7
-	Rhel7LiaPackageName = "EMC-ScaleIO-lia-2.0-10000.2072.el7.x86_64"
+	Rhel7LiaPackageName = "EMC-ScaleIO-lia"
 
 	//Rhel7GwPackageName GW package name for RHEL7
-	Rhel7GwPackageName = "EMC-ScaleIO-gateway-2.0-10000.2072.x86_64"
+	Rhel7GwPackageName = "EMC-ScaleIO-gateway"
 
 	//RexRayPackageName rexray package name
 	RexRayPackageName = "rexray"
