@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 	jsonpb "github.com/gogo/protobuf/jsonpb"
@@ -17,6 +18,10 @@ import (
 	mesos "github.com/codedellemc/scaleio-framework/scaleio-scheduler/mesos/v1"
 	"github.com/codedellemc/scaleio-framework/scaleio-scheduler/server"
 	"github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
+)
+
+const (
+	subscribeRetryDelayInSec = 2
 )
 
 //ScaleIOScheduler represents a Mesos scheduler
@@ -100,18 +105,25 @@ func (s *ScaleIOScheduler) send(call *sched.Call) (*http.Response, error) {
 // It keeps the http connection opens with the Master to stream
 // subsequent events.
 func (s *ScaleIOScheduler) subscribe() error {
-	call := &sched.Call{
-		Type: sched.Call_SUBSCRIBE.Enum(),
-		Subscribe: &sched.Call_Subscribe{
-			FrameworkInfo: s.Framework,
-		},
-	}
+	for {
+		call := &sched.Call{
+			Type: sched.Call_SUBSCRIBE.Enum(),
+			Subscribe: &sched.Call_Subscribe{
+				FrameworkInfo: s.Framework,
+			},
+		}
 
-	resp, err := s.send(call)
-	if resp != nil {
-		go s.qEvents(resp)
+		resp, err := s.send(call)
+		if err != nil {
+			log.Warnln("subscribe error:", err)
+		} else if resp != nil {
+			go s.qEvents(resp)
+			break
+		}
+
+		time.Sleep(time.Duration(subscribeRetryDelayInSec) * time.Second)
 	}
-	return err
+	return nil
 }
 
 func (s *ScaleIOScheduler) qEvents(resp *http.Response) {
