@@ -163,16 +163,22 @@ func (cfg *Config) AddFlags(fs *flag.FlagSet) {
 			"Primary MDM node is assumed to have the Gateway installed on it.")
 	fs.StringVar(&cfg.BlockDevice, "scaleio.device", cfg.BlockDevice,
 		"Specifies which device to use")
-	fs.StringVar(&cfg.DebMdm, "scaleio.deb.mdm", cfg.DebMdm, "ScaleIO MDM Package")
-	fs.StringVar(&cfg.DebSds, "scaleio.deb.sds", cfg.DebSds, "ScaleIO SDS Package")
-	fs.StringVar(&cfg.DebSdc, "scaleio.deb.sdc", cfg.DebSdc, "ScaleIO SDC Package")
-	fs.StringVar(&cfg.DebLia, "scaleio.deb.lia", cfg.DebLia, "ScaleIO LIA Package")
-	fs.StringVar(&cfg.DebGw, "scaleio.deb.gw", cfg.DebGw, "ScaleIO Gateway Package")
-	fs.StringVar(&cfg.RpmMdm, "scaleio.rpm.mdm", cfg.RpmMdm, "ScaleIO MDM Package")
-	fs.StringVar(&cfg.RpmSds, "scaleio.rpm.sds", cfg.RpmSds, "ScaleIO SDS Package")
-	fs.StringVar(&cfg.RpmSdc, "scaleio.rpm.sdc", cfg.RpmSdc, "ScaleIO SDC Package")
-	fs.StringVar(&cfg.RpmLia, "scaleio.rpm.lia", cfg.RpmLia, "ScaleIO LIA Package")
-	fs.StringVar(&cfg.RpmGw, "scaleio.rpm.gw", cfg.RpmGw, "ScaleIO Gateway Package")
+	fs.StringVar(&cfg.DebMdm, "scaleio.ubuntu14.mdm", cfg.DebMdm, "ScaleIO MDM Package for Ubuntu 14.04")
+	fs.StringVar(&cfg.DebSds, "scaleio.ubuntu14.sds", cfg.DebSds, "ScaleIO SDS Package for Ubuntu 14.04")
+	fs.StringVar(&cfg.DebSdc, "scaleio.ubuntu14.sdc", cfg.DebSdc, "ScaleIO SDC Package for Ubuntu 14.04")
+	fs.StringVar(&cfg.DebLia, "scaleio.ubuntu14.lia", cfg.DebLia, "ScaleIO LIA Package for Ubuntu 14.04")
+	fs.StringVar(&cfg.DebGw, "scaleio.ubuntu14.gw", cfg.DebGw, "ScaleIO Gateway Package for Ubuntu 14.04")
+	fs.StringVar(&cfg.RpmMdm, "scaleio.rhel7.mdm", cfg.RpmMdm, "ScaleIO MDM Package for RHEL7")
+	fs.StringVar(&cfg.RpmSds, "scaleio.rhel7.sds", cfg.RpmSds, "ScaleIO SDS Package for RHEL7")
+	fs.StringVar(&cfg.RpmSdc, "scaleio.rhel7.sdc", cfg.RpmSdc, "ScaleIO SDC Package for RHEL7")
+	fs.StringVar(&cfg.RpmLia, "scaleio.rhel7.lia", cfg.RpmLia, "ScaleIO LIA Package for RHEL7")
+	fs.StringVar(&cfg.RpmGw, "scaleio.rhel7.gw", cfg.RpmGw, "ScaleIO Gateway Package for RHEL7")
+	fs.StringVar(&cfg.RpmMdm, "scaleio.centos7.mdm", cfg.RpmMdm, "ScaleIO MDM Package for CentOS7")
+	fs.StringVar(&cfg.RpmSds, "scaleio.centos7.sds", cfg.RpmSds, "ScaleIO SDS Package for CentOS7")
+	fs.StringVar(&cfg.RpmSdc, "scaleio.centos7.sdc", cfg.RpmSdc, "ScaleIO SDC Package for CentOS7")
+	fs.StringVar(&cfg.RpmLia, "scaleio.centos7.lia", cfg.RpmLia, "ScaleIO LIA Package for CentOS7")
+	fs.StringVar(&cfg.RpmGw, "scaleio.centos7.gw", cfg.RpmGw, "ScaleIO Gateway Package for CentOS7")
+
 }
 
 //NewConfig creates a new Config object
