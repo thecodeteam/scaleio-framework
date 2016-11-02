@@ -2,6 +2,8 @@ package client
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"net"
 	"net/http"
 	"time"
@@ -16,15 +18,19 @@ const (
 
 //Client representation of an HTTP client
 type Client struct {
-	streamID string
-	url      string
-	client   *http.Client
+	streamID   string
+	url        string
+	masterAddr string
+	masterPath string
+	client     *http.Client
 }
 
 //New generates a new HTTP client
 func New(addr string, path string) *Client {
 	return &Client{
-		url: "http://" + addr + path,
+		url:        "http://" + addr + path,
+		masterAddr: addr,
+		masterPath: path,
 		client: &http.Client{
 			Transport: &http.Transport{
 				Dial: (&net.Dialer{
@@ -54,6 +60,18 @@ func (c *Client) Send(payload []byte) (*http.Response, error) {
 	if err != nil {
 		log.Errorln("HTTP ERROR:", err)
 		return nil, err
+	}
+
+	if httpResp.StatusCode == http.StatusTemporaryRedirect ||
+		httpResp.StatusCode == http.StatusPermanentRedirect {
+		log.Warnln("Old Master:", c.masterAddr)
+		c.masterAddr = httpResp.Header.Get("Location")
+		log.Warnln("New Master:", c.masterAddr)
+		c.url = "http://" + c.masterAddr + c.masterPath
+		log.Warnln("New URL:", c.url)
+		msg := fmt.Sprint("StatusRedirect - New master is: ", c.masterAddr)
+		log.Errorln(msg)
+		return nil, errors.New(msg)
 	}
 
 	streamID := httpResp.Header.Get("Mesos-Stream-Id")
