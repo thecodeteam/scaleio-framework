@@ -38,46 +38,40 @@ func whichNode(executorID string, getstate common.RetrieveState) (common.IScalei
 
 	var sionode common.IScaleioNode
 
-	prev, persona := nodePreviouslyConfigured()
+	if nodePreviouslyConfigured() {
+		log.Infoln("nodePreviouslyConfigured is TRUE. Launching FakeNode.")
+		sionode = scaleionodes.NewFake()
+	} else {
+		log.Infoln("ScaleIO Executor Retrieve State from Scheduler")
+		state := common.WaitForStableState(getstate)
 
-	log.Infoln("ScaleIO Executor Retrieve State from Scheduler")
-	state := common.WaitForStableState(getstate)
+		log.Infoln("Find Self Node")
+		node := common.GetSelfNode(executorID, state)
+		if node == nil {
+			log.Infoln("GetSelfNode Failed")
+			log.Infoln("WhichNode LEAVE")
+			return nil, ErrFoundSelfFailed
+		}
 
-	log.Infoln("Find Self Node")
-	node := common.GetSelfNode(executorID, state)
-	if node == nil {
-		log.Infoln("GetSelfNode Failed")
-		log.Infoln("WhichNode LEAVE")
-		return nil, ErrFoundSelfFailed
+		switch node.Persona {
+		case types.PersonaMdmPrimary:
+			log.Infoln("Is Primary")
+			sionode = scaleionodes.NewPri(state)
+		case types.PersonaMdmSecondary:
+			log.Infoln("Is Secondary")
+			sionode = scaleionodes.NewSec(state)
+		case types.PersonaTb:
+			log.Infoln("Is TieBreaker")
+			sionode = scaleionodes.NewTb(state)
+		case types.PersonaNode:
+			log.Infoln("Is DataNode")
+			sionode = scaleionodes.NewData(state)
+		}
+
+		sionode.SetExecutorID(executorID)
+		sionode.SetRetrieveState(getstate)
+		sionode.UpdateScaleIOState()
 	}
-
-	//TODO temporary until libkv
-	var personaID int
-	if prev {
-		personaID = common.PersonaStringToID(persona)
-		log.Infoln("Override Persona for now to", persona, "=", personaID)
-		node.Persona = personaID
-	}
-
-	switch node.Persona {
-	case types.PersonaMdmPrimary:
-		log.Infoln("Is Primary")
-		sionode = scaleionodes.NewPri(state)
-	case types.PersonaMdmSecondary:
-		log.Infoln("Is Secondary")
-		sionode = scaleionodes.NewSec(state)
-	case types.PersonaTb:
-		log.Infoln("Is TieBreaker")
-		sionode = scaleionodes.NewTb(state)
-	case types.PersonaNode:
-		log.Infoln("Is DataNode")
-		sionode = scaleionodes.NewData(state)
-	}
-
-	sionode.SetExecutorID(executorID)
-	sionode.SetOverridePersona(personaID) //TODO temporary until libkv
-	sionode.SetRetrieveState(getstate)
-	sionode.UpdateScaleIOState()
 
 	log.Infoln("WhichNode Succeeded")
 	log.Infoln("WhichNode LEAVE")
