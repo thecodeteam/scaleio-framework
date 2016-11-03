@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	xplatform "github.com/dvonthenen/goxplatform"
 )
 
 const (
@@ -42,6 +44,14 @@ func New(addr string, path string) *Client {
 	}
 }
 
+func parsePartialURI(str string) (string, string) {
+	str = xplatform.GetInstance().Str.Trim(str, " /")
+	index := strings.Index(str, "/")
+	master := str[:index]
+	path := str[index:]
+	return master, path
+}
+
 //Send will send a HTTP payload to an HTTP server
 func (c *Client) Send(payload []byte) (*http.Response, error) {
 	httpReq, err := http.NewRequest("POST", c.url, bytes.NewReader(payload))
@@ -65,7 +75,9 @@ func (c *Client) Send(payload []byte) (*http.Response, error) {
 	if httpResp.StatusCode == http.StatusTemporaryRedirect ||
 		httpResp.StatusCode == http.StatusPermanentRedirect {
 		log.Warnln("Old Master:", c.masterAddr)
-		c.masterAddr = httpResp.Header.Get("Location")
+		master, path := parsePartialURI(httpResp.Header.Get("Location"))
+		c.masterAddr = master
+		c.masterPath = path
 		log.Warnln("New Master:", c.masterAddr)
 		c.url = "http://" + c.masterAddr + c.masterPath
 		log.Warnln("New URL:", c.url)
