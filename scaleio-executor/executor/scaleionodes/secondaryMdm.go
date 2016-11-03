@@ -57,7 +57,7 @@ func (ssmn *ScaleioSecondaryMdmNode) RunStateUnknown() {
 		log.Debugln("Signaled StateCleanPrereqsReboot")
 	}
 
-	ssmn.State = common.WaitForCleanPrereqsReboot(ssmn.GetState)
+	common.WaitForCleanPrereqsReboot(ssmn)
 
 	errState = ssmn.UpdateNodeState(types.StatePrerequisitesInstalled)
 	if errState != nil {
@@ -89,7 +89,7 @@ func (ssmn *ScaleioSecondaryMdmNode) RunStateUnknown() {
 
 //RunStatePrerequisitesInstalled default action for StatePrerequisitesInstalled
 func (ssmn *ScaleioSecondaryMdmNode) RunStatePrerequisitesInstalled() {
-	ssmn.State = common.WaitForPrereqsFinish(ssmn.GetState)
+	common.WaitForPrereqsFinish(ssmn)
 	err := ssmn.PkgMgr.ManagementSetup(ssmn.State, true)
 	if err != nil {
 		log.Errorln("ManagementSetup Failed:", err)
@@ -124,7 +124,7 @@ func (ssmn *ScaleioSecondaryMdmNode) RunStatePrerequisitesInstalled() {
 
 //RunStateBasePackagedInstalled default action for StateBasePackagedInstalled
 func (ssmn *ScaleioSecondaryMdmNode) RunStateBasePackagedInstalled() {
-	ssmn.State = common.WaitForBaseFinish(ssmn.GetState)
+	common.WaitForBaseFinish(ssmn)
 
 	errState := ssmn.UpdateNodeState(types.StateInitializeCluster)
 	if errState != nil {
@@ -136,7 +136,7 @@ func (ssmn *ScaleioSecondaryMdmNode) RunStateBasePackagedInstalled() {
 
 //RunStateInitializeCluster default action for StateInitializeCluster
 func (ssmn *ScaleioSecondaryMdmNode) RunStateInitializeCluster() {
-	ssmn.State = common.WaitForClusterInstallFinish(ssmn.GetState)
+	common.WaitForClusterInstallFinish(ssmn)
 	reboot, err := ssmn.PkgMgr.GatewaySetup(ssmn.State)
 	if err != nil {
 		log.Errorln("GatewaySetup Failed:", err)
@@ -160,7 +160,7 @@ func (ssmn *ScaleioSecondaryMdmNode) RunStateInitializeCluster() {
 
 //RunStateInstallRexRay default action for StateInstallRexRay
 func (ssmn *ScaleioSecondaryMdmNode) RunStateInstallRexRay() {
-	ssmn.State = common.WaitForClusterInitializeFinish(ssmn.GetState)
+	common.WaitForClusterInitializeFinish(ssmn)
 	reboot, err := ssmn.PkgMgr.RexraySetup(ssmn.State)
 	if err != nil {
 		log.Errorln("REX-Ray setup Failed:", err)
@@ -192,7 +192,7 @@ func (ssmn *ScaleioSecondaryMdmNode) RunStateInstallRexRay() {
 		log.Debugln("Signaled StateCleanInstallReboot")
 	}
 
-	ssmn.State = common.WaitForCleanInstallReboot(ssmn.GetState)
+	common.WaitForCleanInstallReboot(ssmn)
 
 	//requires a reboot?
 	if ssmn.RebootRequired || reboot {
@@ -247,10 +247,8 @@ func (ssmn *ScaleioSecondaryMdmNode) RunStateFinishInstall() {
 		"seconds for changes in the cluster.")
 	time.Sleep(time.Duration(common.PollForChangesInSeconds) * time.Second)
 
-	if ssmn.State.DemoMode {
-		log.Infoln("DemoMode = TRUE. Leaving marker file for previously configured")
-		ssmn.LeaveMarkerFileForConfigured()
-	}
+	//TODO temporary until libkv
+	ssmn.LeaveMarkerFileForConfigured()
 
 	//TODO eventual plan for MDM node behavior
 	/*

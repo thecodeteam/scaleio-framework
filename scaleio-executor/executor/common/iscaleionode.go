@@ -6,6 +6,7 @@ import (
 
 //IScaleioNode is the interface for implementing a ScaleIO node
 type IScaleioNode interface {
+	SetOverridePersona(persona int) //TODO temporary until libkv
 	SetExecutorID(ID string)
 	SetRetrieveState(getstate RetrieveState)
 	GetSelfNode() *types.ScaleIONode

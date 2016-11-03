@@ -22,11 +22,18 @@ var (
 
 //ScaleioNode implementation for ScaleIO Node
 type ScaleioNode struct {
-	ExecutorID     string
-	RebootRequired bool
-	Node           *types.ScaleIONode
-	State          *types.ScaleIOFramework
-	GetState       RetrieveState
+	ExecutorID      string
+	RebootRequired  bool
+	Node            *types.ScaleIONode
+	State           *types.ScaleIOFramework
+	GetState        RetrieveState
+	OverridePersona int //TODO temporary until libkv
+}
+
+//SetOverridePersona TODO temporary until libkv
+//SetOverridePersona overrides the scheduler persona
+func (bsn *ScaleioNode) SetOverridePersona(persona int) {
+	bsn.OverridePersona = persona
 }
 
 //SetExecutorID sets the ExecutorID
@@ -48,32 +55,26 @@ func (bsn *ScaleioNode) GetSelfNode() *types.ScaleIONode {
 func (bsn *ScaleioNode) UpdateScaleIOState() *types.ScaleIOFramework {
 	bsn.State = WaitForStableState(bsn.GetState)
 	bsn.Node = GetSelfNode(bsn.ExecutorID, bsn.State)
+	bsn.Node.Persona = bsn.OverridePersona //TODO temporary until libkv
 	return bsn.State
 }
 
-func personaToString(persona int) string {
-	switch persona {
-	case types.PersonaMdmPrimary:
-		return "primary"
-	case types.PersonaMdmSecondary:
-		return "secondary"
-	case types.PersonaTb:
-		return "tiebreaker"
-	case types.PersonaNode:
-		return "data"
-	default:
-		return "unknown"
-	}
-}
-
+//LeaveMarkerFileForConfigured TODO temporary until libkv
 //LeaveMarkerFileForConfigured sets a marker file when in demo mode
 func (bsn *ScaleioNode) LeaveMarkerFileForConfigured() {
+	if !bsn.State.DemoMode {
+		log.Infoln("DemoMode = FALSE. Leaving marker file for previously configured")
+		return
+	}
+
+	log.Infoln("DemoMode = TRUE. Leaving marker file for previously configured")
+
 	err := os.MkdirAll("/etc/scaleio-framework", 0644)
 	if err != nil {
 		log.Errorln("Unable to mkdir:", err)
 	}
 
-	data := []byte(personaToString(bsn.Node.Persona))
+	data := []byte(PersonaIDToString(bsn.Node.Persona))
 	err = ioutil.WriteFile("/etc/scaleio-framework/state", data, 0644)
 	if err != nil {
 		log.Errorln("Unable to write to marker file:", err)

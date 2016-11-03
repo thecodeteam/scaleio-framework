@@ -28,6 +28,38 @@ var (
 	ErrMdmPairFailed = errors.New("Failed to Find MDM Pair")
 )
 
+//PersonaStringToID String -> PersonaID
+func PersonaStringToID(persona string) int {
+	switch persona {
+	case "primary":
+		return types.PersonaMdmPrimary
+	case "secondary":
+		return types.PersonaMdmSecondary
+	case "tiebreaker":
+		return types.PersonaTb
+	case "data":
+		return types.PersonaNode
+	default:
+		return types.PersonaUnknown
+	}
+}
+
+//PersonaIDToString PersonaID -> String
+func PersonaIDToString(persona int) string {
+	switch persona {
+	case types.PersonaMdmPrimary:
+		return "primary"
+	case types.PersonaMdmSecondary:
+		return "secondary"
+	case types.PersonaTb:
+		return "tiebreaker"
+	case types.PersonaNode:
+		return "data"
+	default:
+		return "unknown"
+	}
+}
+
 //GetSelfNode gets self
 func GetSelfNode(executorID string, state *types.ScaleIOFramework) *types.ScaleIONode {
 	log.Infoln("getSelfNode ENTER")

@@ -57,7 +57,7 @@ func (sdn *ScaleioDataNode) RunStateUnknown() {
 		log.Debugln("Signaled StateCleanPrereqsReboot")
 	}
 
-	sdn.State = common.WaitForCleanPrereqsReboot(sdn.GetState)
+	common.WaitForCleanPrereqsReboot(sdn)
 
 	errState = sdn.UpdateNodeState(types.StatePrerequisitesInstalled)
 	if errState != nil {
@@ -116,7 +116,7 @@ func (sdn *ScaleioDataNode) RunStateInstallRexRay() {
 	} else {
 		//we need to wait because without the gateway, the rexray service restart
 		//will fail
-		sdn.State = common.WaitForClusterInitializeFinish(sdn.GetState)
+		common.WaitForClusterInitializeFinish(sdn)
 	}
 
 	reboot, err := sdn.PkgMgr.RexraySetup(sdn.State)
@@ -150,7 +150,7 @@ func (sdn *ScaleioDataNode) RunStateInstallRexRay() {
 		log.Debugln("Signaled StateCleanInstallReboot")
 	}
 
-	sdn.State = common.WaitForCleanInstallReboot(sdn.GetState)
+	common.WaitForCleanInstallReboot(sdn)
 
 	//requires a reboot?
 	if reboot {
@@ -196,6 +196,16 @@ func (sdn *ScaleioDataNode) RunStateSystemReboot() {
 	} else {
 		log.Debugln("Signaled StateFinishInstall")
 	}
+}
+
+//RunStateFinishInstall default action for StateFinishInstall
+func (sdn *ScaleioDataNode) RunStateFinishInstall() {
+	log.Debugln("In StateFinishInstall. Wait for", common.PollForChangesInSeconds,
+		"seconds for changes in the cluster.")
+	time.Sleep(time.Duration(common.PollForChangesInSeconds) * time.Second)
+
+	//TODO temporary until libkv
+	sdn.LeaveMarkerFileForConfigured()
 }
 
 //RunStateUpgradeCluster default action for StateUpgradeCluster

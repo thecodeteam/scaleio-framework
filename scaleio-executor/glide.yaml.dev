@@ -11,6 +11,6 @@ import:
 - package: github.com/dvonthenen/goxplatform
   vcs:     git
 - package: github.com/codedellemc/scaleio-framework
-  ref:     fca7496ab1500e86ced2845c12c2ebdb799998c0
+  ref:     c120835345902a3d934f60cc0569c1122374b3df
   vcs:     git
   repo:    https://github.com/dvonthenen/scaleio-framework
