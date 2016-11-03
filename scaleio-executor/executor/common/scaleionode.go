@@ -55,13 +55,13 @@ func (bsn *ScaleioNode) UpdateScaleIOState() *types.ScaleIOFramework {
 //LeaveMarkerFileForConfigured sets a marker file when in demo mode
 func (bsn *ScaleioNode) LeaveMarkerFileForConfigured() {
 	if !bsn.State.DemoMode {
-		log.Infoln("DemoMode = FALSE. Leaving marker file for previously configured")
+		log.Infoln("DemoMode = FALSE. Do not leave marker file")
 		return
 	}
 
 	log.Infoln("DemoMode = TRUE. Leaving marker file for previously configured")
 
-	err := os.MkdirAll("/etc/scaleio-framework", 0644)
+	err := os.MkdirAll("/etc/scaleio-framework", os.ModeDir)
 	if err != nil {
 		log.Errorln("Unable to mkdir:", err)
 	}

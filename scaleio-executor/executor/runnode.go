@@ -3,10 +3,10 @@ package executor
 import (
 	"errors"
 	"io/ioutil"
-	"os"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	xplatform "github.com/dvonthenen/goxplatform"
 
 	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 	scaleionodes "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/scaleionodes"
@@ -20,12 +20,12 @@ var (
 
 //TODO temporary until libkv
 func nodePreviouslyConfigured() bool {
-	if _, err := os.Stat("/etc/scaleio-framework/state"); err == nil {
+	if xplatform.GetInstance().Fs.DoesFileExist("/etc/scaleio-framework/state") {
 		b, errFile := ioutil.ReadFile("/etc/scaleio-framework/state")
 		if errFile != nil {
 			log.Errorln("Unable to open file:", errFile)
 		} else {
-			log.Infoln("Node is configured as", string(b), "MDM node")
+			log.Infoln("Node is configured as", string(b), "node")
 		}
 		return true
 	}
@@ -41,6 +41,9 @@ func whichNode(executorID string, getstate common.RetrieveState) (common.IScalei
 	if nodePreviouslyConfigured() {
 		log.Infoln("nodePreviouslyConfigured is TRUE. Launching FakeNode.")
 		sionode = scaleionodes.NewFake()
+		sionode.SetExecutorID(executorID)
+		sionode.SetRetrieveState(getstate)
+		sionode.UpdateScaleIOState()
 	} else {
 		log.Infoln("ScaleIO Executor Retrieve State from Scheduler")
 		state := common.WaitForStableState(getstate)
