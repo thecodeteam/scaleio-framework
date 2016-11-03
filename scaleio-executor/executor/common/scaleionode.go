@@ -22,18 +22,11 @@ var (
 
 //ScaleioNode implementation for ScaleIO Node
 type ScaleioNode struct {
-	ExecutorID      string
-	RebootRequired  bool
-	Node            *types.ScaleIONode
-	State           *types.ScaleIOFramework
-	GetState        RetrieveState
-	OverridePersona int //TODO temporary until libkv
-}
-
-//SetOverridePersona TODO temporary until libkv
-//SetOverridePersona overrides the scheduler persona
-func (bsn *ScaleioNode) SetOverridePersona(persona int) {
-	bsn.OverridePersona = persona
+	ExecutorID     string
+	RebootRequired bool
+	Node           *types.ScaleIONode
+	State          *types.ScaleIOFramework
+	GetState       RetrieveState
 }
 
 //SetExecutorID sets the ExecutorID
@@ -55,7 +48,6 @@ func (bsn *ScaleioNode) GetSelfNode() *types.ScaleIONode {
 func (bsn *ScaleioNode) UpdateScaleIOState() *types.ScaleIOFramework {
 	bsn.State = WaitForStableState(bsn.GetState)
 	bsn.Node = GetSelfNode(bsn.ExecutorID, bsn.State)
-	bsn.Node.Persona = bsn.OverridePersona //TODO temporary until libkv
 	return bsn.State
 }
 
