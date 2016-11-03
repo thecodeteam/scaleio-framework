@@ -139,7 +139,7 @@ func doesSciniExistInRexrayInitD() (bool, error) {
 func fixSciniDepInRexraySystemD() error {
 	log.Debugln("fixSciniDepInRexraySystemD ENTER")
 
-	writeSciniCmdline := "sed -i 's/After=/After=rexray.target /' /usr/lib/systemd/system/rexray.service"
+	writeSciniCmdline := "sed -i 's/Before=/After=scini.service\\nBefore=/' /etc/systemd/system/rexray.service"
 	output, errScini := xplatform.GetInstance().Run.CommandOutput(writeSciniCmdline)
 	if errScini != nil {
 		log.Errorln("Failed to add Scini dependency:", errScini)
@@ -161,7 +161,7 @@ func fixSciniDepInRexraySystemD() error {
 func doesSciniExistInRexraySystemD() (bool, error) {
 	log.Debugln("doesSciniExistInRexraySystemD LEAVE")
 
-	file, err := os.Open("/usr/lib/systemd/system/rexray.service")
+	file, err := os.Open("/etc/systemd/system/rexray.service")
 	if err != nil {
 		log.Debugln("Failed on file Open:", err)
 		log.Debugln("doesSciniExistInRexraySystemD LEAVE")
