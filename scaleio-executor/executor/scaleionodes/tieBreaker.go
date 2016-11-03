@@ -57,7 +57,7 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateUnknown() {
 		log.Debugln("Signaled StateCleanPrereqsReboot")
 	}
 
-	stbmn.State = common.WaitForCleanPrereqsReboot(stbmn.GetState)
+	common.WaitForCleanPrereqsReboot(stbmn)
 
 	errState = stbmn.UpdateNodeState(types.StatePrerequisitesInstalled)
 	if errState != nil {
@@ -89,7 +89,7 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateUnknown() {
 
 //RunStatePrerequisitesInstalled default action for StatePrerequisitesInstalled
 func (stbmn *ScaleioTieBreakerMdmNode) RunStatePrerequisitesInstalled() {
-	stbmn.State = common.WaitForPrereqsFinish(stbmn.GetState)
+	common.WaitForPrereqsFinish(stbmn)
 	err := stbmn.PkgMgr.ManagementSetup(stbmn.State, false)
 	if err != nil {
 		log.Errorln("ManagementSetup Failed:", err)
@@ -124,7 +124,7 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStatePrerequisitesInstalled() {
 
 //RunStateBasePackagedInstalled default action for StateBasePackagedInstalled
 func (stbmn *ScaleioTieBreakerMdmNode) RunStateBasePackagedInstalled() {
-	stbmn.State = common.WaitForBaseFinish(stbmn.GetState)
+	common.WaitForBaseFinish(stbmn)
 
 	errState := stbmn.UpdateNodeState(types.StateInitializeCluster)
 	if errState != nil {
@@ -136,7 +136,7 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateBasePackagedInstalled() {
 
 //RunStateInitializeCluster default action for StateInitializeCluster
 func (stbmn *ScaleioTieBreakerMdmNode) RunStateInitializeCluster() {
-	stbmn.State = common.WaitForClusterInstallFinish(stbmn.GetState)
+	common.WaitForClusterInstallFinish(stbmn)
 	reboot, err := stbmn.PkgMgr.GatewaySetup(stbmn.State)
 	if err != nil {
 		log.Errorln("GatewaySetup Failed:", err)
@@ -160,7 +160,7 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateInitializeCluster() {
 
 //RunStateInstallRexRay default action for StateInstallRexRay
 func (stbmn *ScaleioTieBreakerMdmNode) RunStateInstallRexRay() {
-	stbmn.State = common.WaitForClusterInitializeFinish(stbmn.GetState)
+	common.WaitForClusterInitializeFinish(stbmn)
 	reboot, err := stbmn.PkgMgr.RexraySetup(stbmn.State)
 	if err != nil {
 		log.Errorln("REX-Ray setup Failed:", err)
@@ -192,7 +192,7 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateInstallRexRay() {
 		log.Debugln("Signaled StateCleanInstallReboot")
 	}
 
-	stbmn.State = common.WaitForCleanInstallReboot(stbmn.GetState)
+	common.WaitForCleanInstallReboot(stbmn)
 
 	//requires a reboot?
 	if stbmn.RebootRequired || reboot {
@@ -247,10 +247,8 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateFinishInstall() {
 		"seconds for changes in the cluster.")
 	time.Sleep(time.Duration(common.PollForChangesInSeconds) * time.Second)
 
-	if stbmn.State.DemoMode {
-		log.Infoln("DemoMode = TRUE. Leaving marker file for previously configured")
-		stbmn.LeaveMarkerFileForConfigured()
-	}
+	//TODO temporary until libkv
+	stbmn.LeaveMarkerFileForConfigured()
 
 	//TODO eventual plan for MDM node behavior
 	/*

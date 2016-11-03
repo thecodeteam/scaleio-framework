@@ -18,7 +18,8 @@ var (
 	ErrFoundSelfFailed = errors.New("Failed to locate self node")
 )
 
-func nodePreviouslyConfigured() bool {
+//TODO temporary until libkv
+func nodePreviouslyConfigured() (bool, string) {
 	if _, err := os.Stat("/etc/scaleio-framework/state"); err == nil {
 		b, errFile := ioutil.ReadFile("/etc/scaleio-framework/state")
 		if errFile != nil {
@@ -26,9 +27,10 @@ func nodePreviouslyConfigured() bool {
 		} else {
 			log.Infoln("Node is configured as", string(b), "MDM node")
 		}
-		return true
+		return true, string(b)
 	}
-	return false
+	log.Debugln("Node has not been previously been configured")
+	return false, ""
 }
 
 func whichNode(executorID string, getstate common.RetrieveState) (common.IScaleioNode, error) {
@@ -36,40 +38,46 @@ func whichNode(executorID string, getstate common.RetrieveState) (common.IScalei
 
 	var sionode common.IScaleioNode
 
-	if nodePreviouslyConfigured() {
-		log.Infoln("nodePreviouslyConfigured is TRUE. Launching FakeNode.")
-		sionode = scaleionodes.NewFake()
-	} else {
-		log.Infoln("ScaleIO Executor Retrieve State from Scheduler")
-		state := common.WaitForStableState(getstate)
+	prev, persona := nodePreviouslyConfigured()
 
-		log.Infoln("Find Self Node")
-		node := common.GetSelfNode(executorID, state)
-		if node == nil {
-			log.Infoln("GetSelfNode Failed")
-			log.Infoln("WhichNode LEAVE")
-			return nil, ErrFoundSelfFailed
-		}
+	log.Infoln("ScaleIO Executor Retrieve State from Scheduler")
+	state := common.WaitForStableState(getstate)
 
-		switch node.Persona {
-		case types.PersonaMdmPrimary:
-			log.Infoln("Is Primary")
-			sionode = scaleionodes.NewPri(state)
-		case types.PersonaMdmSecondary:
-			log.Infoln("Is Secondary")
-			sionode = scaleionodes.NewSec(state)
-		case types.PersonaTb:
-			log.Infoln("Is TieBreaker")
-			sionode = scaleionodes.NewTb(state)
-		case types.PersonaNode:
-			log.Infoln("Is DataNode")
-			sionode = scaleionodes.NewData(state)
-		}
-
-		sionode.SetExecutorID(executorID)
-		sionode.SetRetrieveState(getstate)
-		sionode.UpdateScaleIOState()
+	log.Infoln("Find Self Node")
+	node := common.GetSelfNode(executorID, state)
+	if node == nil {
+		log.Infoln("GetSelfNode Failed")
+		log.Infoln("WhichNode LEAVE")
+		return nil, ErrFoundSelfFailed
 	}
+
+	//TODO temporary until libkv
+	var personaID int
+	if prev {
+		personaID = common.PersonaStringToID(persona)
+		log.Infoln("Override Persona for now to", persona, "=", personaID)
+		node.Persona = personaID
+	}
+
+	switch node.Persona {
+	case types.PersonaMdmPrimary:
+		log.Infoln("Is Primary")
+		sionode = scaleionodes.NewPri(state)
+	case types.PersonaMdmSecondary:
+		log.Infoln("Is Secondary")
+		sionode = scaleionodes.NewSec(state)
+	case types.PersonaTb:
+		log.Infoln("Is TieBreaker")
+		sionode = scaleionodes.NewTb(state)
+	case types.PersonaNode:
+		log.Infoln("Is DataNode")
+		sionode = scaleionodes.NewData(state)
+	}
+
+	sionode.SetExecutorID(executorID)
+	sionode.SetOverridePersona(personaID) //TODO temporary until libkv
+	sionode.SetRetrieveState(getstate)
+	sionode.UpdateScaleIOState()
 
 	log.Infoln("WhichNode Succeeded")
 	log.Infoln("WhichNode LEAVE")

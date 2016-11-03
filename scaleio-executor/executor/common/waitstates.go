@@ -77,16 +77,10 @@ func WaitForStableState(getstate RetrieveState) *types.ScaleIOFramework {
 	return state
 }
 
-func waitForState(getstate RetrieveState, nodeState int, allNodes bool) *types.ScaleIOFramework {
-	var err error
+func waitForState(sio IScaleioNode, nodeState int, allNodes bool) *types.ScaleIOFramework {
 	var state *types.ScaleIOFramework
 	for {
-		state, err = getstate()
-		if err != nil {
-			log.Debugln("Unable to getstate. Waiting for", PollStatusInSeconds, "seconds")
-			time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
-			continue
-		}
+		state = sio.UpdateScaleIOState()
 		if waitForRunState(state, nodeState, allNodes) {
 			log.Debugln("Achieve state", nodeState, "among management nodes")
 			break
@@ -98,32 +92,32 @@ func waitForState(getstate RetrieveState, nodeState int, allNodes bool) *types.S
 }
 
 //WaitForPrereqsFinish waits until all prereqs have been installed
-func WaitForPrereqsFinish(getstate RetrieveState) *types.ScaleIOFramework {
-	return waitForState(getstate, types.StatePrerequisitesInstalled, false)
+func WaitForPrereqsFinish(sio IScaleioNode) {
+	waitForState(sio, types.StatePrerequisitesInstalled, false)
 }
 
 //WaitForCleanPrereqsReboot waits until all systems are ready to reboot
 //after prereq install
-func WaitForCleanPrereqsReboot(getstate RetrieveState) *types.ScaleIOFramework {
-	return waitForState(getstate, types.StateCleanPrereqsReboot, true)
+func WaitForCleanPrereqsReboot(sio IScaleioNode) {
+	waitForState(sio, types.StateCleanPrereqsReboot, true)
 }
 
 //WaitForBaseFinish waits until base ScaleIO components have been installed
-func WaitForBaseFinish(getstate RetrieveState) *types.ScaleIOFramework {
-	return waitForState(getstate, types.StateBasePackagedInstalled, false)
+func WaitForBaseFinish(sio IScaleioNode) {
+	waitForState(sio, types.StateBasePackagedInstalled, false)
 }
 
 //WaitForClusterInstallFinish waits for the cluster to be created
-func WaitForClusterInstallFinish(getstate RetrieveState) *types.ScaleIOFramework {
-	return waitForState(getstate, types.StateInitializeCluster, false)
+func WaitForClusterInstallFinish(sio IScaleioNode) {
+	waitForState(sio, types.StateInitializeCluster, false)
 }
 
 //WaitForClusterInitializeFinish wait until the cluster has been initialized
-func WaitForClusterInitializeFinish(getstate RetrieveState) *types.ScaleIOFramework {
-	return waitForState(getstate, types.StateInstallRexRay, false)
+func WaitForClusterInitializeFinish(sio IScaleioNode) {
+	waitForState(sio, types.StateInstallRexRay, false)
 }
 
 //WaitForCleanInstallReboot waits for reboot of nodes after install
-func WaitForCleanInstallReboot(getstate RetrieveState) *types.ScaleIOFramework {
-	return waitForState(getstate, types.StateCleanInstallReboot, true)
+func WaitForCleanInstallReboot(sio IScaleioNode) {
+	waitForState(sio, types.StateCleanInstallReboot, true)
 }

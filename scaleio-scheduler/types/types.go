@@ -39,6 +39,9 @@ const (
 )
 
 const (
+	//PersonaUnknown is unknown
+	PersonaUnknown = 0
+
 	//PersonaMdmPrimary is the first MDM
 	PersonaMdmPrimary = 1
 
