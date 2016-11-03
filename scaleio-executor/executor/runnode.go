@@ -19,7 +19,7 @@ var (
 )
 
 //TODO temporary until libkv
-func nodePreviouslyConfigured() (bool, string) {
+func nodePreviouslyConfigured() bool {
 	if _, err := os.Stat("/etc/scaleio-framework/state"); err == nil {
 		b, errFile := ioutil.ReadFile("/etc/scaleio-framework/state")
 		if errFile != nil {
@@ -27,10 +27,10 @@ func nodePreviouslyConfigured() (bool, string) {
 		} else {
 			log.Infoln("Node is configured as", string(b), "MDM node")
 		}
-		return true, string(b)
+		return true
 	}
 	log.Debugln("Node has not been previously been configured")
-	return false, ""
+	return false
 }
 
 func whichNode(executorID string, getstate common.RetrieveState) (common.IScaleioNode, error) {
