@@ -223,7 +223,7 @@ func (e *ScaleIOExecutor) handleEvents() {
 
 			go func() {
 				//TODO reminder not to rely on node.LastContact value until we add in pings
-				errNode := RunExecutor(e.Config.ExecutorID, e.retrieveState)
+				errNode := RunExecutor(e.Config, e.retrieveState)
 				if errNode != nil {
 					myErr := e.sendUpdate(task, mesos.TaskState_TASK_ERROR.Enum())
 					if myErr != nil {

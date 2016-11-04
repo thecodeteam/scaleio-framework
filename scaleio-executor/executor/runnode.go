@@ -8,6 +8,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	xplatform "github.com/dvonthenen/goxplatform"
 
+	config "github.com/codedellemc/scaleio-framework/scaleio-executor/config"
 	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 	scaleionodes "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/scaleionodes"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
@@ -33,15 +34,15 @@ func nodePreviouslyConfigured() bool {
 	return false
 }
 
-func whichNode(executorID string, getstate common.RetrieveState) (common.IScaleioNode, error) {
+func whichNode(cfg *config.Config, getstate common.RetrieveState) (common.IScaleioNode, error) {
 	log.Infoln("WhichNode ENTER")
 
 	var sionode common.IScaleioNode
 
-	if nodePreviouslyConfigured() {
+	if nodePreviouslyConfigured() { //TODO temporary until libkv
 		log.Infoln("nodePreviouslyConfigured is TRUE. Launching FakeNode.")
 		sionode = scaleionodes.NewFake()
-		sionode.SetExecutorID(executorID)
+		sionode.SetConfig(cfg)
 		sionode.SetRetrieveState(getstate)
 		sionode.UpdateScaleIOState()
 	} else {
@@ -49,7 +50,7 @@ func whichNode(executorID string, getstate common.RetrieveState) (common.IScalei
 		state := common.WaitForStableState(getstate)
 
 		log.Infoln("Find Self Node")
-		node := common.GetSelfNode(executorID, state)
+		node := common.GetSelfNode(cfg.ExecutorID, state)
 		if node == nil {
 			log.Infoln("GetSelfNode Failed")
 			log.Infoln("WhichNode LEAVE")
@@ -71,7 +72,7 @@ func whichNode(executorID string, getstate common.RetrieveState) (common.IScalei
 			sionode = scaleionodes.NewData(state)
 		}
 
-		sionode.SetExecutorID(executorID)
+		sionode.SetConfig(cfg)
 		sionode.SetRetrieveState(getstate)
 		sionode.UpdateScaleIOState()
 	}
@@ -82,11 +83,11 @@ func whichNode(executorID string, getstate common.RetrieveState) (common.IScalei
 }
 
 //RunExecutor starts the executor
-func RunExecutor(executorID string, getstate common.RetrieveState) error {
+func RunExecutor(cfg *config.Config, getstate common.RetrieveState) error {
 	log.Infoln("RunExecutor ENTER")
-	log.Infoln("executorID:", executorID)
+	log.Infoln("executorID:", cfg.ExecutorID)
 
-	node, err := whichNode(executorID, getstate)
+	node, err := whichNode(cfg, getstate)
 	if err != nil {
 		log.Errorln("Unable to find Self in node list")
 		log.Infoln("RunExecutor LEAVE")

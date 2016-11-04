@@ -3,6 +3,8 @@ package config
 import (
 	"flag"
 	"strconv"
+
+	xplatform "github.com/dvonthenen/goxplatform"
 )
 
 //consts exported out of package
@@ -183,7 +185,7 @@ func (cfg *Config) AddFlags(fs *flag.FlagSet) {
 
 //NewConfig creates a new Config object
 func NewConfig() *Config {
-	ip, err := autoDiscoverIP()
+	ip, err := xplatform.GetInstance().Nw.AutoDiscoverIP()
 	if err != nil {
 		ip = "127.0.0.1"
 	}
