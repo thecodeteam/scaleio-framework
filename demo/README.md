@@ -1,6 +1,6 @@
 # Demo/Test the ScaleIO Framework for Apache Mesos
 
-The requirements of having a 3-Node ScaleIO cluster along with an Apache Mesos Master and Agent cluster would heavily resource constrain a laptop or computer used for local development. An [AWS CloudFormation template](ScaleIO_Mesos_Testing_Cluster.json) is provided that deploys and installs a fully configured Dell EMC ScaleIO and Apache Mesos cluster on Amazon AWS. This template currently works in the **US-West-1 (aka N.California) region only**.
+The requirements of having a 3-Node ScaleIO cluster along with an Apache Mesos Master and Agent cluster would heavily resource constrain a laptop or computer used for local development. An [AWS CloudFormation template](Framework_Testing_Cluster_Ubuntu.json) is provided that deploys and installs a fully configured Dell EMC ScaleIO and Apache Mesos cluster on Amazon AWS. This template currently works in the **US-West-1 (aka N.California) region only**.
 
 *NOTE: Deploying this template uses six (6) `t2.medium` instances in the N.California region, costing $0.068/hour. The AWS EC2 compute usage for this cluster will cost approximately $9.78/day. The template provisions nine (9) EBS volumes in total. Six (6) for the operating systems and three (3) 100-gigabyte volumes for ScaleIO storage.*
 
@@ -22,7 +22,7 @@ Within the AWS Web GUI:
 1. Verify you are in the N. California region.
 2. Within the drop-down of `Services` choose `CloudFormation`
 3. Click `Create Stack`, then `Choose a Template`
-4. Click `Upload file to S3`, and upload [ScaleIO_Mesos_Testing_Cluster.json](ScaleIO_Mesos_Testing_Cluster.json)
+4. Click `Upload file to S3`, and upload [Framework_Testing_Cluster_Ubuntu.json](Framework_Testing_Cluster_Ubuntu.json)
 5. Give the stack a unique name (such as: MesosFrameworkDemo)
 6. Select a keypair that exists in the **N.California region**
 7. Click `next`. Tags are optional. Click `next`

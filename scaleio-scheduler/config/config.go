@@ -39,11 +39,11 @@ const (
 
 //consts internal
 const (
-	debMdm = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-mdm-2.0-5014.0.Ubuntu.14.04.x86_64.deb"
-	debSds = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-sds-2.0-5014.0.Ubuntu.14.04.x86_64.deb"
-	debSdc = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-sdc-2.0-5014.0.Ubuntu.14.04.x86_64.deb"
-	debLia = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-lia-2.0-5014.0.Ubuntu.14.04.x86_64.deb"
-	debGw  = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/emc-scaleio-gateway_2.0-5014.0_amd64.deb"
+	debMdm = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-mdm-2.0-10000.2072.Ubuntu.14.04.x86_64.deb"
+	debSds = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-sds-2.0-10000.2072.Ubuntu.14.04.x86_64.deb"
+	debSdc = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-sdc-2.0-10000.2072.Ubuntu.14.04.x86_64.deb"
+	debLia = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-lia-2.0-10000.2072.Ubuntu.14.04.x86_64.deb"
+	debGw  = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/emc-scaleio-gateway_2.0-10000.2072_amd64.deb"
 	rpmMdm = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-mdm-2.0-10000.2072.el7.x86_64.rpm"
 	rpmSds = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-sds-2.0-10000.2072.el7.x86_64.rpm"
 	rpmSdc = "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/EMC-ScaleIO-sdc-2.0-10000.2072.el7.x86_64.rpm"
