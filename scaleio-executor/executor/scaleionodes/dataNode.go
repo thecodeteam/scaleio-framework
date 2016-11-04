@@ -73,7 +73,13 @@ func (sdn *ScaleioDataNode) RunStateUnknown() {
 		if sdn.State.Debug {
 			log.Infoln("Skipping the reboot since Debug is TRUE")
 		} else {
-			time.Sleep(time.Duration(common.DelayForRebootInSeconds) * time.Second)
+			ip1, err1 := xplatform.GetInstance().Nw.AutoDiscoverIP()
+			ip2, err2 := sdn.Config.ParseIPFromRestURI()
+
+			if err1 == nil && err2 == nil && ip1 == ip2 {
+				log.Infoln("Delay reboot host running the Scheduler")
+				time.Sleep(time.Duration(common.DelayForRebootInSeconds) * time.Second)
+			}
 
 			rebootErr := xplatform.GetInstance().Run.Command(common.RebootCmdline, common.RebootCheck, "")
 			if rebootErr != nil {
@@ -157,8 +163,6 @@ func (sdn *ScaleioDataNode) RunStateInstallRexRay() {
 		log.Infoln("Reboot required before StateFinishInstall!")
 		log.Debugln("reboot:", reboot)
 
-		time.Sleep(time.Duration(common.DelayForRebootInSeconds) * time.Second)
-
 		errState = sdn.UpdateNodeState(types.StateSystemReboot)
 		if errState != nil {
 			log.Errorln("Failed to signal state change:", errState)
@@ -169,6 +173,14 @@ func (sdn *ScaleioDataNode) RunStateInstallRexRay() {
 		if sdn.State.Debug {
 			log.Infoln("Skipping the reboot since Debug is TRUE")
 		} else {
+			ip1, err1 := xplatform.GetInstance().Nw.AutoDiscoverIP()
+			ip2, err2 := sdn.Config.ParseIPFromRestURI()
+
+			if err1 == nil && err2 == nil && ip1 == ip2 {
+				log.Infoln("Delay reboot host running the Scheduler")
+				time.Sleep(time.Duration(common.DelayForRebootInSeconds) * time.Second)
+			}
+
 			rebootErr := xplatform.GetInstance().Run.Command(common.RebootCmdline, common.RebootCheck, "")
 			if rebootErr != nil {
 				log.Errorln("Install Kernel Failed:", rebootErr)

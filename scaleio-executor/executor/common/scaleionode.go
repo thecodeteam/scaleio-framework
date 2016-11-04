@@ -12,6 +12,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
+	config "github.com/codedellemc/scaleio-framework/scaleio-executor/config"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
@@ -22,21 +23,26 @@ var (
 
 //ScaleioNode implementation for ScaleIO Node
 type ScaleioNode struct {
-	ExecutorID     string
+	Config         *config.Config
 	RebootRequired bool
 	Node           *types.ScaleIONode
 	State          *types.ScaleIOFramework
 	GetState       RetrieveState
 }
 
-//SetExecutorID sets the ExecutorID
-func (bsn *ScaleioNode) SetExecutorID(ID string) {
-	bsn.ExecutorID = ID
+//SetConfig sets the Config
+func (bsn *ScaleioNode) SetConfig(cfg *config.Config) {
+	bsn.Config = cfg
 }
 
 //SetRetrieveState sets the retrieve state function
 func (bsn *ScaleioNode) SetRetrieveState(getstate RetrieveState) {
 	bsn.GetState = getstate
+}
+
+//GetConfig retrieves the config
+func (bsn *ScaleioNode) GetConfig() *config.Config {
+	return bsn.Config
 }
 
 //GetSelfNode get self node
@@ -47,7 +53,7 @@ func (bsn *ScaleioNode) GetSelfNode() *types.ScaleIONode {
 //UpdateScaleIOState updates the state of the framework
 func (bsn *ScaleioNode) UpdateScaleIOState() *types.ScaleIOFramework {
 	bsn.State = WaitForStableState(bsn.GetState)
-	bsn.Node = GetSelfNode(bsn.ExecutorID, bsn.State)
+	bsn.Node = GetSelfNode(bsn.Config.ExecutorID, bsn.State)
 	return bsn.State
 }
 
@@ -83,7 +89,7 @@ func (bsn *ScaleioNode) UpdateNodeState(nodeState int) error {
 
 	state := &types.UpdateNode{
 		Acknowledged: false,
-		ExecutorID:   bsn.ExecutorID,
+		ExecutorID:   bsn.Config.ExecutorID,
 		State:        nodeState,
 	}
 
@@ -155,7 +161,7 @@ func (bsn *ScaleioNode) UpdatePingNode() error {
 
 	state := &types.PingNode{
 		Acknowledged: false,
-		ExecutorID:   bsn.ExecutorID,
+		ExecutorID:   bsn.Config.ExecutorID,
 	}
 
 	response, err := json.MarshalIndent(state, "", "  ")

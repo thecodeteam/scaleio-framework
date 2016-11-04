@@ -1,6 +1,16 @@
 package config
 
-import "flag"
+import (
+	"errors"
+	"flag"
+
+	xplatform "github.com/dvonthenen/goxplatform"
+)
+
+var (
+	//ErrInvalidRestURI The REST URI provided is not valid
+	ErrInvalidRestURI = errors.New("The REST URI provided is not valid")
+)
 
 //Config is the representation of the config
 type Config struct {
@@ -35,4 +45,17 @@ func NewConfig() *Config {
 		FrameworkID:  env("MESOS_FRAMEWORK_ID", ""),
 		ExecutorID:   env("MESOS_EXECUTOR_ID", ""),
 	}
+}
+
+//ParseIPFromRestURI returns the IP from the URI
+func (cfg *Config) ParseIPFromRestURI() (string, error) {
+	strings, err := xplatform.GetInstance().Str.RegexMatch(cfg.SchedulerURI, ".+//(.*):[0-9]+")
+	if err != nil {
+		return "", err
+	}
+	if len(strings) != 2 {
+		return "", ErrInvalidRestURI
+	}
+	ip := strings[1]
+	return ip, nil
 }
