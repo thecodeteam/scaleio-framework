@@ -325,28 +325,39 @@ func (nm *NodeManager) RexraySetup(state *types.ScaleIOFramework) (bool, error) 
 
 		rexrayConfig := `rexray:
   logLevel: debug
+  modules:
+    default-docker:
+      type: docker
+      libstorage:
+        service: scaleio 
+      host: unix:///run/docker/plugins/docker.sock
+    mesos:
+      type: docker
+      libstorage:
+        service: scaleio
+      host: unix:///run/docker/plugins/mesos.sock
+      libstorage:
+        integration:
+          volume:
+            operations:
+              unmount:
+                ignoreUsedCount: true
 libstorage:
+  service: scaleio
   integration:
     volume:
       operations:
         mount:
           preempt: true
-        unmount:
-          ignoreUsedCount: true
-  service: scaleio
-  server:
-    services:
-      scaleio:
-        driver: scaleio
-        scaleio:
-          endpoint: https://{IP_ADDRESS}/api
-          insecure: true
-          thinOrThick: ThinProvisioned
-          userName: admin
-          password: {PASSWORD}
-          {SYSTEMIDENTIFIER}
-          protectionDomainName: {PROTECTIONDOMAINNAME}
-          storagePoolName: {STORAGEPOOLNAME}`
+scaleio:
+  endpoint: https://{IP_ADDRESS}/api
+  insecure: true
+  thinOrThick: ThinProvisioned
+  userName: admin
+  password: {PASSWORD}
+  {SYSTEMIDENTIFIER}
+  protectionDomainName: {PROTECTIONDOMAINNAME}
+  storagePoolName: {STORAGEPOOLNAME}`
 
 		rexrayConfig = strings.Replace(rexrayConfig, "{IP_ADDRESS}", gateway, -1)
 		rexrayConfig = strings.Replace(rexrayConfig, "{PASSWORD}",
