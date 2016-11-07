@@ -4,7 +4,7 @@ const (
 	//Environment
 	aiozipCheck                = "[0-9]+ upgraded|[0-9]+ newly"
 	genericInstallCheck        = "1 upgraded|1 newly"
-	requiredKernelVersionCheck = "4.2.0-30-generic"
+	requiredKernelVersionCheck = "4.4.0-38-generic"
 
 	//ScaleIO node
 	mdmInstallCheck     = "mdm start/running"
