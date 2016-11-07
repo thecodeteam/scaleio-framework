@@ -35,7 +35,7 @@ If [MesosDNS](https://github.com/mesosphere/mesos-dns) or another service discov
     "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/scaleio-scheduler",
     "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/scaleio-executor"
   ],
-  "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=[IP ADDRESS FOR MESOS MASTER]:5050 -scaleio.clustername=[SCALEIO NAME] -scaleio.password=[SCALEIO GATEWAY PASSWORD] -scaleio.protectiondomain=[PROTECTION DOMAIN NAME] -scaleio.storagepool=[STORAGE POOL NAME] -scaleio.preconfig.primary=[MASTER MDM IP ADDRESS] -scaleio.preconfig.secondary=[SLAVE MDM IP ADDRESS] -scaleio.preconfig.tiebreaker=[TIEBREAKER MDM IP ADDRESS] -scaleio.preconfig.gateway=[GATEWAY IP ADDRESS] -executor.mem.non=256 -executor.cpu.non=0.5",
+  "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=[IP ADDRESS FOR MESOS MASTER]:5050 -scaleio.clustername=[SCALEIO NAME] -scaleio.password=[SCALEIO GATEWAY PASSWORD] -scaleio.protectiondomain=[PROTECTION DOMAIN NAME] -scaleio.storagepool=[STORAGE POOL NAME] -scaleio.preconfig.primary=[MASTER MDM IP ADDRESS] -scaleio.preconfig.secondary=[SLAVE MDM IP ADDRESS] -scaleio.preconfig.tiebreaker=[TIEBREAKER MDM IP ADDRESS] -scaleio.preconfig.gateway=[GATEWAY IP ADDRESS]",
   "mem": 32,
   "cpus": 0.2,
   "instances": 1,
@@ -59,6 +59,7 @@ curl -k -XPOST -d @scaleio.json -H "Content-Type: application/json" 127.0.0.1:80
 What does the ScaleIO Framework really do under the covers? Up to this point, its been stated that the Framework automates the lifecycle of ScaleIO and any related components required to provision external persistent storage in a "run it and forget it" fashion, but what does that really mean?
 
 The ScaleIO Framework performs the following steps on deployment. It installs and configures:
+
 1. Any dependencies required for ScaleIO to run. This is done via apt-get or yum.
 2. The ScaleIO SDS (or Server) package. This is the service that takes designated disks (physical or virtual) and contributes them to the ScaleIO cluster.
 3. The ScaleIO SDC (or Client) package. This is the service that provides access to ScaleIO volumes created within the ScaleIO cluster.
