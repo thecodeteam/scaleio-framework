@@ -411,14 +411,15 @@ scaleio:
 		log.Infoln(types.RexRayPackageName, "is already installed")
 	}
 
-	if rrInst == "" && rrInstErr == nil {
-		log.Debugln("No previous install of", types.RexRayPackageName,
+	if rrInst == "" {
+		log.Infoln("No previous install of", types.RexRayPackageName,
 			"exists. Reboot required!")
 		log.Infoln("RexraySetup LEAVE")
 		return true, nil
 	}
 
-	log.Infoln("RexraySetup Succeeded")
+	log.Infoln("Previous install of", types.RexRayPackageName,
+		"exists. No reboot required.")
 	log.Infoln("RexraySetup LEAVE")
 	return false, nil
 }
