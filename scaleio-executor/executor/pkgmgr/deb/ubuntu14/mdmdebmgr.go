@@ -33,11 +33,11 @@ func (mdm *MdmDebUbuntu14Mgr) EnvironmentSetup(state *types.ScaleIOFramework) (b
 		log.Infoln("libaio1 and zip are already installed")
 	}
 
-	kernelErr := xplatform.GetInstance().Inst.IsInstalled("linux-image-4.2.0-30-generic")
+	kernelErr := xplatform.GetInstance().Inst.IsInstalled("linux-image-4.4.0-38-generic")
 	if kernelErr != nil {
-		log.Infoln("Installing linux-image-4.2.0-30-generic")
+		log.Infoln("Installing linux-image-4.4.0-38-generic")
 
-		kernelCmdline := "apt-get -y install linux-image-4.2.0-30-generic"
+		kernelCmdline := "apt-get -y install linux-image-4.4.0-38-generic"
 		err := xplatform.GetInstance().Run.Command(kernelCmdline, genericInstallCheck, "")
 		if err != nil {
 			log.Errorln("Install Kernel Failed:", err)
@@ -45,7 +45,7 @@ func (mdm *MdmDebUbuntu14Mgr) EnvironmentSetup(state *types.ScaleIOFramework) (b
 			return false, err
 		}
 	} else {
-		log.Infoln("linux-image-4.2.0-30-generic is already installed")
+		log.Infoln("linux-image-4.4.0-38-generic is already installed")
 	}
 
 	//get running kernel version
