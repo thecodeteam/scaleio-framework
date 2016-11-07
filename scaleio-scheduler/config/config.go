@@ -19,7 +19,7 @@ const (
 	CPUPerMdmExecutor = 1.5
 
 	//CPUPerNonExecutor num of CPUs to Non-MDM executor
-	CPUPerNonExecutor = 1.0
+	CPUPerNonExecutor = 0.5
 
 	//MemPerMdmExecutor mem to MDM executor
 	MemPerMdmExecutor = 3072

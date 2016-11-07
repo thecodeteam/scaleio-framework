@@ -84,7 +84,7 @@ Utilize [scaleio.json](scaleio.json) to correctly match and/or update the intern
     "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/scaleio-scheduler",
     "https://github.com/codedellemc/scaleio-framework/releases/download/v0.1.0/scaleio-executor"
   ],
-  "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=10.0.0.21:5050 -scaleio.clusterid=39f2e3fe27fbc1dc -scaleio.password=F00barbaz -scaleio.protectiondomain=default -scaleio.storagepool=default -scaleio.preconfig.primary=10.0.0.12 -scaleio.preconfig.secondary=10.0.0.11 -scaleio.preconfig.tiebreaker=10.0.0.13 -scaleio.preconfig.gateway=10.0.0.11 -executor.mem.non=256 -executor.cpu.non=0.5",
+  "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=10.0.0.21:5050 -scaleio.clusterid=39f2e3fe27fbc1dc -scaleio.password=F00barbaz -scaleio.protectiondomain=default -scaleio.storagepool=default -scaleio.preconfig.primary=10.0.0.12 -scaleio.preconfig.secondary=10.0.0.11 -scaleio.preconfig.tiebreaker=10.0.0.13 -scaleio.preconfig.gateway=10.0.0.11",
   "mem": 32,
   "cpus": 0.2,
   "instances": 1,
