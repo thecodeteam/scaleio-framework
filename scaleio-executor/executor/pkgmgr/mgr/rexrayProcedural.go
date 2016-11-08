@@ -78,15 +78,28 @@ func getRexrayVersionToInstall(state *types.ScaleIOFramework) (string, error) {
 func fixSciniDepInRexrayInitD() error {
 	log.Debugln("fixSciniDepInRexrayInitD ENTER")
 
-	writeSciniCmdline := "sed -i 's/\\/usr\\/bin\\/rexray start/if \\[ -e \\/etc\\/init.d\\/scini \\]\\; then \\/etc\\/init.d\\/scini start; fi\\n    \\/usr\\/bin\\/rexray start/' /etc/init.d/rexray"
-	output, errScini := xplatform.GetInstance().Run.CommandOutput(writeSciniCmdline)
-	if errScini != nil {
-		log.Errorln("Failed to add Scini dependency:", errScini)
+	writeSciniCmdline1 := "sed -i 's/# Required-Start:    $remote_fs $syslog/# Required-Start:    $remote_fs $syslog scini/' /etc/init.d/rexray"
+	output1, errScini1 := xplatform.GetInstance().Run.CommandOutput(writeSciniCmdline1)
+	if errScini1 != nil {
+		log.Errorln("Failed to add Scini dependency:", errScini1)
 		log.Debugln("fixSciniDepInRexrayInitD LEAVE")
-		return errScini
+		return errScini1
 	}
-	if len(output) > 0 {
-		log.Errorln("Output Error:", output)
+	if len(output1) > 0 {
+		log.Errorln("Output Error:", output1)
+		log.Debugln("fixSciniDepInRexrayInitD LEAVE")
+		return ErrAddDependencyFailed
+	}
+
+	writeSciniCmdline2 := "sed -i 's/\\/usr\\/bin\\/rexray start/if \\[ -e \\/etc\\/init.d\\/scini \\]\\; then \\/etc\\/init.d\\/scini start; fi\\n    \\/usr\\/bin\\/rexray start/' /etc/init.d/rexray"
+	output2, errScini2 := xplatform.GetInstance().Run.CommandOutput(writeSciniCmdline2)
+	if errScini2 != nil {
+		log.Errorln("Failed to add Scini dependency:", errScini2)
+		log.Debugln("fixSciniDepInRexrayInitD LEAVE")
+		return errScini2
+	}
+	if len(output2) > 0 {
+		log.Errorln("Output Error:", output2)
 		log.Debugln("fixSciniDepInRexrayInitD LEAVE")
 		return ErrAddDependencyFailed
 	}
