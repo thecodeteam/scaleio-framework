@@ -166,6 +166,8 @@ func (nm *NodeManager) NodeSetup(state *types.ScaleIOFramework) error {
 func isClusterInstalled() error {
 	log.Infoln("isClusterInstalled ENTER")
 
+	time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
+
 	queryCmdline := "scli --query_cluster"
 	err := xplatform.GetInstance().Run.Command(queryCmdline, clusterConfigCheck, "")
 	if err != nil {
@@ -173,6 +175,8 @@ func isClusterInstalled() error {
 		log.Infoln("isClusterInstalled LEAVE")
 		return err
 	}
+
+	time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
 
 	log.Debugln("isClusterInstalled Succeeded")
 	log.Infoln("isClusterInstalled LEAVE")
@@ -303,6 +307,8 @@ func (mm *MdmManager) CreateCluster(state *types.ScaleIOFramework) error {
 
 func isClusterInitialized() error {
 	log.Infoln("isClusterInitialized ENTER")
+
+	time.Sleep(time.Duration(common.DelayBetweenCommandsInSeconds) * time.Second)
 
 	queryCmdline := "scli --query_all_sds"
 	err := xplatform.GetInstance().Run.Command(queryCmdline, "", clusterNotInitialedCheck)
