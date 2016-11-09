@@ -187,6 +187,8 @@ func isClusterInstalled() error {
 func (mm *MdmManager) CreateCluster(state *types.ScaleIOFramework) error {
 	log.Infoln("CreateCluster ENTER")
 
+	//TODO chicken and the egg problem... will remove when libkv implemented
+	//at the end post, configured and on reboot check state
 	errCheck := isClusterInstalled()
 	if errCheck == nil {
 		log.Infoln("ScaleIO cluster is already installed")
@@ -387,6 +389,8 @@ func (mm *MdmManager) AddSdsNodesToCluster(state *types.ScaleIOFramework, needsL
 func (mm *MdmManager) InitializeCluster(state *types.ScaleIOFramework) error {
 	log.Infoln("InitializeCluster ENTER")
 
+	//TODO chicken and the egg problem... will remove when libkv implemented
+	//at the end post, configured and on reboot check state
 	errCheck := isClusterInitialized()
 	if errCheck == nil {
 		log.Infoln("ScaleIO cluster is already initialized")
