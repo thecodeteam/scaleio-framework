@@ -32,8 +32,8 @@ If [MesosDNS](https://github.com/mesosphere/mesos-dns) or another service discov
 {
   "id": "scaleio-scheduler",
   "uris": [
-    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.2.0-rc2/scaleio-scheduler",
-    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.2.0-rc2/scaleio-executor"
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.2.0/scaleio-scheduler",
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.2.0/scaleio-executor"
   ],
   "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=[IP ADDRESS FOR MESOS MASTER]:5050 -scaleio.clustername=[SCALEIO NAME] -scaleio.password=[SCALEIO GATEWAY PASSWORD] -scaleio.protectiondomain=[PROTECTION DOMAIN NAME] -scaleio.storagepool=[STORAGE POOL NAME] -scaleio.preconfig.primary=[MASTER MDM IP ADDRESS] -scaleio.preconfig.secondary=[SLAVE MDM IP ADDRESS] -scaleio.preconfig.tiebreaker=[TIEBREAKER MDM IP ADDRESS] -scaleio.preconfig.gateway=[GATEWAY IP ADDRESS]",
   "mem": 32,
