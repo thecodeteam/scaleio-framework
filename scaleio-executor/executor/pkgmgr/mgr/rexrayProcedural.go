@@ -1,10 +1,7 @@
 package mgr
 
 import (
-	"bufio"
-	"errors"
 	"os"
-	"regexp"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
@@ -26,40 +23,6 @@ const (
 	initChkConfig
 )
 
-var (
-	//ErrSystemInitUnknown Unable to determine the system init type
-	ErrSystemInitUnknown = errors.New("Unable to determine the system init type")
-
-	//ErrAddDependencyFailed Failed to add the scini dependency to REX-Ray
-	ErrAddDependencyFailed = errors.New("Failed to add the scini dependency to REX-Ray")
-)
-
-func getInitSystemType() int {
-	log.Debugln("getInitSystemType ENTER")
-
-	if xplatform.GetInstance().Run.ExecExistsInPath("systemctl") {
-		log.Debugln("getInitSystemType = initSystemD")
-		log.Debugln("getInitSystemType LEAVE")
-		return initSystemD
-	}
-
-	if xplatform.GetInstance().Run.ExecExistsInPath("update-rc.d") {
-		log.Debugln("getInitSystemType = initUpdateRcD")
-		log.Debugln("getInitSystemType LEAVE")
-		return initUpdateRcD
-	}
-
-	if xplatform.GetInstance().Run.ExecExistsInPath("chkconfig") {
-		log.Debugln("getInitSystemType = initChkConfig")
-		log.Debugln("getInitSystemType LEAVE")
-		return initChkConfig
-	}
-
-	log.Debugln("getInitSystemType = initUnknown")
-	log.Debugln("getInitSystemType LEAVE")
-	return initUnknown
-}
-
 func getRexrayVersionFromBintray(state *types.ScaleIOFramework) (string, error) {
 	url := rexrayBintrayRootURI + state.Rexray.Branch
 	version, err := xplatform.GetInstance().Inst.GetVersionFromBintray(url)
@@ -73,234 +36,6 @@ func getRexrayVersionToInstall(state *types.ScaleIOFramework) (string, error) {
 	}
 
 	return state.Rexray.Version, nil
-}
-
-func fixSciniDepInRexrayInitD() error {
-	log.Debugln("fixSciniDepInRexrayInitD ENTER")
-
-	writeSciniCmdline1 := "sed -i 's/# Required-Start:    $remote_fs $syslog/# Required-Start:    $remote_fs $syslog scini/' /etc/init.d/rexray"
-	output1, errScini1 := xplatform.GetInstance().Run.CommandOutput(writeSciniCmdline1)
-	if errScini1 != nil {
-		log.Errorln("Failed to add Scini dependency:", errScini1)
-		log.Debugln("fixSciniDepInRexrayInitD LEAVE")
-		return errScini1
-	}
-	if len(output1) > 0 {
-		log.Errorln("Output Error:", output1)
-		log.Debugln("fixSciniDepInRexrayInitD LEAVE")
-		return ErrAddDependencyFailed
-	}
-
-	writeSciniCmdline2 := "sed -i 's/\\/usr\\/bin\\/rexray start/if \\[ -e \\/etc\\/init.d\\/scini \\]\\; then \\/etc\\/init.d\\/scini start; fi\\n    \\/usr\\/bin\\/rexray start/' /etc/init.d/rexray"
-	output2, errScini2 := xplatform.GetInstance().Run.CommandOutput(writeSciniCmdline2)
-	if errScini2 != nil {
-		log.Errorln("Failed to add Scini dependency:", errScini2)
-		log.Debugln("fixSciniDepInRexrayInitD LEAVE")
-		return errScini2
-	}
-	if len(output2) > 0 {
-		log.Errorln("Output Error:", output2)
-		log.Debugln("fixSciniDepInRexrayInitD LEAVE")
-		return ErrAddDependencyFailed
-	}
-
-	log.Debugln("Scini has been configured as a dependency on REX-Ray InitD")
-	log.Debugln("fixSciniDepInRexrayInitD LEAVE")
-
-	return nil
-}
-
-func doesSciniExistInRexrayInitD() (bool, error) {
-	log.Debugln("doesSciniExistInRexrayInitD LEAVE")
-
-	file, err := os.Open("/etc/init.d/rexray")
-	if err != nil {
-		log.Debugln("Failed on file Open:", err)
-		log.Debugln("doesSciniExistInRexrayInitD LEAVE")
-		return false, err
-	}
-	defer file.Close()
-
-	r, err := regexp.Compile("scini")
-	if err != nil {
-		log.Debugln("regexp is invalid")
-		log.Debugln("doesSciniExistInRexrayInitD LEAVE")
-		return false, err
-	}
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		log.Debugln("Line:", line)
-		if len(line) == 0 {
-			continue
-		}
-
-		strings := r.FindStringSubmatch(line)
-		if strings != nil || len(strings) == 1 {
-			log.Debugln("Match found:", line)
-			log.Debugln("doesSciniExistInRexrayInitD LEAVE")
-			return true, nil
-		}
-	}
-
-	log.Debugln("Scini is not configured in the rexray InitD")
-	log.Debugln("doesSciniExistInRexrayInitD LEAVE")
-	return false, nil
-}
-
-func fixSciniDepInRexraySystemD() error {
-	log.Debugln("fixSciniDepInRexraySystemD ENTER")
-
-	writeSciniCmdline := "sed -i 's/Before=/After=scini.service\\nBefore=/' /etc/systemd/system/rexray.service"
-	output, errScini := xplatform.GetInstance().Run.CommandOutput(writeSciniCmdline)
-	if errScini != nil {
-		log.Errorln("Failed to add Scini dependency:", errScini)
-		log.Debugln("fixSciniDepInRexraySystemD LEAVE")
-		return errScini
-	}
-	if len(output) > 0 {
-		log.Errorln("Output Error:", output)
-		log.Debugln("fixSciniDepInRexraySystemD LEAVE")
-		return ErrAddDependencyFailed
-	}
-
-	log.Debugln("Scini has been configured as a dependency on REX-Ray SystemD")
-	log.Debugln("fixSciniDepInRexraySystemD LEAVE")
-
-	return nil
-}
-
-func doesSciniExistInRexraySystemD() (bool, error) {
-	log.Debugln("doesSciniExistInRexraySystemD LEAVE")
-
-	file, err := os.Open("/etc/systemd/system/rexray.service")
-	if err != nil {
-		log.Debugln("Failed on file Open:", err)
-		log.Debugln("doesSciniExistInRexraySystemD LEAVE")
-		return false, err
-	}
-	defer file.Close()
-
-	r, err := regexp.Compile("scini")
-	if err != nil {
-		log.Debugln("regexp is invalid")
-		log.Debugln("doesSciniExistInRexraySystemD LEAVE")
-		return false, err
-	}
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		log.Debugln("Line:", line)
-		if len(line) == 0 {
-			continue
-		}
-
-		strings := r.FindStringSubmatch(line)
-		if strings != nil || len(strings) == 1 {
-			log.Debugln("Match found:", line)
-			log.Debugln("doesSciniExistInRexraySystemD LEAVE")
-			return true, nil
-		}
-	}
-
-	log.Debugln("Scini is not configured in the rexray SystemD")
-	log.Debugln("doesSciniExistInRexraySystemD LEAVE")
-	return false, nil
-}
-
-func fixRexrayDependencyToScini() error {
-	log.Debugln("fixRexrayDependencyToScini ENTER")
-
-	switch getInitSystemType() {
-	case initSystemD:
-		{
-			found, errInitd := doesSciniExistInRexraySystemD()
-			if errInitd != nil {
-				log.Infoln("doesSciniExistInRexraySystemD failed:", errInitd)
-				log.Infoln("fixRexrayDependencyToScini LEAVE")
-				return errInitd
-			}
-			if !found {
-				log.Debugln("Modify REX-Ray SystemD to add Scini dependency")
-
-				errScini := fixSciniDepInRexraySystemD()
-				if errScini != nil {
-					log.Errorln("Failed to add Scini dependency:", errScini)
-					log.Debugln("fixRexrayDependencyToScini LEAVE")
-					return errScini
-				}
-
-				log.Debugln("Scini has been configured as a dependency on REX-Ray initd")
-			} else {
-				log.Debugln("Scini has already been configured as a dependency on REX-Ray initd")
-			}
-
-			log.Debugln("fixRexrayDependencyToScini LEAVE")
-			return nil
-		}
-
-	case initUpdateRcD:
-		{
-			found, errInitd := doesSciniExistInRexrayInitD()
-			if errInitd != nil {
-				log.Infoln("doesSciniExistInRexrayInitD failed:", errInitd)
-				log.Infoln("fixRexrayDependencyToScini LEAVE")
-				return errInitd
-			}
-			if !found {
-				log.Debugln("Modify REX-Ray SystemD to add Scini dependency")
-
-				errScini := fixSciniDepInRexrayInitD()
-				if errScini != nil {
-					log.Errorln("Failed to add Scini dependency:", errScini)
-					log.Debugln("fixRexrayDependencyToScini LEAVE")
-					return errScini
-				}
-
-				log.Debugln("Scini has been configured as a dependency on REX-Ray initd")
-			} else {
-				log.Debugln("Scini has already been configured as a dependency on REX-Ray initd")
-			}
-
-			log.Debugln("Scini has already been configured as a dependency on REX-Ray initd")
-			log.Debugln("fixRexrayDependencyToScini LEAVE")
-			return nil
-		}
-
-	case initChkConfig:
-		{
-			found, errInitd := doesSciniExistInRexrayInitD()
-			if errInitd != nil {
-				log.Infoln("doesSciniExistInRexrayInitD failed:", errInitd)
-				log.Infoln("fixRexrayDependencyToScini LEAVE")
-				return errInitd
-			}
-			if !found {
-				log.Debugln("Modify REX-Ray SystemD to add Scini dependency")
-
-				errScini := fixSciniDepInRexrayInitD()
-				if errScini != nil {
-					log.Errorln("Failed to add Scini dependency:", errScini)
-					log.Debugln("fixRexrayDependencyToScini LEAVE")
-					return errScini
-				}
-
-				log.Debugln("Scini has been configured as a dependency on REX-Ray initd")
-			} else {
-				log.Debugln("Scini has already been configured as a dependency on REX-Ray initd")
-			}
-
-			log.Debugln("Scini has already been configured as a dependency on REX-Ray initd")
-			log.Debugln("fixRexrayDependencyToScini LEAVE")
-			return nil
-		}
-	}
-
-	log.Debugln("Unable to determine system init type")
-	log.Debugln("fixRexrayDependencyToScini LEAVE")
-	return ErrSystemInitUnknown
 }
 
 //RexraySetup procedure for setting up REX-Ray
@@ -414,10 +149,10 @@ scaleio:
 			return false, err
 		}
 
-		err = fixRexrayDependencyToScini()
+		err = xplatform.GetInstance().Init.AddDependentService("rexray", "scini")
 		if err != nil {
-			log.Infoln("fixRexrayDependencyToScini failed:", err)
-			log.Infoln("RexraySetup LEAVE")
+			log.Infoln("AddDependentService scini<-rexray failed:", err)
+			log.Infoln("fixRexrayDependencyToScini LEAVE")
 			return false, err
 		}
 	} else {
