@@ -71,14 +71,17 @@ const (
 	//StateInitializeCluster the cluster is setup, now initial the cluster
 	StateInitializeCluster = 4
 
-	//StateInstallRexRay install rexray
-	StateInstallRexRay = 5
+	//StateAddResourcesToScaleIO resources are being added to ScaleIO
+	StateAddResourcesToScaleIO = 5
 
-	//StateCleanInstallReboot after installing all components
-	StateCleanInstallReboot = 6
+	//StateInstallRexRay install rexray
+	StateInstallRexRay = 6
+
+	//StateCleanInstallReboot waiting for all nodes to acknowledge reboot
+	StateCleanInstallReboot = 7
 
 	//StateSystemReboot system is rebooting
-	StateSystemReboot = 7
+	StateSystemReboot = 8
 
 	//StateFinishInstall the agent node installation is complete
 	StateFinishInstall = 1024
@@ -117,20 +120,36 @@ type Rhel7Packages struct {
 	Gw  string `json:"rhel7gw"`
 }
 
+//StoragePool describes a ScaleIO StoragePool
+type StoragePool struct {
+	Name     string            `json:"name"`
+	Devices  []string          `json:"devices"`
+	KeyValue map[string]string `json:"keyvalue,omitempty"`
+}
+
+//ProtectionDomain describes a ScaleIO ProtectionDomain
+type ProtectionDomain struct {
+	Name     string            `json:"name"`
+	KeyValue map[string]string `json:"keyvalue,omitempty"`
+	Pools    map[string]*StoragePool
+}
+
 //ScaleIONode node definition
 type ScaleIONode struct {
-	AgentID     string            `json:"name"`
-	TaskID      string            `json:"taskid"`
-	ExecutorID  string            `json:"executorid"`
-	OfferID     string            `json:"offerid"`
-	IPAddress   string            `json:"ipaddress"`
-	Hostname    string            `json:"hostname"`
-	Index       int               `json:"index"`
-	Persona     int               `json:"persona"`
-	State       int               `json:"state"`
-	InCluster   bool              `json:"incluster"`
-	LastContact int64             `json:"lastcontact"`
-	KeyValue    map[string]string `json:"keyvalue,omitempty"`
+	AgentID         string            `json:"name"`
+	TaskID          string            `json:"taskid"`
+	ExecutorID      string            `json:"executorid"`
+	OfferID         string            `json:"offerid"`
+	IPAddress       string            `json:"ipaddress"`
+	Hostname        string            `json:"hostname"`
+	Persona         int               `json:"persona"`
+	State           int               `json:"state"`
+	LastContact     int64             `json:"lastcontact"`
+	Declarative     bool              `json:"declarative"`
+	Advertised      bool              `json:"advertised"`
+	KeyValue        map[string]string `json:"keyvalue,omitempty"`
+	ProvidesDomains map[string]*ProtectionDomain
+	ConsumesDomains map[string]*ProtectionDomain
 }
 
 //ScaleIONodes collection of ScaleIONode
@@ -140,21 +159,22 @@ type ScaleIONodes []*ScaleIONode
 //ScaleIO cluster
 type ScaleIOPreConfig struct {
 	PreConfigEnabled     bool   `json:"preconfigenabled"`
-	PrimaryMdmAddress    string `json:"preconfigprimdm"`
-	SecondaryMdmAddress  string `json:"preconfigsecmdm"`
-	TieBreakerMdmAddress string `json:"preconfigtbmdm"`
-	GatewayAddress       string `json:"preconfiggateway"`
+	PrimaryMdmAddress    string `json:"preconfigprimdm"`  //required
+	SecondaryMdmAddress  string `json:"preconfigsecmdm"`  //required
+	TieBreakerMdmAddress string `json:"preconfigtbmdm"`   //required
+	GatewayAddress       string `json:"preconfiggateway"` //optional. Default: PrimaryMdmAddress
 }
 
 //ScaleIOConfig describes the configuration for this cluster
 type ScaleIOConfig struct {
+	Configured       bool              `json:"configured"`
 	ClusterID        string            `json:"clusterid"`
-	ClusterName      string            `json:"clustername"`
-	LbGateway        string            `json:"lbgateway"`
-	ProtectionDomain string            `json:"protectiondomain"` //optional. Default: pd
-	StoragePool      string            `json:"storagepool"`      //optional. Default: sp
+	ClusterName      string            `json:"clustername"`      //optional. Default: scaleio
+	LbGateway        string            `json:"lbgateway"`        //optional.
+	ProtectionDomain string            `json:"protectiondomain"` //optional. Default: default
+	StoragePool      string            `json:"storagepool"`      //optional. Default: default
 	AdminPassword    string            `json:"adminpassword"`    //optional. Default: Scaleio123
-	BlockDevice      string            `json:"blockdevice"`      //optional. Default: /dev/xvdf
+	APIVersion       string            `json:"apiversion"`       //optional. Default: 2.0
 	KeyValue         map[string]string `json:"keyvalue,omitempty"`
 	Nodes            ScaleIONodes
 	Preconfig        ScaleIOPreConfig
@@ -177,14 +197,19 @@ type RexrayConfig struct {
 //ScaleIOFramework describes the overall framework state
 type ScaleIOFramework struct {
 	SchedulerAddress string            `json:"scheduleraddress"`
-	LogLevel         string            `json:"loglevel"`
-	DemoMode         bool              `json:"demomode"`
-	Debug            bool              `json:"debug"`
-	Experimental     bool              `json:"experimental"`
+	LogLevel         string            `json:"loglevel"`     //optional. Default: info
+	Debug            bool              `json:"debug"`        //optional. Default: false
+	Experimental     bool              `json:"experimental"` //optional. Default: false
 	KeyValue         map[string]string `json:"keyvalue,omitempty"`
-	ScaleIO          ScaleIOConfig
+	ScaleIO          *ScaleIOConfig
 	Rexray           RexrayConfig
 	Isolator         IsolatorConfig
+}
+
+//UpdateCluster describes how to update the cluster state
+type UpdateCluster struct {
+	Acknowledged bool              `json:"acknowledged"`
+	KeyValue     map[string]string `json:"keyvalue,omitempty"`
 }
 
 //UpdateNode describes an executor going through a state change
@@ -195,10 +220,11 @@ type UpdateNode struct {
 	KeyValue     map[string]string `json:"keyvalue,omitempty"`
 }
 
-//AddNode describes an executor being added to the ScaleIO cluster
-type AddNode struct {
+//UpdateDevices describes an executor offering devices to the default pd/sp
+type UpdateDevices struct {
 	Acknowledged bool              `json:"acknowledged"`
 	ExecutorID   string            `json:"executorid"`
+	Devices      []string          `json:"devices"`
 	KeyValue     map[string]string `json:"keyvalue,omitempty"`
 }
 

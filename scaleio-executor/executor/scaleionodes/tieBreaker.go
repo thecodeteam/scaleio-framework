@@ -7,6 +7,7 @@ import (
 	xplatform "github.com/dvonthenen/goxplatform"
 	xplatformsys "github.com/dvonthenen/goxplatform/sys"
 
+	config "github.com/codedellemc/scaleio-framework/scaleio-executor/config"
 	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 	ubuntu14 "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/deb/ubuntu14"
 	mgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/mgr"
@@ -21,14 +22,19 @@ type ScaleioTieBreakerMdmNode struct {
 }
 
 //NewTb generates a TieBreaker MDM Node object
-func NewTb(state *types.ScaleIOFramework) *ScaleioTieBreakerMdmNode {
+func NewTb(state *types.ScaleIOFramework, cfg *config.Config, getstate common.RetrieveState) *ScaleioTieBreakerMdmNode {
 	myNode := &ScaleioTieBreakerMdmNode{}
+	myNode.Config = cfg
+	myNode.GetState = getstate
+	myNode.RebootRequired = false
 
 	var pkgmgr mgr.IMdmMgr
 	switch xplatform.GetInstance().Sys.GetOsType() {
 	case xplatformsys.OsRhel:
+		log.Infoln("Is RHEL7")
 		pkgmgr = rhel7.NewMdmRpmRhel7Mgr(state)
 	case xplatformsys.OsUbuntu:
+		log.Infoln("Is Ubuntu14")
 		pkgmgr = ubuntu14.NewMdmDebUbuntu14Mgr(state)
 	}
 	myNode.PkgMgr = pkgmgr
@@ -120,6 +126,18 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStatePrerequisitesInstalled() {
 		return
 	}
 
+	err = stbmn.UpdateDevices()
+	if err != nil {
+		log.Errorln("UpdateDevices Failed:", err)
+		errState := stbmn.UpdateNodeState(types.StateFatalInstall)
+		if errState != nil {
+			log.Errorln("Failed to signal state change:", errState)
+		} else {
+			log.Debugln("Signaled StateFatalInstall")
+		}
+		return
+	}
+
 	errState := stbmn.UpdateNodeState(types.StateBasePackagedInstalled)
 	if errState != nil {
 		log.Errorln("Failed to signal state change:", errState)
@@ -154,20 +172,19 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateInitializeCluster() {
 		}
 		return
 	}
-	stbmn.RebootRequired = reboot
+	stbmn.RebootRequired = stbmn.RebootRequired || reboot
 
-	errState := stbmn.UpdateNodeState(types.StateInstallRexRay)
+	errState := stbmn.UpdateNodeState(types.StateAddResourcesToScaleIO)
 	if errState != nil {
 		log.Errorln("Failed to signal state change:", errState)
 	} else {
-		log.Debugln("Signaled StateInstallRexRay")
+		log.Debugln("Signaled StateAddResourcesToScaleIO")
 	}
 }
 
 //RunStateInstallRexRay default action for StateInstallRexRay
 func (stbmn *ScaleioTieBreakerMdmNode) RunStateInstallRexRay() {
-	common.WaitForClusterInitializeFinish(stbmn)
-	reboot, err := stbmn.PkgMgr.RexraySetup(stbmn.State)
+	reboot, err := stbmn.PkgMgr.RexraySetup(stbmn.State, stbmn.Config.ExecutorID)
 	if err != nil {
 		log.Errorln("REX-Ray setup Failed:", err)
 		errState := stbmn.UpdateNodeState(types.StateFatalInstall)
@@ -178,6 +195,7 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateInstallRexRay() {
 		}
 		return
 	}
+	stbmn.RebootRequired = stbmn.RebootRequired || reboot
 
 	err = stbmn.PkgMgr.SetupIsolator(stbmn.State)
 	if err != nil {
@@ -201,12 +219,11 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateInstallRexRay() {
 	common.WaitForCleanInstallReboot(stbmn)
 
 	//requires a reboot?
-	if stbmn.RebootRequired || reboot {
+	if stbmn.RebootRequired {
 		log.Infoln("Reboot required before StateFinishInstall!")
 		log.Debugln("rebootRequired:", stbmn.RebootRequired)
-		log.Debugln("reboot:", reboot)
 
-		errState = stbmn.UpdateNodeState(types.StateSystemReboot)
+		errState := stbmn.UpdateNodeState(types.StateSystemReboot)
 		if errState != nil {
 			log.Errorln("Failed to signal state change:", errState)
 		} else {
@@ -234,7 +251,7 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateInstallRexRay() {
 	} else {
 		log.Infoln("No need to reboot while installing REX-Ray")
 
-		errState = stbmn.UpdateNodeState(types.StateFinishInstall)
+		errState := stbmn.UpdateNodeState(types.StateFinishInstall)
 		if errState != nil {
 			log.Errorln("Failed to signal state change:", errState)
 		} else {
@@ -255,12 +272,19 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateSystemReboot() {
 
 //RunStateFinishInstall default action for StateFinishInstall
 func (stbmn *ScaleioTieBreakerMdmNode) RunStateFinishInstall() {
+	node := stbmn.GetSelfNode()
+	if !node.Declarative && !node.Advertised {
+		err := stbmn.UpdateDevices()
+		if err == nil {
+			log.Infoln("UpdateDevices() Succcedeed. Devices advertised!")
+		} else {
+			log.Errorln("UpdateDevices() Failed. Err:", err)
+		}
+	}
+
 	log.Debugln("In StateFinishInstall. Wait for", common.PollForChangesInSeconds,
 		"seconds for changes in the cluster.")
 	time.Sleep(time.Duration(common.PollForChangesInSeconds) * time.Second)
-
-	//TODO temporary until libkv
-	stbmn.LeaveMarkerFileForConfigured()
 
 	//TODO eventual plan for MDM node behavior
 	/*
@@ -269,28 +293,7 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateFinishInstall() {
 		else if upgrade then
 			_ = waitForClusterUpgrade(spmn.UpdateScaleIOState())
 			doUpgrade()
-		else
-			checkForNewDataNodesToAdd()
 	*/
-
-	//TODO replace this at some point with API calls instead of CLI
-	pri, errPri := common.GetPrimaryMdmNode(stbmn.State)
-	sec, errSec := common.GetSecondaryMdmNode(stbmn.State)
-
-	if errPri != nil {
-		log.Errorln("Unable to find the Primary MDM Node. Retry again later.")
-	} else if errSec != nil {
-		log.Errorln("Unable to find the Secondary MDM Node. Retry again later.")
-	} else {
-		if (pri.LastContact+common.OfflineTimeForMdmNodesInSeconds) < time.Now().Unix() &&
-			(sec.LastContact+common.OfflineTimeForMdmNodesInSeconds) < time.Now().Unix() {
-			//This is the checkForNewDataNodesToAdd(). Other functionality TBD.
-			err := stbmn.PkgMgr.AddSdsNodesToCluster(stbmn.State, true)
-			if err != nil {
-				log.Errorln("Failed to add node to ScaleIO cluster:", err)
-			}
-		}
-	}
 }
 
 //RunStateUpgradeCluster default action for StateUpgradeCluster

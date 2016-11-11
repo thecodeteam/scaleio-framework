@@ -2,8 +2,10 @@ package main
 
 import (
 	"flag"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -14,6 +16,7 @@ import (
 // ----------------------- func init() ------------------------- //
 
 func init() {
+	rand.Seed(time.Now().UnixNano())
 	log.SetOutput(os.Stdout)
 	log.Infoln("Initializing the ScaleIO Scheduler...")
 }
@@ -73,6 +76,10 @@ func main() {
 	}
 
 	sched := scheduler.NewScaleIOScheduler(cfg)
+	if sched == nil {
+		log.Fatalln("Scheduler is nil")
+		return
+	}
 	log.Debugln("Starting ScaleIO Scheduler")
 	<-sched.Start()
 	log.Debugln("Scheduler terminating")

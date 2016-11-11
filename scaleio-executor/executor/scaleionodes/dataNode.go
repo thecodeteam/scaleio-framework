@@ -7,6 +7,7 @@ import (
 	xplatform "github.com/dvonthenen/goxplatform"
 	xplatformsys "github.com/dvonthenen/goxplatform/sys"
 
+	config "github.com/codedellemc/scaleio-framework/scaleio-executor/config"
 	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 	ubuntu14 "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/deb/ubuntu14"
 	mgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/mgr"
@@ -21,14 +22,19 @@ type ScaleioDataNode struct {
 }
 
 //NewData generates a Data Node object
-func NewData(state *types.ScaleIOFramework) *ScaleioDataNode {
+func NewData(state *types.ScaleIOFramework, cfg *config.Config, getstate common.RetrieveState) *ScaleioDataNode {
 	myNode := &ScaleioDataNode{}
+	myNode.Config = cfg
+	myNode.GetState = getstate
+	myNode.RebootRequired = false
 
 	var pkgmgr mgr.INodeMgr
 	switch xplatform.GetInstance().Sys.GetOsType() {
 	case xplatformsys.OsRhel:
+		log.Infoln("Is RHEL7")
 		pkgmgr = rhel7.NewNodeRpmRhel7Mgr(state)
 	case xplatformsys.OsUbuntu:
+		log.Infoln("Is Ubuntu14")
 		pkgmgr = ubuntu14.NewNodeDebUbuntu14Mgr(state)
 	}
 	myNode.PkgMgr = pkgmgr
@@ -107,25 +113,29 @@ func (sdn *ScaleioDataNode) RunStatePrerequisitesInstalled() {
 		return
 	}
 
-	errState := sdn.UpdateNodeState(types.StateInstallRexRay)
+	err = sdn.UpdateDevices()
+	if err != nil {
+		log.Errorln("UpdateDevices Failed:", err)
+		errState := sdn.UpdateNodeState(types.StateFatalInstall)
+		if errState != nil {
+			log.Errorln("Failed to signal state change:", errState)
+		} else {
+			log.Debugln("Signaled StateFatalInstall")
+		}
+		return
+	}
+
+	errState := sdn.UpdateNodeState(types.StateAddResourcesToScaleIO)
 	if errState != nil {
 		log.Errorln("Failed to signal state change:", errState)
 	} else {
-		log.Debugln("Signaled StateInstallRexRay")
+		log.Debugln("Signaled StateAddResourcesToScaleIO")
 	}
 }
 
 //RunStateInstallRexRay default action for StateInstallRexRay
 func (sdn *ScaleioDataNode) RunStateInstallRexRay() {
-	if sdn.State.ScaleIO.Preconfig.PreConfigEnabled {
-		log.Debugln("Pre-Config is enabled skipping wait for Cluster Initialization")
-	} else {
-		//we need to wait because without the gateway, the rexray service restart
-		//will fail
-		common.WaitForClusterInitializeFinish(sdn)
-	}
-
-	reboot, err := sdn.PkgMgr.RexraySetup(sdn.State)
+	reboot, err := sdn.PkgMgr.RexraySetup(sdn.State, sdn.Config.ExecutorID)
 	if err != nil {
 		log.Errorln("REX-Ray setup Failed:", err)
 		errState := sdn.UpdateNodeState(types.StateFatalInstall)
@@ -136,6 +146,7 @@ func (sdn *ScaleioDataNode) RunStateInstallRexRay() {
 		}
 		return
 	}
+	sdn.RebootRequired = sdn.RebootRequired || reboot
 
 	err = sdn.PkgMgr.SetupIsolator(sdn.State)
 	if err != nil {
@@ -159,11 +170,11 @@ func (sdn *ScaleioDataNode) RunStateInstallRexRay() {
 	common.WaitForCleanInstallReboot(sdn)
 
 	//requires a reboot?
-	if reboot {
+	if sdn.RebootRequired {
 		log.Infoln("Reboot required before StateFinishInstall!")
-		log.Debugln("reboot:", reboot)
+		log.Debugln("reboot:", sdn.RebootRequired)
 
-		errState = sdn.UpdateNodeState(types.StateSystemReboot)
+		errState := sdn.UpdateNodeState(types.StateSystemReboot)
 		if errState != nil {
 			log.Errorln("Failed to signal state change:", errState)
 		} else {
@@ -191,7 +202,7 @@ func (sdn *ScaleioDataNode) RunStateInstallRexRay() {
 	} else {
 		log.Infoln("No need to reboot while installing REX-Ray")
 
-		errState = sdn.UpdateNodeState(types.StateFinishInstall)
+		errState := sdn.UpdateNodeState(types.StateFinishInstall)
 		if errState != nil {
 			log.Errorln("Failed to signal state change:", errState)
 		} else {
@@ -212,12 +223,19 @@ func (sdn *ScaleioDataNode) RunStateSystemReboot() {
 
 //RunStateFinishInstall default action for StateFinishInstall
 func (sdn *ScaleioDataNode) RunStateFinishInstall() {
+	node := sdn.GetSelfNode()
+	if !node.Declarative && !node.Advertised {
+		err := sdn.UpdateDevices()
+		if err == nil {
+			log.Infoln("UpdateDevices() Succcedeed. Devices advertised!")
+		} else {
+			log.Errorln("UpdateDevices() Failed. Err:", err)
+		}
+	}
+
 	log.Debugln("In StateFinishInstall. Wait for", common.PollForChangesInSeconds,
 		"seconds for changes in the cluster.")
 	time.Sleep(time.Duration(common.PollForChangesInSeconds) * time.Second)
-
-	//TODO temporary until libkv
-	sdn.LeaveMarkerFileForConfigured()
 }
 
 //RunStateUpgradeCluster default action for StateUpgradeCluster

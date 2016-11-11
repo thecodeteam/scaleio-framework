@@ -18,6 +18,7 @@ import (
 	assert "github.com/stretchr/testify/assert"
 
 	config "github.com/codedellemc/scaleio-framework/scaleio-scheduler/config"
+	kvstore "github.com/codedellemc/scaleio-framework/scaleio-scheduler/scheduler/kvstore"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
@@ -34,11 +35,19 @@ func TestMain(m *testing.M) {
 
 	//create config object
 	cfg := config.NewConfig()
+	cfg.Store = "boltdb"
+	cfg.StoreURI = "/tmp/bolt-test"
+
+	//store
+	store, err := kvstore.NewKvStore(cfg)
+	if err != nil {
+		log.Fatalln("Store init failed. Err:", err)
+	}
 
 	//alt executor path
 	cfg.AltExecutorPath = TestInputFile
 
-	server = NewRestServer(cfg)
+	server = NewRestServer(cfg, store)
 
 	server.State.ScaleIO.Nodes = append(server.State.ScaleIO.Nodes, &types.ScaleIONode{
 		AgentID:    "127.0.0.1",
@@ -66,7 +75,7 @@ func TestMain(m *testing.M) {
 	})
 
 	server.State.ScaleIO.AdminPassword = "Scaleio123"
-	server.State.ScaleIO.Deb.DebMdm = "mymdm"
+	server.State.ScaleIO.Ubuntu14.Mdm = "mymdm"
 
 	//wait 5 seconds for server to come up
 	time.Sleep(5 * time.Second)
@@ -180,8 +189,8 @@ func TestState(t *testing.T) {
 	assert.NoError(t, err)
 
 	assert.Equal(t, "scaleio", state.ScaleIO.ClusterName)
-	assert.Equal(t, "pd", state.ScaleIO.ProtectionDomain)
-	assert.Equal(t, "sp", state.ScaleIO.StoragePool)
+	assert.Equal(t, "default", state.ScaleIO.ProtectionDomain)
+	assert.Equal(t, "default", state.ScaleIO.StoragePool)
 	assert.Equal(t, "Scaleio123", state.ScaleIO.AdminPassword)
 
 	for _, node := range state.ScaleIO.Nodes {
@@ -201,7 +210,7 @@ func TestState(t *testing.T) {
 		}
 	}
 
-	assert.Equal(t, "mymdm", state.ScaleIO.Deb.DebMdm)
+	assert.Equal(t, "mymdm", state.ScaleIO.Ubuntu14.Mdm)
 }
 
 func TestNodeStateOk(t *testing.T) {
@@ -288,52 +297,6 @@ func TestNodeStateBad(t *testing.T) {
 	assert.Equal(t, "Unable to find the Executor", strings.TrimSpace(string(body)))
 }
 
-func TestNodeAdd(t *testing.T) {
-	url := "http://" + server.Config.RestAddress + ":" +
-		strconv.Itoa(server.Config.RestPort) + "/api/node/cluster"
-
-	state := types.AddNode{
-		Acknowledged: false,
-		ExecutorID:   "executor1",
-	}
-
-	response, err := json.MarshalIndent(state, "", "  ")
-	assert.NotNil(t, response)
-	assert.NoError(t, err)
-
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(response))
-	assert.NotNil(t, req)
-	assert.NoError(t, err)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	assert.NotNil(t, resp)
-	assert.NoError(t, err)
-	assert.Equal(t, resp.StatusCode, http.StatusOK)
-
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(io.LimitReader(resp.Body, 1048576))
-	assert.NotNil(t, body)
-	assert.NoError(t, err)
-
-	log.Debugln("response Status:", resp.Status)
-	log.Debugln("response Headers:", resp.Header)
-	log.Debugln("response Body:", string(body))
-
-	var newstate types.AddNode
-	err = json.Unmarshal(body, &newstate)
-	assert.NotNil(t, state)
-	assert.NoError(t, err)
-
-	log.Debugln("Acknowledged:", newstate.Acknowledged)
-	log.Debugln("ExecutorID:", newstate.ExecutorID)
-
-	assert.Equal(t, true, newstate.Acknowledged)
-	assert.Equal(t, "executor1", newstate.ExecutorID)
-}
-
 func TestNodePing(t *testing.T) {
 	url := "http://" + server.Config.RestAddress + ":" +
 		strconv.Itoa(server.Config.RestPort) + "/api/node/ping"
@@ -368,7 +331,56 @@ func TestNodePing(t *testing.T) {
 	log.Debugln("response Headers:", resp.Header)
 	log.Debugln("response Body:", string(body))
 
-	var newstate types.AddNode
+	var newstate types.PingNode
+	err = json.Unmarshal(body, &newstate)
+	assert.NotNil(t, state)
+	assert.NoError(t, err)
+
+	log.Debugln("Acknowledged:", newstate.Acknowledged)
+	log.Debugln("ExecutorID:", newstate.ExecutorID)
+
+	assert.Equal(t, true, newstate.Acknowledged)
+	assert.Equal(t, "executor1", newstate.ExecutorID)
+}
+
+func TestNodeDevice(t *testing.T) {
+	url := "http://" + server.Config.RestAddress + ":" +
+		strconv.Itoa(server.Config.RestPort) + "/api/node/device"
+
+	state := types.UpdateDevices{
+		Acknowledged: false,
+		ExecutorID:   "executor1",
+	}
+
+	state.Devices = append(state.Devices, "/dev/loop0")
+	state.Devices = append(state.Devices, "/dev/loop1")
+
+	response, err := json.MarshalIndent(state, "", "  ")
+	assert.NotNil(t, response)
+	assert.NoError(t, err)
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(response))
+	assert.NotNil(t, req)
+	assert.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	assert.NotNil(t, resp)
+	assert.NoError(t, err)
+	assert.Equal(t, resp.StatusCode, http.StatusOK)
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(io.LimitReader(resp.Body, 1048576))
+	assert.NotNil(t, body)
+	assert.NoError(t, err)
+
+	log.Debugln("response Status:", resp.Status)
+	log.Debugln("response Headers:", resp.Header)
+	log.Debugln("response Body:", string(body))
+
+	var newstate types.UpdateDevices
 	err = json.Unmarshal(body, &newstate)
 	assert.NotNil(t, state)
 	assert.NoError(t, err)

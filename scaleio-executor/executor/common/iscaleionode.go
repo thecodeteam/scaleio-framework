@@ -1,19 +1,13 @@
 package common
 
-import (
-	"github.com/codedellemc/scaleio-framework/scaleio-executor/config"
-	"github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
-)
+import "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 
 //IScaleioNode is the interface for implementing a ScaleIO node
 type IScaleioNode interface {
-	SetConfig(cfg *config.Config)
-	SetRetrieveState(getstate RetrieveState)
-	GetConfig() *config.Config
 	GetSelfNode() *types.ScaleIONode
 	UpdateScaleIOState() *types.ScaleIOFramework
-	LeaveMarkerFileForConfigured()
 	UpdateNodeState(nodeState int) error
+	UpdateDevices() error
 	UpdatePingNode() error
 
 	RunStateUnknown()
@@ -21,6 +15,7 @@ type IScaleioNode interface {
 	RunStatePrerequisitesInstalled()
 	RunStateBasePackagedInstalled()
 	RunStateInitializeCluster()
+	RunStateAddResourcesToScaleIO()
 	RunStateInstallRexRay()
 	RunStateCleanInstallReboot()
 	RunStateSystemReboot()

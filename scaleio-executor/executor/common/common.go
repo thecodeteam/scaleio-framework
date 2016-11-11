@@ -2,7 +2,6 @@ package common
 
 import (
 	"errors"
-	"strconv"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -26,6 +25,9 @@ var (
 
 	//ErrMdmPairFailed failed to find MDM Pair
 	ErrMdmPairFailed = errors.New("Failed to Find MDM Pair")
+
+	//ErrStateChangeNotAcknowledged failed to find MDM Pair
+	ErrStateChangeNotAcknowledged = errors.New("The node state change was not acknowledged")
 )
 
 //PersonaStringToID String -> PersonaID
@@ -61,7 +63,7 @@ func PersonaIDToString(persona int) string {
 }
 
 //GetSelfNode gets self
-func GetSelfNode(executorID string, state *types.ScaleIOFramework) *types.ScaleIONode {
+func GetSelfNode(state *types.ScaleIOFramework, executorID string) *types.ScaleIONode {
 	log.Infoln("getSelfNode ENTER")
 	for _, node := range state.ScaleIO.Nodes {
 		if executorID == node.ExecutorID {
@@ -157,7 +159,7 @@ func CreateMdmPairString(state *types.ScaleIOFramework) (string, error) {
 
 //GenerateSdsName creates the SDS name for this given node
 func GenerateSdsName(node *types.ScaleIONode) string {
-	str := "sds" + strconv.Itoa(node.Index)
+	str := "sds-" + node.Hostname
 	return str
 }
 

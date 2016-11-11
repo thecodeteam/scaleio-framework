@@ -1,30 +1,15 @@
 package scheduler
 
 import (
-	"strconv"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 
 	mesos "github.com/codedellemc/scaleio-framework/scaleio-scheduler/mesos/v1"
-	"github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
+	common "github.com/codedellemc/scaleio-framework/scaleio-scheduler/scheduler/common"
+	kvstore "github.com/codedellemc/scaleio-framework/scaleio-scheduler/scheduler/kvstore"
+	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
-
-func findScaleIONodeByHostname(nodes types.ScaleIONodes, hostname string) *types.ScaleIONode {
-	log.Debugln("findScaleIONodeByHostname ENTER")
-
-	for i := 0; i < len(nodes); i++ {
-		node := nodes[i]
-		log.Debugln(node.Hostname, "=", hostname, "?")
-		if node.Hostname == hostname {
-			log.Debugln("Node Found")
-			log.Debugln("findScaleIONodeByHostname LEAVE")
-			return node
-		}
-	}
-	log.Debugln("Node NOT Found")
-	log.Debugln("findScaleIONodeByHostname LEAVE")
-	return nil
-}
 
 //IsNodeAnMDMNode returns true is node is an MDM node
 func IsNodeAnMDMNode(node *types.ScaleIONode) bool {
@@ -39,20 +24,138 @@ func IsNodeAnMDMNode(node *types.ScaleIONode) bool {
 	return isMDM
 }
 
-func prepareScaleIONode(offer *mesos.Offer, persona int, ID int) *types.ScaleIONode {
+func appendClientPrefix(key string) string {
+	if strings.Contains(key, "scaleio-sdc-") {
+		return key
+	}
+	return "scaleio-sdc-" + key
+}
+
+func appendServerPrefix(key string) string {
+	if strings.Contains(key, "scaleio-sds-") {
+		return key
+	}
+	return "scaleio-sds-" + key
+}
+
+func getAttributeByKey(attribs []*mesos.Attribute, key string) (string, error) {
+	for _, attrib := range attribs {
+		if attrib.GetName() == key {
+			return attrib.GetText().GetValue(), nil
+		}
+	}
+
+	return "", common.ErrAttributeNotFound
+}
+
+type fixprefix func(string) string
+
+func prepareScaleIONode(store *kvstore.KvStore, offer *mesos.Offer) (*types.ScaleIONode, error) {
+	persona, state, err := store.GetNodeInfo(offer.GetHostname())
+	if err != nil {
+		log.Errorln("Unable to find Node metadata for", offer.GetHostname())
+		return nil, err
+	}
+
 	node := &types.ScaleIONode{
 		AgentID:     offer.GetAgentId().GetValue(),
-		TaskID:      "scaleio" + strconv.Itoa(ID),
-		ExecutorID:  "executor-scaleio" + strconv.Itoa(ID),
+		TaskID:      "scaleio-" + offer.GetHostname(),
+		ExecutorID:  "executor-scaleio-" + offer.GetHostname(),
 		OfferID:     offer.GetId().GetValue(),
 		IPAddress:   offer.GetUrl().GetAddress().GetIp(),
 		Hostname:    offer.GetHostname(),
-		Index:       ID,
 		Persona:     persona,
-		State:       types.StateUnknown,
-		InCluster:   false,
+		State:       state,
 		LastContact: 0,
+		Declarative: false,
+		Advertised:  false,
 	}
 
-	return node
+	keys := []string{
+		"scaleio-sds-domains",
+		"scaleio-sdc-domains",
+	}
+	fixprefix := []fixprefix{
+		appendServerPrefix,
+		appendClientPrefix,
+	}
+
+	for i := 0; i < 2; i++ {
+		value, err := getAttributeByKey(offer.GetAttributes(), keys[i])
+		if err != nil {
+			log.Warnln("Attribute", keys[i], "not found")
+			continue
+		}
+
+		//this means this particular node was explicitly provisioned
+		node.Declarative = true
+
+		fsDomains := strings.Split(value, ",")
+		for _, fsDomain := range fsDomains {
+
+			if node.ProvidesDomains == nil {
+				node.ProvidesDomains = make(map[string]*types.ProtectionDomain)
+			}
+			if node.ProvidesDomains[fsDomain] == nil {
+				node.ProvidesDomains[fsDomain] = &types.ProtectionDomain{
+					Name:     fsDomain,
+					KeyValue: make(map[string]string),
+				}
+			}
+			nDomain := node.ProvidesDomains[fsDomain]
+
+			poolsStr, err := getAttributeByKey(offer.GetAttributes(), fixprefix[i](fsDomain))
+			if err != nil {
+				log.Warnln("Attribute", fixprefix[i](fsDomain), "not found")
+				continue
+			}
+
+			fsPools := strings.Split(poolsStr, ",")
+			for _, fsPool := range fsPools {
+
+				if nDomain.Pools == nil {
+					nDomain.Pools = make(map[string]*types.StoragePool)
+				}
+				if nDomain.Pools[fsPool] == nil {
+					nDomain.Pools[fsPool] = &types.StoragePool{
+						Name:     fsPool,
+						KeyValue: make(map[string]string),
+					}
+				}
+				nPool := nDomain.Pools[fsPool]
+
+				deviceStr, err := getAttributeByKey(offer.GetAttributes(), fixprefix[i](fsPool))
+				if err != nil {
+					log.Warnln("Attribute", fixprefix[i](fsPool), "not found")
+					continue
+				}
+
+				fsDevices := strings.Split(deviceStr, ",")
+				for _, fsDevice := range fsDevices {
+					if nPool.Devices == nil {
+						nPool.Devices = make([]string, 0)
+					}
+					//TODO check for device
+					nPool.Devices = append(nPool.Devices, fsDevice)
+				}
+			}
+		}
+	}
+
+	return node, nil
+}
+
+func (s *ScaleIOScheduler) addScaleIONode(offer *mesos.Offer) error {
+	node := common.FindScaleIONodeByHostname(s.Server.State.ScaleIO.Nodes, offer.GetHostname())
+	if node != nil {
+		return common.ErrNodeNotFound
+	}
+
+	node, err := prepareScaleIONode(s.Store, offer)
+	if err != nil {
+		return err
+	}
+
+	s.Server.State.ScaleIO.Nodes = append(s.Server.State.ScaleIO.Nodes, node)
+	return nil
 }

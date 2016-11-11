@@ -9,6 +9,6 @@ type INodeMgr interface {
 	EnvironmentSetup(state *types.ScaleIOFramework) (bool, error)
 	NodeSetup(state *types.ScaleIOFramework) error
 
-	RexraySetup(state *types.ScaleIOFramework) (bool, error)
+	RexraySetup(state *types.ScaleIOFramework, executorID string) (bool, error)
 	SetupIsolator(state *types.ScaleIOFramework) error
 }

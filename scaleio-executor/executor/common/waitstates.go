@@ -82,7 +82,7 @@ func waitForState(sio IScaleioNode, nodeState int, allNodes bool) *types.ScaleIO
 	for {
 		state = sio.UpdateScaleIOState()
 		if waitForRunState(state, nodeState, allNodes) {
-			log.Debugln("Achieve state", nodeState, "among management nodes")
+			log.Debugln("Achieve state", nodeState, "among nodes")
 			break
 		}
 		log.Debugln("Waiting for", PollStatusInSeconds, "seconds")

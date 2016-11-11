@@ -3,22 +3,17 @@ package common
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
+	"strings"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	xplatform "github.com/dvonthenen/goxplatform"
 
 	config "github.com/codedellemc/scaleio-framework/scaleio-executor/config"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
-)
-
-var (
-	//ErrStateChangeNotAcknowledged failed to find MDM Pair
-	ErrStateChangeNotAcknowledged = errors.New("The node state change was not acknowledged")
 )
 
 //ScaleioNode implementation for ScaleIO Node
@@ -30,22 +25,7 @@ type ScaleioNode struct {
 	GetState       RetrieveState
 }
 
-//SetConfig sets the Config
-func (bsn *ScaleioNode) SetConfig(cfg *config.Config) {
-	bsn.Config = cfg
-}
-
-//SetRetrieveState sets the retrieve state function
-func (bsn *ScaleioNode) SetRetrieveState(getstate RetrieveState) {
-	bsn.GetState = getstate
-}
-
-//GetConfig retrieves the config
-func (bsn *ScaleioNode) GetConfig() *config.Config {
-	return bsn.Config
-}
-
-//GetSelfNode get self node
+//GetSelfNode returns myself
 func (bsn *ScaleioNode) GetSelfNode() *types.ScaleIONode {
 	return bsn.Node
 }
@@ -53,30 +33,8 @@ func (bsn *ScaleioNode) GetSelfNode() *types.ScaleIONode {
 //UpdateScaleIOState updates the state of the framework
 func (bsn *ScaleioNode) UpdateScaleIOState() *types.ScaleIOFramework {
 	bsn.State = WaitForStableState(bsn.GetState)
-	bsn.Node = GetSelfNode(bsn.Config.ExecutorID, bsn.State)
+	bsn.Node = GetSelfNode(bsn.State, bsn.Config.ExecutorID)
 	return bsn.State
-}
-
-//LeaveMarkerFileForConfigured TODO temporary until libkv
-//LeaveMarkerFileForConfigured sets a marker file when in demo mode
-func (bsn *ScaleioNode) LeaveMarkerFileForConfigured() {
-	if !bsn.State.DemoMode {
-		log.Infoln("DemoMode = FALSE. Do not leave marker file")
-		return
-	}
-
-	log.Infoln("DemoMode = TRUE. Leaving marker file for previously configured")
-
-	err := os.MkdirAll("/etc/scaleio-framework", os.ModeDir)
-	if err != nil {
-		log.Errorln("Unable to mkdir:", err)
-	}
-
-	data := []byte(PersonaIDToString(bsn.Node.Persona))
-	err = ioutil.WriteFile("/etc/scaleio-framework/state", data, 0644)
-	if err != nil {
-		log.Errorln("Unable to write to marker file:", err)
-	}
 }
 
 //UpdateNodeState this function tells the scheduler that the executor's state
@@ -150,6 +108,121 @@ func (bsn *ScaleioNode) UpdateNodeState(nodeState int) error {
 
 	log.Errorln("NotifyNodeState Succeeded")
 	log.Debugln("NotifyNodeState LEAVE")
+	return nil
+}
+
+func isInList(haystack []string, needle string) bool {
+	for _, item := range haystack {
+		if strings.Contains(item, needle) {
+			return true
+		}
+	}
+	return false
+}
+
+//UpdateDevices this function tells the scheduler which devices to add
+func (bsn *ScaleioNode) UpdateDevices() error {
+	log.Debugln("UpdateDevices ENTER")
+
+	if bsn.GetSelfNode().Declarative {
+		log.Debugln("Declarative = TRUE. Skip discovering new devices.")
+		log.Debugln("UpdateDevices LEAVE")
+		return nil
+	}
+
+	url := bsn.State.SchedulerAddress + "/api/node/device"
+
+	state := &types.UpdateDevices{
+		Acknowledged: false,
+		ExecutorID:   bsn.Config.ExecutorID,
+	}
+
+	deviceList, errList := xplatform.GetInstance().Sys.GetDeviceList()
+	if errList != nil {
+		log.Debugln("GetDeviceList Failed. Err:", errList)
+		log.Debugln("UpdateDevices LEAVE")
+		return errList
+	}
+
+	deviceInUse, errInUse := xplatform.GetInstance().Sys.GetInUseDeviceList()
+	if errInUse != nil {
+		log.Debugln("GetInUseDeviceList Failed. Err:", errInUse)
+		log.Debugln("UpdateDevices LEAVE")
+		return errInUse
+	}
+
+	atLeastOne := false
+	for _, device := range deviceList {
+		log.Debugln("Device:", device)
+		if isInList(deviceInUse, device) {
+			log.Debugln("Device is InUse")
+			continue
+		}
+		log.Debugln("Add Device:", device)
+		state.Devices = append(state.Devices, device)
+		atLeastOne = true
+	}
+
+	if !atLeastOne {
+		log.Debugln("Does not have any devices to offer!")
+	}
+
+	response, err := json.MarshalIndent(state, "", "  ")
+	if err != nil {
+		log.Errorln("Failed to marshall state object:", err)
+		log.Debugln("UpdateDevices LEAVE")
+		return err
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(response))
+	if err != nil {
+		log.Errorln("Failed to create new HTTP request:", err)
+		log.Debugln("UpdateDevices LEAVE")
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Errorln("Failed to make HTTP call:", err)
+		log.Debugln("UpdateDevices LEAVE")
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(io.LimitReader(resp.Body, 1048576))
+	if err != nil {
+		log.Errorln("Failed to read the HTTP Body:", err)
+		log.Debugln("UpdateDevices LEAVE")
+		return err
+	}
+
+	log.Debugln("response Status:", resp.Status)
+	log.Debugln("response Headers:", resp.Header)
+	log.Debugln("response Body:", string(body))
+
+	var newstate types.UpdateDevices
+	err = json.Unmarshal(body, &newstate)
+	if err != nil {
+		log.Errorln("Failed to unmarshal the UpdateState object:", err)
+		log.Debugln("UpdateDevices LEAVE")
+		return err
+	}
+
+	log.Debugln("Acknowledged:", newstate.Acknowledged)
+	log.Debugln("ExecutorID:", newstate.ExecutorID)
+
+	if !newstate.Acknowledged {
+		log.Errorln("Failed to receive an acknowledgement")
+		log.Debugln("UpdateDevices LEAVE")
+		return ErrStateChangeNotAcknowledged
+	}
+
+	log.Debugln("UpdateDevices Succeeded")
+	log.Debugln("UpdateDevices LEAVE")
 	return nil
 }
 
@@ -250,6 +323,12 @@ func (bsn *ScaleioNode) RunStateBasePackagedInstalled() {
 //RunStateInitializeCluster default action for StateInitializeCluster
 func (bsn *ScaleioNode) RunStateInitializeCluster() {
 	log.Debugln("In StateInitializeCluster. Do nothing.")
+	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
+}
+
+//RunStateAddResourcesToScaleIO default action for StateAddResourcesToScaleIO
+func (bsn *ScaleioNode) RunStateAddResourcesToScaleIO() {
+	log.Debugln("In StateAddResourcesToScaleIO. Do nothing.")
 	time.Sleep(time.Duration(PollStatusInSeconds) * time.Second)
 }
 
