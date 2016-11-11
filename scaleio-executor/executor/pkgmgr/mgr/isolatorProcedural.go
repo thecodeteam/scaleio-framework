@@ -186,7 +186,7 @@ func (nm *NodeManager) SetupIsolator(state *types.ScaleIOFramework) error {
 
 		//Copy File
 		dstFullPath := isolatorInstallDir + "/" + xplatform.GetInstance().Fs.GetFilenameFromURIOrFullPath(localIsolator)
-		err = xplatform.GetInstance().Fs.FileCopy(localIsolator, dstFullPath)
+		err = xplatform.GetInstance().Fs.CopyFile(localIsolator, dstFullPath)
 		if err != nil {
 			log.Errorln("Failed to Copy isolator to Dst:", err)
 			log.Infoln("SetupIsolator LEAVE")
