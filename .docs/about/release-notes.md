@@ -13,7 +13,7 @@ To upgrade the ScaleIO-Framework to the latest version, simply redeploy the Fram
     "https://github.com/codedellemc/scaleio-framework/releases/download/v0.2.0/scaleio-scheduler",
     "https://github.com/codedellemc/scaleio-framework/releases/download/v0.2.0/scaleio-executor"
   ],
-  "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=[IP ADDRESS FOR MESOS MASTER]:5050 -scaleio.clustername=[SCALEIO NAME] -scaleio.password=[SCALEIO GATEWAY PASSWORD] -scaleio.protectiondomain=[PROTECTION DOMAIN NAME] -scaleio.storagepool=[STORAGE POOL NAME] -scaleio.preconfig.primary=[MASTER MDM IP ADDRESS] -scaleio.preconfig.secondary=[SLAVE MDM IP ADDRESS] -scaleio.preconfig.tiebreaker=[TIEBREAKER MDM IP ADDRESS] -scaleio.preconfig.gateway=[GATEWAY IP ADDRESS]",
+  "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=[IP ADDRESS FOR MESOS MASTER]:5050 -scaleio.clustername=[SCALEIO NAME] -scaleio.password=[SCALEIO GATEWAY PASSWORD] -scaleio.preconfig.primary=[MASTER MDM IP ADDRESS] -scaleio.preconfig.secondary=[SLAVE MDM IP ADDRESS] -scaleio.preconfig.tiebreaker=[TIEBREAKER MDM IP ADDRESS] -scaleio.preconfig.gateway=[GATEWAY IP ADDRESS]",
   "mem": 32,
   "cpus": 0.2,
   "instances": 1,
@@ -34,8 +34,19 @@ GET [SCHEDULER IP/FQDN]:[Marathon Dynamic Port]/version
 }
 ```
 
+## Version 0.3.0 (2016/12/15)
+ScaleIO Framework 0.3.0 introduces the new Declarative approach for deploying ScaleIO.
+
+### New Features
+- Addressed Issue [#82](https://github.com/codedellemc/scaleio-framework/issues/82): Implement User Defined Deployment. Please see PR [#111](https://github.com/codedellemc/scaleio-framework/pull/111) for more details.
+
+### Enhancements
+- Another feature that has been enhanced is that when new nodes are brought online, storage devices will be add to the ScaleIO cluster based on the method being used.
+  - If the Declarative approach is used, only devices defined by the user will be added.
+  - The old automatic method is used, any available block devices that are currently not being used (ie has a filesystem on it) will be added to the default domain/pool.
+
 ## Version 0.2.0 (2016/11/09)
-ScaleIO Framework 0.2.0 introduces RHEL7/CentOS7 support and also refreshes the version of ScaleIO to versio 2.0.1 which is the latest as of writting this release..
+ScaleIO Framework 0.2.0 introduces RHEL7/CentOS7 support and also refreshes the version of ScaleIO to version 2.0.1 which is the latest as of writting this release..
 
 ### New Features
 - Addressed Issue [#65](https://github.com/codedellemc/scaleio-framework/issues/65): RHEL7 and CentOS7 Support. Supports ScaleIO 2.0.1
