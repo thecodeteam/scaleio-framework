@@ -10,7 +10,5 @@ type IMdmMgr interface {
 
 	ManagementSetup(state *types.ScaleIOFramework, isPriOrSec bool) error
 	CreateCluster(state *types.ScaleIOFramework) error
-	AddSdsNodesToCluster(state *types.ScaleIOFramework, needsLogin bool) error
-	InitializeCluster(state *types.ScaleIOFramework) error
 	GatewaySetup(state *types.ScaleIOFramework) (bool, error)
 }

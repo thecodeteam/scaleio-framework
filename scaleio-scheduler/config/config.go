@@ -54,10 +54,14 @@ const (
 
 //Config is the representation of the config
 type Config struct {
-	LogLevel     string
-	DemoMode     bool
-	Debug        bool
-	Experimental bool
+	LogLevel        string
+	Debug           bool
+	DeleteKeyValues bool
+	DumpKeyValues   bool
+	StoreAddKey     string
+	StoreAddVal     string
+	StoreDelKey     string
+	Experimental    bool
 
 	RexrayBranch  string
 	RexrayVersion string
@@ -77,6 +81,8 @@ type Config struct {
 	User                 string
 	Hostname             string
 	Role                 string
+	Store                string
+	StoreURI             string
 
 	ClusterName          string
 	ClusterID            string
@@ -84,11 +90,11 @@ type Config struct {
 	ProtectionDomain     string
 	StoragePool          string
 	AdminPassword        string
+	APIVersion           string
 	PrimaryMdmAddress    string
 	SecondaryMdmAddress  string
 	TieBreakerMdmAddress string
 	GatewayAddress       string
-	BlockDevice          string
 	DebMdm               string
 	DebSds               string
 	DebSdc               string
@@ -105,10 +111,18 @@ type Config struct {
 func (cfg *Config) AddFlags(fs *flag.FlagSet) {
 	fs.StringVar(&cfg.LogLevel, "loglevel", cfg.LogLevel,
 		"Set the logging level for the application")
-	fs.BoolVar(&cfg.DemoMode, "demomode", cfg.DemoMode,
-		"Sets the application to demo mode")
 	fs.BoolVar(&cfg.Debug, "debug", cfg.Debug,
 		"Debug more prevents the reboot so the logs dont get cycled")
+	fs.BoolVar(&cfg.DeleteKeyValues, "store.delete", cfg.DeleteKeyValues,
+		"Helper function that deletes ScaleIO Framework Key/Value Store")
+	fs.BoolVar(&cfg.DumpKeyValues, "store.dump", cfg.DumpKeyValues,
+		"Helper function that dumps ScaleIO Framework Key/Value Store")
+	fs.StringVar(&cfg.StoreAddKey, "store.add.key", cfg.StoreAddKey,
+		"Modify a select store key")
+	fs.StringVar(&cfg.StoreAddVal, "store.add.value", cfg.StoreAddVal,
+		"Set the values to the key provided by store.key")
+	fs.StringVar(&cfg.StoreDelKey, "store.del.key", cfg.StoreDelKey,
+		"Delete a select store key")
 	fs.BoolVar(&cfg.Experimental, "experimental", cfg.Experimental,
 		"Sets the application to experimental mode")
 
@@ -141,6 +155,8 @@ func (cfg *Config) AddFlags(fs *flag.FlagSet) {
 	fs.StringVar(&cfg.User, "user", cfg.User, "The User account the framework is running under")
 	fs.StringVar(&cfg.Hostname, "hostname", cfg.Hostname, "The Hostname where the framework runs")
 	fs.StringVar(&cfg.Role, "role", cfg.Role, "Framework role to register with the Mesos master")
+	fs.StringVar(&cfg.Store, "store.type", cfg.Store, "The type of keyvalue store to use")
+	fs.StringVar(&cfg.StoreURI, "store.uri", cfg.StoreURI, "Store URI to connect with")
 
 	fs.StringVar(&cfg.ClusterName, "scaleio.clustername", cfg.ClusterName, "ScaleIO Cluster Name")
 	fs.StringVar(&cfg.ClusterID, "scaleio.clusterid", cfg.ClusterID, "ScaleIO Cluster ID")
@@ -151,6 +167,8 @@ func (cfg *Config) AddFlags(fs *flag.FlagSet) {
 		"ScaleIO StoragePool Name")
 	fs.StringVar(&cfg.AdminPassword, "scaleio.password", cfg.AdminPassword,
 		"ScaleIO Admin Password")
+	fs.StringVar(&cfg.APIVersion, "scaleio.apiversion", cfg.APIVersion,
+		"ScaleIO API Version")
 	fs.StringVar(&cfg.PrimaryMdmAddress, "scaleio.preconfig.primary",
 		cfg.PrimaryMdmAddress, "Pre-Configured Pri MDM Node. Requires Sec and TB "+
 			"MDM nodes to be Pre-Configured")
@@ -163,8 +181,6 @@ func (cfg *Config) AddFlags(fs *flag.FlagSet) {
 	fs.StringVar(&cfg.GatewayAddress, "scaleio.preconfig.gateway",
 		cfg.GatewayAddress, "Used to set a separated Gateway node. Otherwise, the "+
 			"Primary MDM node is assumed to have the Gateway installed on it.")
-	fs.StringVar(&cfg.BlockDevice, "scaleio.device", cfg.BlockDevice,
-		"Specifies which device to use")
 	fs.StringVar(&cfg.DebMdm, "scaleio.ubuntu14.mdm", cfg.DebMdm, "ScaleIO MDM Package for Ubuntu 14.04")
 	fs.StringVar(&cfg.DebSds, "scaleio.ubuntu14.sds", cfg.DebSds, "ScaleIO SDS Package for Ubuntu 14.04")
 	fs.StringVar(&cfg.DebSdc, "scaleio.ubuntu14.sdc", cfg.DebSdc, "ScaleIO SDC Package for Ubuntu 14.04")
@@ -192,8 +208,12 @@ func NewConfig() *Config {
 
 	return &Config{
 		LogLevel:             env("LOG_LEVEL", "info"),
-		DemoMode:             envBool("DEMO_MODE", "false"),
 		Debug:                envBool("DEBUG", "false"),
+		DeleteKeyValues:      envBool("DELETE_STORE", "false"),
+		DumpKeyValues:        envBool("DUMP_STORE", "false"),
+		StoreAddKey:          env("STORE_ADD_KEY", ""),
+		StoreAddVal:          env("STORE_ADD_VAL", ""),
+		StoreDelKey:          env("STORE_DEL_KEY", ""),
 		Experimental:         envBool("EXPERIMENTAL", "false"),
 		RexrayBranch:         env("REXRAY_BRANCH", "stable"),
 		RexrayVersion:        env("REXRAY_VERSION", "latest"),
@@ -211,17 +231,19 @@ func NewConfig() *Config {
 		User:                 env("USER", mesosUser()),
 		Hostname:             env("HOSTNAME", mesosHostname()),
 		Role:                 env("ROLE", "scaleio"),
+		Store:                env("STORE_TYPE", "zk"),
+		StoreURI:             env("STORE_URI", ""),
 		ClusterName:          env("CLUSTER_NAME", "scaleio"),
 		ClusterID:            env("CLUSTER_ID", ""),
 		LbGateway:            env("LB_GATEWAY", ""),
 		ProtectionDomain:     env("PROTECTION_DOMAIN", "default"),
 		StoragePool:          env("STORAGE_POOL", "default"),
 		AdminPassword:        env("ADMIN_PASSWORD", "Scaleio123"),
+		APIVersion:           env("ADMIN_PASSWORD", "2.0"),
 		PrimaryMdmAddress:    env("PRIMARY_MDM_ADDRESS", ""),
 		SecondaryMdmAddress:  env("SECONDARY_MDM_ADDRESS", ""),
 		TieBreakerMdmAddress: env("TIEBREAKER_MDM_ADDRESS", ""),
 		GatewayAddress:       env("GATEWAY_ADDRESS", ""),
-		BlockDevice:          env("BLOCK_DEVICE", "/dev/xvdf"),
 		DebMdm:               env("DEB_MDM", debMdm),
 		DebSds:               env("DEB_SDS", debSds),
 		DebSdc:               env("DEB_SDC", debSdc),

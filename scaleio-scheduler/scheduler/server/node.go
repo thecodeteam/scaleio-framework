@@ -9,23 +9,9 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
+	"github.com/codedellemc/scaleio-framework/scaleio-scheduler/scheduler/common"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
-
-func findScaleIONodeByExecutorID(nodes types.ScaleIONodes, executorID string) *types.ScaleIONode {
-	log.Debugln("findScaleIONodeByExecutorID ENTER")
-	for i := 0; i < len(nodes); i++ {
-		node := nodes[i]
-		if node.ExecutorID == executorID {
-			log.Debugln("Node Found:", node.ExecutorID)
-			log.Debugln("findScaleIONodeByExecutorID LEAVE")
-			return node
-		}
-	}
-	log.Debugln("Node NOT Found")
-	log.Debugln("findScaleIONodeByExecutorID LEAVE")
-	return nil
-}
 
 func setNodeState(w http.ResponseWriter, r *http.Request, server *RestServer) {
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
@@ -37,19 +23,36 @@ func setNodeState(w http.ResponseWriter, r *http.Request, server *RestServer) {
 		log.Warnln("Unable to close the HTTP Body stream:", err)
 	}
 
-	state := &types.UpdateNode{}
+	state := &types.UpdateNode{
+		Acknowledged: false,
+		ExecutorID:   "",
+		State:        types.StateUnknown,
+		KeyValue:     make(map[string]string),
+	}
 	if err := json.Unmarshal(body, &state); err != nil {
 		http.Error(w, "Unable to marshall the response", http.StatusBadRequest)
 		return
 	}
 
-	node := findScaleIONodeByExecutorID(server.State.ScaleIO.Nodes, state.ExecutorID)
+	node := common.FindScaleIONodeByExecutorID(server.State.ScaleIO.Nodes, state.ExecutorID)
 	if node == nil {
 		http.Error(w, "Unable to find the Executor", http.StatusBadRequest)
 		return
 	}
+
+	server.Lock()
+	//set state on object...
 	node.State = state.State
 	node.LastContact = time.Now().Unix()
+
+	//save state in metadata...
+	err = server.Store.SetNodeInfo(node.Hostname, node.Persona, node.State)
+	server.Unlock()
+
+	if err != nil {
+		http.Error(w, "SetNodeInfo Err: "+err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	//acknowledged the state change
 	state.Acknowledged = true
@@ -61,7 +64,9 @@ func setNodeState(w http.ResponseWriter, r *http.Request, server *RestServer) {
 	}
 }
 
-func setNodeAdded(w http.ResponseWriter, r *http.Request, server *RestServer) {
+func setNodeDevices(w http.ResponseWriter, r *http.Request, server *RestServer) {
+	log.Debugln("setNodeDevices ENTER")
+
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
 		http.Error(w, "Unable to read the HTTP Body stream", http.StatusBadRequest)
@@ -71,19 +76,61 @@ func setNodeAdded(w http.ResponseWriter, r *http.Request, server *RestServer) {
 		log.Warnln("Unable to close the HTTP Body stream:", err)
 	}
 
-	state := &types.AddNode{}
+	state := &types.UpdateDevices{
+		Acknowledged: false,
+		ExecutorID:   "",
+		Devices:      make([]string, 0),
+		KeyValue:     make(map[string]string),
+	}
 	if err := json.Unmarshal(body, &state); err != nil {
 		http.Error(w, "Unable to marshall the response", http.StatusBadRequest)
 		return
 	}
 
-	node := findScaleIONodeByExecutorID(server.State.ScaleIO.Nodes, state.ExecutorID)
+	node := common.FindScaleIONodeByExecutorID(server.State.ScaleIO.Nodes, state.ExecutorID)
 	if node == nil {
 		http.Error(w, "Unable to find the Executor", http.StatusBadRequest)
 		return
 	}
-	node.InCluster = true
+
+	server.Lock()
+	//set last contact time on object...
 	node.LastContact = time.Now().Unix()
+
+	//Set advertised!
+	node.Advertised = true
+
+	for _, device := range state.Devices {
+		log.Debugln("Device:", device)
+		if node.ProvidesDomains == nil {
+			node.ProvidesDomains = make(map[string]*types.ProtectionDomain)
+		}
+		if node.ProvidesDomains[server.Config.ProtectionDomain] == nil {
+			log.Debugln("ProvidesDomains is nil")
+			node.ProvidesDomains[server.Config.ProtectionDomain] = &types.ProtectionDomain{
+				Name: server.Config.ProtectionDomain,
+			}
+		}
+		pd := node.ProvidesDomains[server.Config.ProtectionDomain]
+		if pd.Pools == nil {
+			pd.Pools = make(map[string]*types.StoragePool)
+		}
+		if pd.Pools[server.Config.StoragePool] == nil {
+			log.Debugln("Pools is nil")
+			pd.Pools[server.Config.StoragePool] = &types.StoragePool{
+				Name: server.Config.StoragePool,
+			}
+		}
+		sp := pd.Pools[server.Config.StoragePool]
+
+		if sp.Devices == nil {
+			log.Debugln("Devices is nil")
+			sp.Devices = make([]string, 0)
+		}
+		log.Debugln("Add device")
+		sp.Devices = append(sp.Devices, device)
+	}
+	server.Unlock()
 
 	//acknowledged the state change
 	state.Acknowledged = true
@@ -105,18 +152,25 @@ func setNodePing(w http.ResponseWriter, r *http.Request, server *RestServer) {
 		log.Warnln("Unable to close the HTTP Body stream:", err)
 	}
 
-	state := &types.PingNode{}
+	state := &types.PingNode{
+		Acknowledged: false,
+		ExecutorID:   "",
+		KeyValue:     make(map[string]string),
+	}
 	if err := json.Unmarshal(body, &state); err != nil {
 		http.Error(w, "Unable to marshall the response", http.StatusBadRequest)
 		return
 	}
 
-	node := findScaleIONodeByExecutorID(server.State.ScaleIO.Nodes, state.ExecutorID)
+	node := common.FindScaleIONodeByExecutorID(server.State.ScaleIO.Nodes, state.ExecutorID)
 	if node == nil {
 		http.Error(w, "Unable to find the Executor", http.StatusBadRequest)
 		return
 	}
+
+	server.Lock()
 	node.LastContact = time.Now().Unix()
+	server.Unlock()
 
 	//acknowledged the state change
 	state.Acknowledged = true

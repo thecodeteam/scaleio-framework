@@ -4,7 +4,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 
 	sched "github.com/codedellemc/scaleio-framework/scaleio-scheduler/mesos/sched"
-	mesos "github.com/codedellemc/scaleio-framework/scaleio-scheduler/mesos/v1"
+	common "github.com/codedellemc/scaleio-framework/scaleio-scheduler/scheduler/common"
 )
 
 func (s *ScaleIOScheduler) subscribed(event *sched.Event) {
@@ -17,51 +17,14 @@ func (s *ScaleIOScheduler) offers(event *sched.Event) {
 	offers := event.GetOffers().GetOffers()
 	log.Infoln("[EVENT] Received", len(offers), "OFFERS")
 
-	//TODO do a better job at selecting the MDM nodes if not preconfigured
-	//loop through offers and build "State" object.
-	//TODO retrieve pri, sec, tb from zookeeper. Use libkv.
-	for _, offer := range offers {
-		if doesExecutorExistOnHost(offer) {
-			log.Debugln("Skipping node as it already has an executor on it.")
-			continue
-		}
-
-		node := findScaleIONodeByHostname(s.Server.State.ScaleIO.Nodes, offer.GetHostname())
-		if node != nil {
-			log.Errorln("Found existing node by Hostname:", offer.GetHostname())
-			continue
-		}
-
-		ID := s.getNextNodeID()
-		persona := s.getNodeType(ID)
-		log.Debugln("Creating new metadata node. ID:", ID, "Persona:", persona)
-		s.Server.State.ScaleIO.Nodes = append(s.Server.State.ScaleIO.Nodes,
-			prepareScaleIONode(offer, persona, ID))
+	err := s.performNodeSelection(offers)
+	if err != nil {
+		log.Errorln("Failed to determine ScaleIO configuration:", err)
 	}
-	//TODO save pri, sec, tb to zookeeper. Use libkv.
 
 	//setup executors
 	for _, offer := range offers {
 		log.Debugln("Offer:", offer)
-
-		cpuResources := filterResources(offer.Resources, func(res *mesos.Resource) bool {
-			return res.GetName() == "cpus"
-		})
-		cpus := 0.0
-		for _, res := range cpuResources {
-			cpus += res.GetScalar().GetValue()
-		}
-
-		memResources := filterResources(offer.Resources, func(res *mesos.Resource) bool {
-			return res.GetName() == "mem"
-		})
-		mems := 0.0
-		for _, res := range memResources {
-			mems += res.GetScalar().GetValue()
-		}
-
-		log.Infoln("Received Offer <", offer.GetId().GetValue(), ",", offer.GetHostname(),
-			"> with cpus=", cpus, " mem=", mems)
 
 		// account for executor resources if there's an executor already running on the slave
 		if doesExecutorExistOnHost(offer) {
@@ -72,36 +35,12 @@ func (s *ScaleIOScheduler) offers(event *sched.Event) {
 		}
 
 		//find node based on state
-		node := findScaleIONodeByHostname(s.Server.State.ScaleIO.Nodes, offer.GetHostname())
+		node := common.FindScaleIONodeByHostname(s.Server.State.ScaleIO.Nodes, offer.GetHostname())
 		if node == nil {
 			log.Errorln("Unable to find node by Hostname:", offer.GetHostname())
 			message := generateDeclineCall(s.Config, offer)
 			s.send(message)
 			continue
-		}
-
-		//if node is an MDM node
-		if IsNodeAnMDMNode(node) {
-			if s.Config.ExecutorMdmCPU >= (cpus*s.Config.ExecutorCPUFactor) ||
-				s.Config.ExecutorMdmMemory >= (mems*s.Config.ExecutorMemoryFactor) {
-				log.Warnln("Does not have enough resources to install ScaleIO (MDM) on node",
-					offer.GetId().GetValue(), ",", offer.GetHostname())
-				log.Warnln("CPU Required:", s.Config.ExecutorMdmCPU, "CPU Available:", cpus*s.Config.ExecutorCPUFactor)
-				log.Warnln("MEM Required:", s.Config.ExecutorMdmMemory, "MEM Available:", mems*s.Config.ExecutorMemoryFactor)
-				message := generateDeclineCall(s.Config, offer)
-				s.send(message)
-				continue
-			}
-		} else {
-			if s.Config.ExecutorNonCPU >= cpus || s.Config.ExecutorNonMemory >= mems {
-				log.Warnln("Does not have enough resources to install ScaleIO (Non-MDM) on node",
-					offer.GetId().GetValue(), ",", offer.GetHostname())
-				log.Warnln("CPU Required:", s.Config.ExecutorNonCPU, "CPU Available:", cpus*s.Config.ExecutorCPUFactor)
-				log.Warnln("MEM Required:", s.Config.ExecutorNonMemory, "MEM Available:", mems*s.Config.ExecutorMemoryFactor)
-				message := generateDeclineCall(s.Config, offer)
-				s.send(message)
-				continue
-			}
 		}
 
 		//generate accept call to launch executor

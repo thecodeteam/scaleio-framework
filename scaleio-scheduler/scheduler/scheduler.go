@@ -16,40 +16,69 @@ import (
 	"github.com/codedellemc/scaleio-framework/scaleio-scheduler/config"
 	sched "github.com/codedellemc/scaleio-framework/scaleio-scheduler/mesos/sched"
 	mesos "github.com/codedellemc/scaleio-framework/scaleio-scheduler/mesos/v1"
-	"github.com/codedellemc/scaleio-framework/scaleio-scheduler/server"
-	"github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
+	kvstore "github.com/codedellemc/scaleio-framework/scaleio-scheduler/scheduler/kvstore"
+	"github.com/codedellemc/scaleio-framework/scaleio-scheduler/scheduler/server"
 )
 
 const (
 	subscribeRetryDelayInSec = 2
+	rootKey                  = "scaleio-framework"
 )
 
 //ScaleIOScheduler represents a Mesos scheduler
 type ScaleIOScheduler struct {
 	Config *config.Config
+	Store  *kvstore.KvStore
 
-	Framework     *mesos.FrameworkInfo
-	TasksLaunched int
+	Framework *mesos.FrameworkInfo
 
 	Server *server.RestServer
 	Client *client.Client
 
-	Events chan *sched.Event
-	//Offers   chan *sched.Offer
-	//Status   chan *sched.Status
+	Events   chan *sched.Event
 	DoneChan chan struct{}
 }
 
 //NewScaleIOScheduler returns a pointer to new Scheduler
 func NewScaleIOScheduler(cfg *config.Config) *ScaleIOScheduler {
+	myStore, err := kvstore.NewKvStore(cfg)
+	if err != nil {
+		log.Fatalln("NewKvStore Failed. Err:", err)
+		return nil
+	}
+
+	if cfg.DeleteKeyValues {
+		myStore.DeleteStore()
+		return nil
+	} else if cfg.DumpKeyValues {
+		myStore.DumpStore()
+		return nil
+	} else if len(cfg.StoreAddKey) > 0 {
+		err := myStore.UserKeyValue(cfg.StoreAddKey, cfg.StoreAddVal)
+		if err == nil {
+			log.Infoln("UserKeyValue Succeeded")
+		} else {
+			log.Errorln("UserKeyValue Failed. Err:", err)
+		}
+		return nil
+	} else if len(cfg.StoreDelKey) > 0 {
+		err := myStore.UserDeleteKey(cfg.StoreDelKey)
+		if err == nil {
+			log.Infoln("UserDeleteKey Succeeded")
+		} else {
+			log.Errorln("UserDeleteKey Failed. Err:", err)
+		}
+		return nil
+	}
+
 	return &ScaleIOScheduler{
-		Config:        cfg,
-		Client:        client.New(cfg.MasterREST, "/api/v1/scheduler"),
-		Server:        server.NewRestServer(cfg),
-		Framework:     prepareFrameworkInfo(cfg),
-		TasksLaunched: 1,
-		Events:        make(chan *sched.Event),
-		DoneChan:      make(chan struct{}),
+		Config:    cfg,
+		Store:     myStore,
+		Client:    client.New(cfg.MasterREST, "/api/v1/scheduler"),
+		Server:    server.NewRestServer(cfg, myStore),
+		Framework: prepareFrameworkInfo(cfg),
+		Events:    make(chan *sched.Event),
+		DoneChan:  make(chan struct{}),
 	}
 }
 
@@ -63,8 +92,10 @@ func (s *ScaleIOScheduler) Start() <-chan struct{} {
 	return s.DoneChan
 }
 
-func (s *ScaleIOScheduler) stop() {
+//Stop the scheduler and all internal channels
+func (s *ScaleIOScheduler) Stop() {
 	close(s.Events)
+	close(s.DoneChan)
 }
 
 func (s *ScaleIOScheduler) send(call *sched.Call) (*http.Response, error) {
@@ -189,30 +220,4 @@ func (s *ScaleIOScheduler) handleEvents() {
 			s.heartbeat(event)
 		}
 	}
-}
-
-func (s *ScaleIOScheduler) getNextNodeID() int {
-	ID := s.TasksLaunched
-	s.TasksLaunched = s.TasksLaunched + 1
-	return ID
-}
-
-func (s *ScaleIOScheduler) getNodeType(ID int) int {
-	if s.Config.PrimaryMdmAddress != "" {
-		log.Debugln("Pre-Configured MDM Nodes provided. All nodes are Data Nodes.")
-		return types.PersonaNode
-	}
-
-	persona := types.PersonaNode
-
-	switch ID {
-	case 1:
-		persona = types.PersonaMdmPrimary
-	case 2:
-		persona = types.PersonaMdmSecondary
-	case 3:
-		persona = types.PersonaTb
-	}
-
-	return persona
 }

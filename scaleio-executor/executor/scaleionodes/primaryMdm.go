@@ -1,12 +1,18 @@
 package scaleionodes
 
 import (
+	"bytes"
+	"encoding/json"
+	"io"
+	"io/ioutil"
+	"net/http"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
 	xplatform "github.com/dvonthenen/goxplatform"
 	xplatformsys "github.com/dvonthenen/goxplatform/sys"
 
+	config "github.com/codedellemc/scaleio-framework/scaleio-executor/config"
 	common "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 	ubuntu14 "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/deb/ubuntu14"
 	mgr "github.com/codedellemc/scaleio-framework/scaleio-executor/executor/pkgmgr/mgr"
@@ -21,14 +27,19 @@ type ScaleioPrimaryMdmNode struct {
 }
 
 //NewPri generates a Primary MDM Node object
-func NewPri(state *types.ScaleIOFramework) *ScaleioPrimaryMdmNode {
+func NewPri(state *types.ScaleIOFramework, cfg *config.Config, getstate common.RetrieveState) *ScaleioPrimaryMdmNode {
 	myNode := &ScaleioPrimaryMdmNode{}
+	myNode.Config = cfg
+	myNode.GetState = getstate
+	myNode.RebootRequired = false
 
 	var pkgmgr mgr.IMdmMgr
 	switch xplatform.GetInstance().Sys.GetOsType() {
 	case xplatformsys.OsRhel:
+		log.Infoln("Is RHEL7")
 		pkgmgr = rhel7.NewMdmRpmRhel7Mgr(state)
 	case xplatformsys.OsUbuntu:
+		log.Infoln("Is Ubuntu14")
 		pkgmgr = ubuntu14.NewMdmDebUbuntu14Mgr(state)
 	}
 	myNode.PkgMgr = pkgmgr
@@ -120,6 +131,18 @@ func (spmn *ScaleioPrimaryMdmNode) RunStatePrerequisitesInstalled() {
 		return
 	}
 
+	err = spmn.UpdateDevices()
+	if err != nil {
+		log.Errorln("UpdateDevices Failed:", err)
+		errState := spmn.UpdateNodeState(types.StateFatalInstall)
+		if errState != nil {
+			log.Errorln("Failed to signal state change:", errState)
+		} else {
+			log.Debugln("Signaled StateFatalInstall")
+		}
+		return
+	}
+
 	errState := spmn.UpdateNodeState(types.StateBasePackagedInstalled)
 	if errState != nil {
 		log.Errorln("Failed to signal state change:", errState)
@@ -143,6 +166,18 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateBasePackagedInstalled() {
 		return
 	}
 
+	err = spmn.UpdateCluster()
+	if err != nil {
+		log.Errorln("UpdateCluster Failed:", err)
+		errState := spmn.UpdateNodeState(types.StateFatalInstall)
+		if errState != nil {
+			log.Errorln("Failed to signal state change:", errState)
+		} else {
+			log.Debugln("Signaled StateFatalInstall")
+		}
+		return
+	}
+
 	errState := spmn.UpdateNodeState(types.StateInitializeCluster)
 	if errState != nil {
 		log.Errorln("Failed to signal state change:", errState)
@@ -154,18 +189,6 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateBasePackagedInstalled() {
 //RunStateInitializeCluster default action for StateInitializeCluster
 func (spmn *ScaleioPrimaryMdmNode) RunStateInitializeCluster() {
 	common.WaitForClusterInstallFinish(spmn)
-	err := spmn.PkgMgr.InitializeCluster(spmn.State)
-	if err != nil {
-		log.Errorln("InitializeCluster Failed:", err)
-		errState := spmn.UpdateNodeState(types.StateFatalInstall)
-		if errState != nil {
-			log.Errorln("Failed to signal state change:", errState)
-		} else {
-			log.Debugln("Signaled StateFatalInstall")
-		}
-		return
-	}
-
 	reboot, err := spmn.PkgMgr.GatewaySetup(spmn.State)
 	if err != nil {
 		log.Errorln("GatewaySetup Failed:", err)
@@ -177,20 +200,19 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateInitializeCluster() {
 		}
 		return
 	}
-	spmn.RebootRequired = reboot
+	spmn.RebootRequired = spmn.RebootRequired || reboot
 
-	errState := spmn.UpdateNodeState(types.StateInstallRexRay)
+	errState := spmn.UpdateNodeState(types.StateAddResourcesToScaleIO)
 	if errState != nil {
 		log.Errorln("Failed to signal state change:", errState)
 	} else {
-		log.Debugln("Signaled StateInstallRexRay")
+		log.Debugln("Signaled StateAddResourcesToScaleIO")
 	}
 }
 
 //RunStateInstallRexRay default action for StateInstallRexRay
 func (spmn *ScaleioPrimaryMdmNode) RunStateInstallRexRay() {
-	common.WaitForClusterInitializeFinish(spmn)
-	reboot, err := spmn.PkgMgr.RexraySetup(spmn.State)
+	reboot, err := spmn.PkgMgr.RexraySetup(spmn.State, spmn.Config.ExecutorID)
 	if err != nil {
 		log.Errorln("REX-Ray setup Failed:", err)
 		errState := spmn.UpdateNodeState(types.StateFatalInstall)
@@ -201,6 +223,7 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateInstallRexRay() {
 		}
 		return
 	}
+	spmn.RebootRequired = spmn.RebootRequired || reboot
 
 	err = spmn.PkgMgr.SetupIsolator(spmn.State)
 	if err != nil {
@@ -224,12 +247,11 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateInstallRexRay() {
 	common.WaitForCleanInstallReboot(spmn)
 
 	//requires a reboot?
-	if spmn.RebootRequired || reboot {
+	if spmn.RebootRequired {
 		log.Infoln("Reboot required before StateFinishInstall!")
 		log.Debugln("rebootRequired:", spmn.RebootRequired)
-		log.Debugln("reboot:", reboot)
 
-		errState = spmn.UpdateNodeState(types.StateSystemReboot)
+		errState := spmn.UpdateNodeState(types.StateSystemReboot)
 		if errState != nil {
 			log.Errorln("Failed to signal state change:", errState)
 		} else {
@@ -257,7 +279,7 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateInstallRexRay() {
 	} else {
 		log.Infoln("No need to reboot while installing REX-Ray")
 
-		errState = spmn.UpdateNodeState(types.StateFinishInstall)
+		errState := spmn.UpdateNodeState(types.StateFinishInstall)
 		if errState != nil {
 			log.Errorln("Failed to signal state change:", errState)
 		} else {
@@ -278,12 +300,19 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateSystemReboot() {
 
 //RunStateFinishInstall default action for StateFinishInstall
 func (spmn *ScaleioPrimaryMdmNode) RunStateFinishInstall() {
+	node := spmn.GetSelfNode()
+	if !node.Declarative && !node.Advertised {
+		err := spmn.UpdateDevices()
+		if err == nil {
+			log.Infoln("UpdateDevices() Succcedeed. Devices advertised!")
+		} else {
+			log.Errorln("UpdateDevices() Failed. Err:", err)
+		}
+	}
+
 	log.Debugln("In StateFinishInstall. Wait for", common.PollForChangesInSeconds,
 		"seconds for changes in the cluster.")
 	time.Sleep(time.Duration(common.PollForChangesInSeconds) * time.Second)
-
-	//TODO temporary until libkv
-	spmn.LeaveMarkerFileForConfigured()
 
 	//TODO eventual plan for MDM node behavior
 	/*
@@ -292,20 +321,79 @@ func (spmn *ScaleioPrimaryMdmNode) RunStateFinishInstall() {
 		else if upgrade then
 			_ = waitForClusterUpgrade(spmn.UpdateScaleIOState())
 			doUpgrade()
-		else
-			checkForNewDataNodesToAdd()
 	*/
-
-	//This is the checkForNewDataNodesToAdd(). Other functionality TBD.
-	//TODO replace this at some point with API calls instead of CLI
-	err := spmn.PkgMgr.AddSdsNodesToCluster(spmn.State, true)
-	if err != nil {
-		log.Errorln("Failed to add node to ScaleIO cluster:", err)
-	}
 }
 
 //RunStateUpgradeCluster default action for StateUpgradeCluster
 func (spmn *ScaleioPrimaryMdmNode) RunStateUpgradeCluster() {
 	log.Debugln("In StateUpgradeCluster. Do nothing.")
 	//TODO process the upgrade here
+}
+
+//UpdateCluster this function tells the scheduler that ScaleIO has been configured
+func (spmn *ScaleioPrimaryMdmNode) UpdateCluster() error {
+	log.Debugln("UpdateCluster ENTER")
+
+	url := spmn.State.SchedulerAddress + "/api/state"
+
+	state := &types.UpdateCluster{
+		Acknowledged: false,
+	}
+
+	response, err := json.MarshalIndent(state, "", "  ")
+	if err != nil {
+		log.Errorln("Failed to marshall state object:", err)
+		log.Debugln("UpdateCluster LEAVE")
+		return err
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(response))
+	if err != nil {
+		log.Errorln("Failed to create new HTTP request:", err)
+		log.Debugln("UpdateCluster LEAVE")
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Errorln("Failed to make HTTP call:", err)
+		log.Debugln("UpdateCluster LEAVE")
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(io.LimitReader(resp.Body, 1048576))
+	if err != nil {
+		log.Errorln("Failed to read the HTTP Body:", err)
+		log.Debugln("UpdateCluster LEAVE")
+		return err
+	}
+
+	log.Debugln("response Status:", resp.Status)
+	log.Debugln("response Headers:", resp.Header)
+	log.Debugln("response Body:", string(body))
+
+	var newstate types.UpdateCluster
+	err = json.Unmarshal(body, &newstate)
+	if err != nil {
+		log.Errorln("Failed to unmarshal the UpdateState object:", err)
+		log.Debugln("UpdateCluster LEAVE")
+		return err
+	}
+
+	log.Debugln("Acknowledged:", newstate.Acknowledged)
+
+	if !newstate.Acknowledged {
+		log.Errorln("Failed to receive an acknowledgement")
+		log.Debugln("UpdateCluster LEAVE")
+		return common.ErrStateChangeNotAcknowledged
+	}
+
+	log.Errorln("UpdateCluster Succeeded")
+	log.Debugln("UpdateCluster LEAVE")
+	return nil
 }
