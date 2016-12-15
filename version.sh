@@ -15,7 +15,7 @@ else
   tmp=`echo $1 | sed 's/\\./\\\\\\./g'`
   #echo $tmp
   find . -type f -name '*.json' -exec sed -i '' 's/'"$tmp"'/'"$2"'/g' {} +
-  find . -type f -name '*.md' -exec sed -i '' 's/'"$tmp"'/'"$2"'/g' {} +
+  find . -path ./.docs -prune -o -type f -name '*.md' -exec sed -i '' 's/'"$tmp"'/'"$2"'/g' {} +
   find . -type f -name '*.go' -exec sed -i '' 's/'"$tmp"'/'"$2"'/g' {} +
   find . -type f -name 'VERSION' -exec sed -i '' 's/'"$tmp"'/'"$2"'/g' {} +
 fi
