@@ -36,13 +36,13 @@ func displayState(w http.ResponseWriter, r *http.Request, server *RestServer) {
 			response += "Initializing ScaleIO"
 
 		case types.StateAddResourcesToScaleIO:
-			response += "Adding all resources to ScaleIO cluster"
+			response += "Adding resources to ScaleIO cluster"
 
 		case types.StateInstallRexRay:
 			response += "Installing REX-Ray"
 
 		case types.StateCleanInstallReboot:
-			response += "Sync After Adding ScaleIO Resources"
+			response += "Sync Before for Reboot"
 
 		case types.StateSystemReboot:
 			response += "System is Rebooting"
