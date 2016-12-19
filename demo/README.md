@@ -1,6 +1,6 @@
 # Demo/Test the ScaleIO Framework for Apache Mesos
 
-The requirements of having a 3-Node ScaleIO cluster along with an Apache Mesos Master and Agent cluster would heavily resource constrain a laptop or computer used for local development. An [AWS CloudFormation template](Framework_Testing_Cluster_Ubuntu.json) is provided that deploys and installs a fully configured Dell EMC ScaleIO and Apache Mesos cluster on Amazon AWS. This template currently works in the **US-West-1 (aka N.California) region only**.
+The requirements of having a 3-Node ScaleIO cluster along with an Apache Mesos Master and Agent cluster would heavily resource constrain a laptop or computer used for local development. An [AWS CloudFormation template](Framework_Testing_Cluster_RHEL7.json) is provided that deploys and installs a fully configured Dell EMC ScaleIO and Apache Mesos cluster on Amazon AWS. This template currently works in the **US-West-1 (aka N.California) region only**.
 
 *NOTE: Deploying this template uses six (6) `t2.medium` instances in the N.California region, costing $0.068/hour. The AWS EC2 compute usage for this cluster will cost approximately $9.78/day. The template provisions nine (9) EBS volumes in total. Six (6) for the operating systems and three (3) 100-gigabyte volumes for ScaleIO storage.*
 
@@ -15,14 +15,14 @@ Watch the [YouTube Demo Video](https://youtu.be/tt6qhEkeVOQ?list=PLbssOJyyvHuWiB
 
 ## Deploy CloudFormation Template
 
-The password for administrator rights is `F00barbaz`. The ScaleIO nodes are deployed using Redhat 7.X instances and the Mesos nodes are Ubuntu 14.04 instances. The usernames used to log into those systems via ssh are `ec2-user` and `ubuntu`, respectively.
+The password for administrator rights is `F00barbaz`. Both the ScaleIO and Mesos nodes are deployed using Redhat 7.X instances. The usernames used to log into any those systems via ssh are `ec2-user`.
 
 Within the AWS Web GUI:
 
 1. Verify you are in the N. California region.
 2. Within the drop-down of `Services` choose `CloudFormation`
 3. Click `Create Stack`, then `Choose a Template`
-4. Click `Upload file to S3`, and upload [Framework_Testing_Cluster_Ubuntu.json](Framework_Testing_Cluster_Ubuntu.json)
+4. Click `Upload file to S3`, and upload [Framework_Testing_Cluster_RHEL7.json](Framework_Testing_Cluster_RHEL7.json)
 5. Give the stack a unique name (such as: MesosFrameworkDemo)
 6. Select a keypair that exists in the **N.California region**
 7. Click `next`. Tags are optional. Click `next`
@@ -84,7 +84,7 @@ Utilize [scaleio.json](scaleio.json) to correctly match and/or update the intern
     "https://github.com/codedellemc/scaleio-framework/releases/download/v0.3.0-rc1/scaleio-scheduler",
     "https://github.com/codedellemc/scaleio-framework/releases/download/v0.3.0-rc1/scaleio-executor"
   ],
-  "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=10.0.0.21:5050 -scaleio.clusterid=39f2e3fe27fbc1dc -scaleio.password=F00barbaz -scaleio.protectiondomain=default -scaleio.storagepool=default -scaleio.preconfig.primary=10.0.0.12 -scaleio.preconfig.secondary=10.0.0.11 -scaleio.preconfig.tiebreaker=10.0.0.13 -scaleio.preconfig.gateway=10.0.0.11",
+  "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=10.0.0.21:5050 -scaleio.clusterid=39f2e3fe27fbc1dc -scaleio.password=F00barbaz -scaleio.preconfig.primary=10.0.0.12 -scaleio.preconfig.secondary=10.0.0.11 -scaleio.preconfig.tiebreaker=10.0.0.13 -scaleio.preconfig.gateway=10.0.0.11",
   "mem": 32,
   "cpus": 0.2,
   "instances": 1,
@@ -102,11 +102,11 @@ curl -k -XPOST -d @scaleio.json -H "Content-Type: application/json" [MESOS MASTE
 View the status of the ScaleIO framework by opening the Deployment UI.
 
 1. Within the Marathon UI at `http://[MESOS MASTER PUBLIC DNS/IP ADDRESS]:8080`, Click the `scaleio-scheduler`.
-2. The Private IP Address for the scheduler is listed. Substitute the Private IP with the Agent's Public IP Address and keep the existing port values.
+2. Underneath the scheduler's ID, click the link (circled in red below) to open up a simple installation status page contained within the scheduler. 
 3. A list Mesos Agent nodes with the current status of ScaleIO deployment can be seen and the page will automatically refresh itself.
 
-![sio03](img/sio03.png)
-![sio02](img/sio02.png)
+![sio03](img/marathon.png)
+![sio02](img/status.png)
 
 **The Agent Nodes WILL REBOOT after successful installation**. This is done within this demo ONLY to make sure ScaleIO, Docker, REX-Ray and Marathon services are functioning properly. This process can take 2-5 minutes.
 
