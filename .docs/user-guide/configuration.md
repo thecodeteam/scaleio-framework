@@ -1,5 +1,6 @@
 # Configuration
-Setting the configuration files
+
+What are the Framework's configuration options?
 
 ---
 ## Configuration

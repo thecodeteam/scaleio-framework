@@ -1,6 +1,5 @@
-# Demo/Test the ScaleIO Framework for Apache Mesos
+# ScaleIO Framework Demo
 
-## Overview
 If you are looking for a demo or a quick and easy dev/test environment, this might be for you!
 
 ---

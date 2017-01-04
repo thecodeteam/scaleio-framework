@@ -1,5 +1,7 @@
 # Troubleshooting
 
+I need help!
+
 ---
 
 ## Log file location
