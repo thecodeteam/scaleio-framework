@@ -55,8 +55,8 @@ Tool | Description
 [gocyclo](https://github.com/fzipp/gocyclo) | A golang cyclomatic complexity detection tool. No function should have a score above 0.15
 
 It [Visual Studio Code](https://code.visualstudio.com/) is your IDE of choice,
-install the [go-plus](https://atom.io/packages/go-plus) package, and it will
-execute all of the tools above less gocyclo upon saving a file.
+install the [vscode-go](https://github.com/Microsoft/vscode-go) package, and it
+will execute all of the tools above upon saving a file.
 
 If [Atom](https://atom.io/) is your IDE of choice, install the
 [go-plus](https://atom.io/packages/go-plus) package, and it will execute all of

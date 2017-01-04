@@ -53,6 +53,27 @@ Upon completion of a successful build, you will not receive a "positive" notific
 of that build, but rather you will find a completed binary at the root of the
 folder.
 
+## Making modifications to source and building
+If you plan on making changes to the source for developing or testing purposes,
+you must follow a couple of prerequisites due to the layout of the project in
+GitHub. Since there exists two projects in in the same repo in which one project,
+the executor, depends on another, the scheduler, there currently is an issue with
+glide when pulling those dependencies for each project. To remedy the issue for
+private builds, you must:
+
+1. Fork the project
+2. Clone your fork into your own workspace
+3. Create a git branch, make your changes and push your branch to your private repo
+4. Run the ./switch.sh file which swaps the current glide.yaml with glide.yaml.dev
+5. Then open the glide.yaml and replace the repo and ref properties of the scaleio-framework package with your fork and the commit you want to build against.
+```
+- package: github.com/codedellemc/scaleio-framework
+  ref:     a8a1be0c946a19f97fdc962150626186f3315078
+  vcs:     git
+  repo:    https://github.com/dvonthenen/scaleio-framework
+```
+6. Then run ./build.sh. If the glide step fails, re-run the ./build.sh command.
+
 ## Version File
 There is a file at the root of the project named `VERSION`. The file contains
 a single line with the *target* version of the project in the file. The version
