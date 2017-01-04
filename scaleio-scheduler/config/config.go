@@ -112,7 +112,7 @@ func (cfg *Config) AddFlags(fs *flag.FlagSet) {
 	fs.StringVar(&cfg.LogLevel, "loglevel", cfg.LogLevel,
 		"Set the logging level for the application")
 	fs.BoolVar(&cfg.Debug, "debug", cfg.Debug,
-		"Debug more prevents the reboot so the logs dont get cycled")
+		"Debug mode prevents the reboot so the logs dont get cycled")
 	fs.BoolVar(&cfg.DeleteKeyValues, "store.delete", cfg.DeleteKeyValues,
 		"Helper function that deletes ScaleIO Framework Key/Value Store")
 	fs.BoolVar(&cfg.DumpKeyValues, "store.dump", cfg.DumpKeyValues,
@@ -196,7 +196,6 @@ func (cfg *Config) AddFlags(fs *flag.FlagSet) {
 	fs.StringVar(&cfg.RpmSdc, "scaleio.centos7.sdc", cfg.RpmSdc, "ScaleIO SDC Package for CentOS7")
 	fs.StringVar(&cfg.RpmLia, "scaleio.centos7.lia", cfg.RpmLia, "ScaleIO LIA Package for CentOS7")
 	fs.StringVar(&cfg.RpmGw, "scaleio.centos7.gw", cfg.RpmGw, "ScaleIO Gateway Package for CentOS7")
-
 }
 
 //NewConfig creates a new Config object

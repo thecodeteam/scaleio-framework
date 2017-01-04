@@ -92,5 +92,25 @@ The `ScaleIO-Framework` is also fairly simple to build from source. For more
 information, please visit the [build-reference](/developer-guide/build-reference.md)
 for more details.
 
-To deploy a build from source
-TODO
+To deploy a build from source, you will need access to an HTTP server in which
+you can house the scaleio-scheduler and scaleio-executor for Marathon to download
+from. After you have placed your custom build binaries, you can make the following
+modification to the JSON file to deploy the Framework (replace `your.domain/path/to/your`
+with the http location of your binaries):
+
+```
+{
+  "id": "scaleio-scheduler",
+  "uris": [
+    "https://your.domain/path/to/your/scaleio-scheduler",
+    "https://your.domain/path/to/your/scaleio-executor"
+  ],
+  "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=[IP ADDRESS FOR ANY MESOS MASTER]:5050 -scaleio.password=[SCALEIO GATEWAY PASSWORD] -scaleio.protectiondomain=[PROTECTION DOMAIN NAME] -scaleio.storagepool=[STORAGE POOL NAME] -scaleio.preconfig.primary=[MASTER MDM IP ADDRESS] -scaleio.preconfig.secondary=[SLAVE MDM IP ADDRESS] -scaleio.preconfig.tiebreaker=[TIEBREAKER MDM IP ADDRESS] -scaleio.preconfig.gateway=[GATEWAY IP ADDRESS]",
+  "mem": 32,
+  "cpus": 0.2,
+  "instances": 1,
+  "constraints": [
+    ["hostname", "UNIQUE"]
+  ]
+}
+```
