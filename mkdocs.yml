@@ -15,7 +15,7 @@ pages:
     - Troubleshooting: user-guide/troubleshooting.md
 - Developer guide:
     - Project guidelines: developer-guide/project-guidelines.md
-    - REST API: user-guide/restapi.md
+    - REST API: developer-guide/restapi.md
     - Build reference: developer-guide/build-reference.md
     - Release process: developer-guide/release-process.md
 - About:
