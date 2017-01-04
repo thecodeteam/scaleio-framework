@@ -4,7 +4,10 @@
 
 ## Upgrading
 
-To upgrade the ScaleIO-Framework to the latest version, simply redeploy the Framework using the Marathon JSON based on the release you want to target. For example, if you are currently running version 0.1.0 and want to upgrade to 0.2.0, upgrading would simply consist of curl'ing the following JSON to Marathon:
+To upgrade the ScaleIO-Framework to the latest version, simply redeploy the
+Framework using the Marathon JSON based on the release you want to target. For
+example, if you are currently running version 0.1.0 and want to upgrade to 0.2.0,
+upgrading would simply consist of curl'ing the following JSON to Marathon:
 
 ```
 {
@@ -23,7 +26,8 @@ To upgrade the ScaleIO-Framework to the latest version, simply redeploy the Fram
 }
 ```
 
-Use the following REST API to determine the currently installed version of the ScaleIO-Framework:
+Use the following REST API to determine the currently installed version of the
+ScaleIO-Framework:
 
 ```
 GET [SCHEDULER IP/FQDN]:[Marathon Dynamic Port]/version

@@ -28,8 +28,8 @@ or `stable` release.
 ## Review Issues & Pull Requests
 The first step to a release is to review the outstanding
 [issues](https://github.com/codedellemc/scaleio-framework/issues) and
-[pull requests](https://github.com/codedellemc/scaleio-framework/pulls) that are tagged for
-the release in question.
+[pull requests](https://github.com/codedellemc/scaleio-framework/pulls) that are
+tagged for the release in question.
 
 If there are outstanding issues requiring changes or pending pull requests to
 be merged, handle those prior to tagging any commit as a release candidate or

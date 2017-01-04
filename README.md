@@ -12,6 +12,13 @@ Test it out following the [Demo Guide](demo/README.md) using an AWS Cloud Format
 - All Agent nodes are configured to be highly available so failed applications can be restarted on other Agent nodes while preserving their data using [REX-Ray](https://github.com/emccode/rexray) as a container runtime volume driver
 - Additional storage can be added to the ScaleIO cluster to expand capacity
 
+## Documentation [![Docs](https://readthedocs.org/projects/scaleio-framework/badge/?version=stable)](http://scaleio-framework.readthedocs.org/en/stable/)
+You will find complete documentation for ScaleIO-Framework at [scaleio-framework.readthedocs.org](http://scaleio-framework.readthedocs.org/en/stable/), including
+[licensing](http://scaleio-framework.readthedocs.org/en/stable/about/license/) and
+[support](http://scaleio-framework.readthedocs.org/en/stable/#getting-help) information.
+Documentation provided at RTD is based on the latest stable build. The `/.docs`
+directory in this repo will refer to the latest or specific commit.
+
 ## Requirements
 - Ubuntu 14.04 or CentOS7/RHEL7
 - Since Ubuntu support for ScaleIO is limited, this framework currently only supports ScaleIO version 2.0.1-2072.
