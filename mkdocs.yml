@@ -11,7 +11,7 @@ pages:
 - User Guide:
     - Installation: user-guide/installation.md
     - Configuration: user-guide/configuration.md
-    - Installation: user-guide/demo.md
+    - Demo: user-guide/demo.md
     - Troubleshooting: user-guide/troubleshooting.md
 - Developer guide:
     - Project guidelines: developer-guide/project-guidelines.md

@@ -1,5 +1,7 @@
 # Release Notes
 
+What's changed?
+
 ---
 
 ## Upgrading
