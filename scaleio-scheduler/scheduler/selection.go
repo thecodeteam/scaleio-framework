@@ -76,7 +76,7 @@ func getManuallyConfigNode(offers []*mesos.Offer, persona int) *mesos.Offer {
 	for _, offer := range offers {
 		attribs := offer.GetAttributes()
 		for _, attrib := range attribs {
-			if attrib.GetName() == "persona" &&
+			if attrib.GetName() == "scaleio-persona" &&
 				attrib.GetText().GetValue() == common.PersonaIDToString(persona) {
 				return offer
 			}

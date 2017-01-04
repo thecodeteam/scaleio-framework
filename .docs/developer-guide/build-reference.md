@@ -29,7 +29,7 @@ directory and run the following build command:
 
 The output will look similar to the following:
 
-```
+```sh
 [INFO] Downloading dependencies. Please wait...
 [INFO] Fetching updates for github.com/stretchr/testify.
 [INFO] Fetching updates for github.com/Sirupsen/logrus.

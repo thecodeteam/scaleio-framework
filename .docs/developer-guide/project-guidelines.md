@@ -26,7 +26,7 @@ For example, the below link points to the anchor `basic-configuration` on the
 `Configuration` page:
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-[/user-guide/config#basic-configuration](/user-guide/config#basic-configuration)
+[/user-guide/configuration#basic-configuration](/user-guide/configuration#basic-configuration)
 
 However, when the above link is followed when viewing this page directly from
 the Github repository instead of the generated site documentation, the link
@@ -38,7 +38,7 @@ will work regardless. To fix the link, simply make it relative and add the
 Markdown file extension:
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-[../user-guide/config.md#basic-configuration](../user-guide/config.md#basic-configuration)
+[../user-guide/configuration.md#basic-configuration](../user-guide/configuration.md#basic-configuration)
 
 Now the link will work regardless from where it's viewed.
 
@@ -53,6 +53,10 @@ Tool | Description
 [golint](https://github.com/golang/lint) | A golang linter
 [govet](https://golang.org/cmd/vet/) | A golang source optimization tool
 [gocyclo](https://github.com/fzipp/gocyclo) | A golang cyclomatic complexity detection tool. No function should have a score above 0.15
+
+It [Visual Studio Code](https://code.visualstudio.com/) is your IDE of choice,
+install the [go-plus](https://atom.io/packages/go-plus) package, and it will
+execute all of the tools above less gocyclo upon saving a file.
 
 If [Atom](https://atom.io/) is your IDE of choice, install the
 [go-plus](https://atom.io/packages/go-plus) package, and it will execute all of

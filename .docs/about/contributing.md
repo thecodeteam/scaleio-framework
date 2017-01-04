@@ -1,8 +1,8 @@
 # Contributing to ScaleIO-Framework
 
-The ScaleIO-Framework project welcomes, and depends, on contributions from developers
-and users in the open source community. Contributions can be made in a number of
-ways, a few examples are:
+The ScaleIO-Framework project welcomes, and depends, on contributions from
+developers and users in the open source community. Contributions can be made in
+a number of ways, a few examples are:
 
 - Code patches via pull requests
 - Documentation improvements
