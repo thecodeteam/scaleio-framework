@@ -128,8 +128,8 @@ View the status of the ScaleIO framework by opening the Deployment UI.
 2. Underneath the scheduler's ID, click the link (circled in red below) to open up a simple installation status page contained within the scheduler.
 3. A list Mesos Agent nodes with the current status of ScaleIO deployment can be seen and the page will automatically refresh itself.
 
-![Marathon Configuration](../image/marathon.png)
-![Framework Status Page](../image/status.png)
+![Marathon Configuration](/.docs/image/marathon.png)
+![Framework Status Page](/,docs/image/status.png)
 
 **The Agent Nodes WILL REBOOT after successful installation**. This is done
 within this demo ONLY to make sure ScaleIO, Docker, REX-Ray and Marathon
