@@ -11,18 +11,16 @@ via [Marathon](https://mesosphere.github.io/marathon/).
 
 ## Requirements
 - Ubuntu 14.04 or CentOS7/RHEL7
-- Since Ubuntu support for ScaleIO is limited, this framework currently only supports ScaleIO version 2.0.1-2072.
+- Since Ubuntu 14.04 support for ScaleIO is limited, this framework currently only supports ScaleIO version 2.0.1-2072 and kernel linux-image-4.4.0-38-generic. You can run `apt-get -y update && apt-get -y install linux-image-4.4.0-38-generic` for install that version.
 - An **existing** 3-node or greater ScaleIO cluster using version 2.0.1-2072 must be running/provided. Primary, Secondary, and TieBreaker MDM are required for a minimal 3-node cluster.
 - The ScaleIO cluster must have a Protection Domain and Storage Pool present which is capable of provisioning volumes.
 - This Framework is implemented using HTTP APIs provided by Apache Mesos. This requires an Apache Mesos cluster running version 1.0 or higher with a compatible version of Marathon installed.
 
-**IMPORTANT NOTE for Ubuntu 14.04:** In order to avoid the Mesos Agent nodes
-from rebooting, it is highly recommended that the Agent Nodes have kernel
-version 4.2.0-30 installed prior to launching the scheduler. You can do this by
-running the following command prior to bringing up the Mesos Agent service:
-```
-apt-get -y update && apt-get -y install linux-image-4.4.0-38-generic
-```
+# Deployment Strategies
+Before you deploy the Framework, you might want to think about what you want your
+final fully deployed ScaleIO cluster to look like. Please take a look at the
+[Deployment Strategies](/user-guide/deployment-strategies.md) section to
+determine the best method for deploying your desired configuration.
 
 ## Deploying the latest version
 
