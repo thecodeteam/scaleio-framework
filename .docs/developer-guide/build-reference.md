@@ -66,12 +66,12 @@ private builds, you must:
 3. Create a git branch, make your changes and push your branch to your private repo
 4. Run the ./switch.sh file which swaps the current glide.yaml with glide.yaml.dev
 5. Then open the glide.yaml and replace the repo and ref properties of the scaleio-framework package with your fork and the commit you want to build against.
-```
-- package: github.com/codedellemc/scaleio-framework
-  ref:     a8a1be0c946a19f97fdc962150626186f3315078
-  vcs:     git
-  repo:    https://github.com/dvonthenen/scaleio-framework
-```
+  ```
+  - package: github.com/codedellemc/scaleio-framework
+    ref:     a8a1be0c946a19f97fdc962150626186f3315078
+    vcs:     git
+    repo:    https://github.com/dvonthenen/scaleio-framework
+  ```
 6. Then run ./build.sh. If the glide step fails, re-run the ./build.sh command.
 
 ## Version File
