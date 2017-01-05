@@ -41,7 +41,7 @@ and configures:
 4. [REX-Ray](https://github.com/codedellemc/rexray) which provides Mesos the ability to provision external storage for tasks that are backed by Docker containers.
 5. [mesos-module-dvdi](https://github.com/emccode/mesos-module-dvdi) and [DVDCLI](https://github.com/emccode/dvdcli) which provides Mesos the ability to provision external storage for tasks that using the Mesos Universal Containerizer. This includes any configuration required on the Mesos Agent nodes.
 
-## Installation and configuration
+## Installation and Configuration
 Installation is fairly simple as it only requires a simple `curl` command to
 deploy the Framework. There are some prerequisites that are required however. You
 can find more information on the [Installation Page](/user-guide/installation.md).

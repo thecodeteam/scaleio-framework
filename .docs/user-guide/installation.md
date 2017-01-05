@@ -16,7 +16,7 @@ via [Marathon](https://mesosphere.github.io/marathon/).
 - The ScaleIO cluster must have a Protection Domain and Storage Pool present which is capable of provisioning volumes.
 - This Framework is implemented using HTTP APIs provided by Apache Mesos. This requires an Apache Mesos cluster running version 1.0 or higher with a compatible version of Marathon installed.
 
-# Deployment Strategies
+## Deployment Strategies
 Before you deploy the Framework, you might want to think about what you want your
 final fully deployed ScaleIO cluster to look like. Please take a look at the
 [Deployment Strategies](/user-guide/deployment-strategies.md) section to
