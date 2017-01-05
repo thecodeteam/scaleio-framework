@@ -10,7 +10,7 @@ Framework. Depending on what your end game is, you might prefer to one method
 over the other. This guide will help you decide which option will best suit
 your needs.
 
-### Single Global Pool
+## Single Global Pool
 
 I call this the "Just Make It Work" option. This is by far the easiest option to
 get working because it requires zero work, but the issue is that unless you give
@@ -34,7 +34,7 @@ disks attached to certain Mesos Agent nodes (provides storage. these are the sds
 and have other Mesos Agent nodes without any disks (consumes storage. these are
 the sdc's).
 
-### Imperative Deployment
+## Imperative Deployment
 
 I call this the "Deploy It Exactly Like This" option. Using
 [Mesos Agent attributes](http://mesos.apache.org/documentation/latest/attributes-resources/),
@@ -87,6 +87,6 @@ sds attributes will be used. Else the default values based on the Configuration
 flags will be used (-scaleio.protectiondomain and
 -scaleio.storagepool).
 
-### Declarative Deployment
+## Declarative Deployment
 
 Coming Soon.
