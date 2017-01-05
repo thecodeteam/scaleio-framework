@@ -238,7 +238,7 @@ func NewConfig() *Config {
 		ProtectionDomain:     env("PROTECTION_DOMAIN", "default"),
 		StoragePool:          env("STORAGE_POOL", "default"),
 		AdminPassword:        env("ADMIN_PASSWORD", "Scaleio123"),
-		APIVersion:           env("ADMIN_PASSWORD", "2.0"),
+		APIVersion:           env("API_VERSION", "2.0"),
 		PrimaryMdmAddress:    env("PRIMARY_MDM_ADDRESS", ""),
 		SecondaryMdmAddress:  env("SECONDARY_MDM_ADDRESS", ""),
 		TieBreakerMdmAddress: env("TIEBREAKER_MDM_ADDRESS", ""),
