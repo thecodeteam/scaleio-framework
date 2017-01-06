@@ -64,7 +64,7 @@ Optional: ScaleIO Cluster ID. The priority of this flag supersedes scaleio.clust
 if used. Default: "empty string"
 
 `-scaleio.lbgateway=[uri for the scaleio gateway]`  
-Optional: Greate to use it your ScaleIO gateway is clustered and load balanced.
+Optional: Great to use if your ScaleIO gateway is clustered and load balanced.
 If the value is "empty string", it is assumed that the ScaleIO is on the primary
 MDM node. Default: "empty string"
 
