@@ -194,6 +194,11 @@ func (nm *NodeManager) RexraySetup(state *types.ScaleIOFramework, executorID str
             operations:
               unmount:
                 ignoreUsedCount: true
+    rexray:
+      type: docker
+      libstorage:
+        service: scaleio
+      host: unix:///run/docker/plugins/rexray.sock
 libstorage:
   service: scaleio
   integration:
