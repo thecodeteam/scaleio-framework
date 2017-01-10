@@ -40,18 +40,20 @@ GET [SCHEDULER IP/FQDN]:[Marathon Dynamic Port]/version
 }
 ```
 
-## Version 0.3.0 (2016/12/15)
+## Version 0.3.0 (2017/01/10)
 ScaleIO Framework 0.3.0 introduces the new Declarative approach for deploying ScaleIO.
 
 ### New Features
 - Addressed Issue [#82](https://github.com/codedellemc/scaleio-framework/issues/82): Implement User Defined Deployment. Please see PR [#111](https://github.com/codedellemc/scaleio-framework/pull/111) for more details.
 - Addressed Issue [#95](https://github.com/codedellemc/scaleio-framework/issues/95): Create a RHEL7 Version of Cloud Formation Template that can be used for demos, testing, etc. RHEL7 will be the preferred platform for development and testing.
+- Addressed Issue [#103](https://github.com/codedellemc/scaleio-framework/issues/103): Full Framework documentation is available on [Read the Docs](http://scaleio-framework.readthedocs.org/en/stable/).
 
 ### Enhancements
 - Another feature that has been enhanced is that when new nodes are brought online, storage devices will be add to the ScaleIO cluster based on the method being used.
   - If the Declarative approach is used, only devices defined by the user will be added.
   - The old automatic method is used, any available block devices that are currently not being used (ie has a filesystem on it) will be added to the default domain/pool.
 - Addressed Issue [#71](https://github.com/codedellemc/scaleio-framework/issues/71): Instead of using elastic ips, each mesos node has been configured to dynamically modify required files (such as hostname, etc) on boot and then start the mesos services.
+- Updated the CloudFormation template for Ubuntu to use ScaleIO 2.0.1.
 
 ## Version 0.2.0 (2016/11/09)
 ScaleIO Framework 0.2.0 introduces RHEL7/CentOS7 support and also refreshes the version of ScaleIO to version 2.0.1 which is the latest as of writting this release..
