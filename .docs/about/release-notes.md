@@ -40,7 +40,7 @@ GET [SCHEDULER IP/FQDN]:[Marathon Dynamic Port]/version
 }
 ```
 
-## Version 0.3.0 (2016/12/15)
+## Version 0.3.0 (2017/01/10)
 ScaleIO Framework 0.3.0 introduces the new Declarative approach for deploying ScaleIO.
 
 ### New Features
