@@ -46,8 +46,9 @@ the following Mesos Agent nodes attributes must be defined: scaleio-sds-domains,
 scaleio-sds-[domain], and scaleio-sds-[pool]. In the example below, the Mesos
 attributes create: 1) a protection domain named `mydomain` with storage pool named
 `mypool` consisting of the disk attached at `/dev/xvdf`, and 2) a second protection
-domain named `myotherdomain` with storage pool named `salwaterpool` consisting of the
-disk attached at `/dev/xvdg`.
+domain named `myotherdomain` with storage pools named `saltwaterpool` consisting of the
+disks attached at `/dev/xvdg` and `/dev/xvdh` and `freshwaterpool` consisting of the
+disk attached at `/dev/xvdi`.
 
 ```
 # cat /etc/mesos-slave/attributes/scaleio-sds-domains
@@ -57,13 +58,16 @@ mydomain,myotherdomain
 mypool
 
 # cat /etc/mesos-slave/attributes/scaleio-sds-myotherdomain
-saltwaterpool
+saltwaterpool,freshwaterpool
 
 # cat /etc/mesos-slave/attributes/scaleio-sds-mypool
 /dev/xvdf
 
 # cat /etc/mesos-slave/attributes/scaleio-sds-saltwaterpool
-/dev/xvdg
+/dev/xvdg,/dev/xvdh
+
+# cat /etc/mesos-slave/attributes/scaleio-sds-freshwaterpool
+/dev/xvdi
 ```
 
 To declare what Mesos Agent nodes consume storage out of which
