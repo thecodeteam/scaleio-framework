@@ -347,6 +347,14 @@
           },
           {
             "IpProtocol": "tcp",
+            "FromPort": "5051",
+            "ToPort": "5051",
+            "CidrIp": {
+              "Ref": "SSHLocation"
+            }
+          },
+          {
+            "IpProtocol": "tcp",
             "FromPort": "31000",
             "ToPort": "32000",
             "CidrIp": {
