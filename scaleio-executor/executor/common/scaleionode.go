@@ -124,8 +124,8 @@ func isInList(haystack []string, needle string) bool {
 func (bsn *ScaleioNode) UpdateDevices() error {
 	log.Debugln("UpdateDevices ENTER")
 
-	if bsn.GetSelfNode().Declarative {
-		log.Debugln("Declarative = TRUE. Skip discovering new devices.")
+	if bsn.GetSelfNode().Imperative {
+		log.Debugln("Imperative = TRUE. Skip discovering new devices.")
 		log.Debugln("UpdateDevices LEAVE")
 		return nil
 	}

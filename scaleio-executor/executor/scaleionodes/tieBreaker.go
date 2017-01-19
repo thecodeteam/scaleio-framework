@@ -273,7 +273,7 @@ func (stbmn *ScaleioTieBreakerMdmNode) RunStateSystemReboot() {
 //RunStateFinishInstall default action for StateFinishInstall
 func (stbmn *ScaleioTieBreakerMdmNode) RunStateFinishInstall() {
 	node := stbmn.GetSelfNode()
-	if !node.Declarative && !node.Advertised {
+	if !node.Imperative && !node.Advertised {
 		err := stbmn.UpdateDevices()
 		if err == nil {
 			log.Infoln("UpdateDevices() Succcedeed. Devices advertised!")

@@ -27,6 +27,9 @@ const (
 	//MemPerNonExecutor mem to Non-MDM executor
 	MemPerNonExecutor = 512
 
+	//AwsFreeSpaceThreshold free less than this will be auto expanded
+	AwsUsedThreshold = 90
+
 	//DefaultRestPort rest port
 	DefaultRestPort = 35000
 
@@ -105,6 +108,12 @@ type Config struct {
 	RpmSdc               string
 	RpmLia               string
 	RpmGw                string
+
+	UsedThreshold    int
+	AccessKey        string
+	SecretKey        string
+	CheckFull        int
+	VolumeGrowthSize int
 }
 
 //AddFlags adds flags to the command line parsing
@@ -196,6 +205,13 @@ func (cfg *Config) AddFlags(fs *flag.FlagSet) {
 	fs.StringVar(&cfg.RpmSdc, "scaleio.centos7.sdc", cfg.RpmSdc, "ScaleIO SDC Package for CentOS7")
 	fs.StringVar(&cfg.RpmLia, "scaleio.centos7.lia", cfg.RpmLia, "ScaleIO LIA Package for CentOS7")
 	fs.StringVar(&cfg.RpmGw, "scaleio.centos7.gw", cfg.RpmGw, "ScaleIO Gateway Package for CentOS7")
+
+	fs.IntVar(&cfg.UsedThreshold, "aws.threshold", cfg.UsedThreshold, "Used Threshold on Storage Pool")
+	fs.StringVar(&cfg.AccessKey, "aws.accesskey", cfg.AccessKey, "AWS AccessKey")
+	fs.StringVar(&cfg.SecretKey, "aws.secretkey", cfg.SecretKey, "AWS SecretKey")
+	fs.IntVar(&cfg.CheckFull, "aws.checkfull", cfg.CheckFull, "Number of minutes to check for full")
+	fs.IntVar(&cfg.VolumeGrowthSize, "aws.growthsize", cfg.VolumeGrowthSize,
+		"Size in GB in which to grow the volume")
 }
 
 //NewConfig creates a new Config object
@@ -253,5 +269,10 @@ func NewConfig() *Config {
 		RpmSdc:               env("RPM_SDC", rpmSdc),
 		RpmLia:               env("RPM_LIA", rpmLia),
 		RpmGw:                env("RPM_GW", rpmGw),
+		UsedThreshold:        envInt("AWS_USED_THRESHOLD", "90"),
+		AccessKey:            env("AWS_ACCESS_KEY", ""),
+		SecretKey:            env("AWS_SECRET_KEY", ""),
+		CheckFull:            envInt("AWS_USED_THRESHOLD", "60"),
+		VolumeGrowthSize:     envInt("AWS_GROWTH_SIZE", "1024"),
 	}
 }

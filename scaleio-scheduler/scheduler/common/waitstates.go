@@ -4,7 +4,10 @@ import "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 
 const (
 	//PollStatusInSeconds the amount of time to wait before updating state
-	PollStatusInSeconds = 30
+	PollStatusInSeconds = 60
+
+	//WaitForVolumeState the amount of time to wait for volume state changes
+	WaitForVolumeState = 1
 )
 
 //RetrieveState is a call back to retrieve an update of the state

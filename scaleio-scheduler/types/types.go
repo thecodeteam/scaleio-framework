@@ -145,7 +145,7 @@ type ScaleIONode struct {
 	Persona         int               `json:"persona"`
 	State           int               `json:"state"`
 	LastContact     int64             `json:"lastcontact"`
-	Declarative     bool              `json:"declarative"`
+	Imperative      bool              `json:"imperative"`
 	Advertised      bool              `json:"advertised"`
 	KeyValue        map[string]string `json:"keyvalue,omitempty"`
 	ProvidesDomains map[string]*ProtectionDomain
@@ -167,19 +167,23 @@ type ScaleIOPreConfig struct {
 
 //ScaleIOConfig describes the configuration for this cluster
 type ScaleIOConfig struct {
-	Configured       bool              `json:"configured"`
-	ClusterID        string            `json:"clusterid"`
-	ClusterName      string            `json:"clustername"`      //optional. Default: scaleio
-	LbGateway        string            `json:"lbgateway"`        //optional.
-	ProtectionDomain string            `json:"protectiondomain"` //optional. Default: default
-	StoragePool      string            `json:"storagepool"`      //optional. Default: default
-	AdminPassword    string            `json:"adminpassword"`    //optional. Default: Scaleio123
-	APIVersion       string            `json:"apiversion"`       //optional. Default: 2.0
-	KeyValue         map[string]string `json:"keyvalue,omitempty"`
-	Nodes            ScaleIONodes
-	Preconfig        ScaleIOPreConfig
-	Ubuntu14         Ubuntu14Packages
-	Rhel7            Rhel7Packages
+	Configured           bool              `json:"configured"`
+	ClusterID            string            `json:"clusterid"`
+	ClusterName          string            `json:"clustername"`      //optional. Default: scaleio
+	LbGateway            string            `json:"lbgateway"`        //optional.
+	ProtectionDomain     string            `json:"protectiondomain"` //optional. Default: default
+	StoragePool          string            `json:"storagepool"`      //optional. Default: default
+	AdminPassword        string            `json:"adminpassword"`    //optional. Default: Scaleio123
+	APIVersion           string            `json:"apiversion"`       //optional. Default: 2.0
+	FakeUsedData         int               `json:"fakeuseddata"`
+	CapacityData         int               `json:"capacitydata"`
+	UsedData             int               `json:"useddata"`
+	AtLeastOneImperative bool              `json:"atleastoneimperative"`
+	KeyValue             map[string]string `json:"keyvalue,omitempty"`
+	Nodes                ScaleIONodes
+	Preconfig            ScaleIOPreConfig
+	Ubuntu14             Ubuntu14Packages
+	Rhel7                Rhel7Packages
 }
 
 //IsolatorConfig describes the configuration for the mesos isolator
@@ -233,4 +237,10 @@ type PingNode struct {
 	Acknowledged bool              `json:"acknowledged"`
 	ExecutorID   string            `json:"executorid"`
 	KeyValue     map[string]string `json:"keyvalue,omitempty"`
+}
+
+//UpdateUsedData describes simulating data used
+type UpdateUsedData struct {
+	Acknowledged bool `json:"acknowledged"`
+	FakeUsedData int  `json:"fakeuseddata"`
 }

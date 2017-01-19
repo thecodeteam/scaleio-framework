@@ -67,7 +67,7 @@ func prepareScaleIONode(store *kvstore.KvStore, offer *mesos.Offer) (*types.Scal
 		Persona:     persona,
 		State:       state,
 		LastContact: 0,
-		Declarative: false,
+		Imperative:  false,
 		Advertised:  false,
 	}
 
@@ -88,7 +88,7 @@ func prepareScaleIONode(store *kvstore.KvStore, offer *mesos.Offer) (*types.Scal
 		}
 
 		//this means this particular node was explicitly provisioned
-		node.Declarative = true
+		node.Imperative = true
 
 		fsDomains := strings.Split(value, ",")
 		for _, fsDomain := range fsDomains {
@@ -154,6 +154,11 @@ func (s *ScaleIOScheduler) addScaleIONode(offer *mesos.Offer) error {
 	node, err := prepareScaleIONode(s.Store, offer)
 	if err != nil {
 		return err
+	}
+
+	if node.Imperative {
+		log.Infoln("At least one node declared by Imperative method.")
+		s.Server.State.ScaleIO.AtLeastOneImperative = true
 	}
 
 	s.Server.State.ScaleIO.Nodes = append(s.Server.State.ScaleIO.Nodes, node)

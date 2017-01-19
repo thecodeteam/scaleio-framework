@@ -76,6 +76,7 @@ func (mm *MdmManager) ManagementSetup(state *types.ScaleIOFramework, isPriOrSec 
 		}
 	} else {
 		log.Infoln(mm.MdmPackageName, "is already installed")
+		time.Sleep(time.Duration(common.DelayIfInstalledInSeconds) * time.Second)
 	}
 
 	log.Infoln("ManagementSetup Succeeded")
@@ -124,6 +125,7 @@ func (nm *NodeManager) NodeSetup(state *types.ScaleIOFramework) error {
 		}
 	} else {
 		log.Infoln(nm.SdsPackageName, "is already installed")
+		time.Sleep(time.Duration(common.DelayIfInstalledInSeconds) * time.Second)
 	}
 
 	//SDC Install
@@ -156,6 +158,7 @@ func (nm *NodeManager) NodeSetup(state *types.ScaleIOFramework) error {
 		}
 	} else {
 		log.Infoln(nm.SdcPackageName, "is already installed")
+		time.Sleep(time.Duration(common.DelayIfInstalledInSeconds) * time.Second)
 	}
 
 	log.Infoln("NodeSetup Succeeded")
@@ -169,6 +172,7 @@ func (mm *MdmManager) CreateCluster(state *types.ScaleIOFramework) error {
 
 	if state.ScaleIO.Configured {
 		log.Infoln("ScaleIO cluster is already installed")
+		time.Sleep(time.Duration(common.DelayIfInstalledInSeconds) * time.Second * 2)
 		log.Infoln("CreateCluster LEAVE")
 		return nil
 	}
@@ -346,6 +350,7 @@ func (mm *MdmManager) GatewaySetup(state *types.ScaleIOFramework) (bool, error) 
 		}
 	} else {
 		log.Infoln(mm.LiaPackageName, "is already installed")
+		time.Sleep(time.Duration(common.DelayIfInstalledInSeconds) * time.Second)
 	}
 
 	//Install Gateway
@@ -393,6 +398,7 @@ func (mm *MdmManager) GatewaySetup(state *types.ScaleIOFramework) (bool, error) 
 		}
 	} else {
 		log.Infoln(mm.GatewayPackageName, "is already installed")
+		time.Sleep(time.Duration(common.DelayIfInstalledInSeconds) * time.Second)
 	}
 
 	if gwInst == "" && gwInstErr == nil {

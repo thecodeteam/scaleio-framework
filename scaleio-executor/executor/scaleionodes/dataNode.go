@@ -224,7 +224,7 @@ func (sdn *ScaleioDataNode) RunStateSystemReboot() {
 //RunStateFinishInstall default action for StateFinishInstall
 func (sdn *ScaleioDataNode) RunStateFinishInstall() {
 	node := sdn.GetSelfNode()
-	if !node.Declarative && !node.Advertised {
+	if !node.Imperative && !node.Advertised {
 		err := sdn.UpdateDevices()
 		if err == nil {
 			log.Infoln("UpdateDevices() Succcedeed. Devices advertised!")
