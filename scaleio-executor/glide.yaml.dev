@@ -12,6 +12,6 @@ import:
   vcs:     git
   
 - package: github.com/codedellemc/scaleio-framework
-  ref:     a8a1be0c946a19f97fdc962150626186f3315078
+  ref:     ebb9d9318186cf78f880b57a805318edb381b5cb
   vcs:     git
   repo:    https://github.com/dvonthenen/scaleio-framework

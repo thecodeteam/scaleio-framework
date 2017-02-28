@@ -7,10 +7,12 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 	xplatform "github.com/dvonthenen/goxplatform"
 
+	"github.com/codedellemc/scaleio-framework/scaleio-executor/executor/common"
 	types "github.com/codedellemc/scaleio-framework/scaleio-scheduler/types"
 )
 
@@ -269,6 +271,7 @@ func (nm *NodeManager) SetupIsolator(state *types.ScaleIOFramework) error {
 		dvdimodFile.Close()
 	} else {
 		log.Infoln("Mesos Module Isolator is already installed")
+		time.Sleep(time.Duration(common.DelayIfInstalledInSeconds) * time.Second)
 	}
 
 	//DVDCLI install
@@ -290,6 +293,7 @@ func (nm *NodeManager) SetupIsolator(state *types.ScaleIOFramework) error {
 		}
 	} else {
 		log.Infoln("DVDCLI is already installed")
+		time.Sleep(time.Duration(common.DelayIfInstalledInSeconds) * time.Second)
 	}
 
 	log.Infoln("SetupIsolator Succeeded")

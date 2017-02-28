@@ -11,6 +11,9 @@ const (
 	//DelayBetweenCommandsInSeconds just like it says
 	DelayBetweenCommandsInSeconds = 5
 
+	//DelayIfInstalledInSeconds just like it says
+	DelayIfInstalledInSeconds = 5
+
 	//DelayOnVolumeCreateInSeconds just like it says
 	DelayOnVolumeCreateInSeconds = 20
 

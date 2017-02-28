@@ -273,7 +273,7 @@ func (ssmn *ScaleioSecondaryMdmNode) RunStateSystemReboot() {
 //RunStateFinishInstall default action for StateFinishInstall
 func (ssmn *ScaleioSecondaryMdmNode) RunStateFinishInstall() {
 	node := ssmn.GetSelfNode()
-	if !node.Declarative && !node.Advertised {
+	if !node.Imperative && !node.Advertised {
 		err := ssmn.UpdateDevices()
 		if err == nil {
 			log.Infoln("UpdateDevices() Succcedeed. Devices advertised!")

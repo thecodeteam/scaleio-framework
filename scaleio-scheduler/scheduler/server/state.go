@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -55,6 +56,32 @@ func displayState(w http.ResponseWriter, r *http.Request, server *RestServer) {
 		}
 		response += "<br />"
 	}
+
+	capacityData := server.State.ScaleIO.CapacityData
+	usedData := server.State.ScaleIO.UsedData
+	fakeUsedData := server.State.ScaleIO.FakeUsedData
+
+	usedSpacePercent := int(float64(usedData+fakeUsedData) / float64(capacityData) * 100)
+	if capacityData == 0 {
+		usedSpacePercent = 0
+	}
+
+	if len(server.Config.AccessKey) > 0 && len(server.Config.SecretKey) > 0 {
+		response += "<br /><br /><br />"
+		response += "Capacity (KB): "
+		response += strconv.Itoa(capacityData)
+		response += "<br />"
+		response += "Fake Used Data (KB): "
+		response += strconv.Itoa(fakeUsedData)
+		response += "<br /><br />"
+		response += "Percent Used: "
+		response += strconv.Itoa(usedSpacePercent)
+		response += "<br />"
+		response += "Threshold Percent: "
+		response += strconv.Itoa(server.Config.UsedThreshold)
+		response += "<br />"
+	}
+
 	server.Unlock()
 
 	response += "</body></html>"

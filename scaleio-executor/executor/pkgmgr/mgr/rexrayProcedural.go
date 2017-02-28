@@ -6,6 +6,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 	xplatform "github.com/dvonthenen/goxplatform"
@@ -287,6 +288,7 @@ scaleio:
 		}
 	} else {
 		log.Infoln(types.RexRayPackageName, "is already installed")
+		time.Sleep(time.Duration(common.DelayIfInstalledInSeconds) * time.Second)
 	}
 
 	if rrInst == "" {
