@@ -37,8 +37,8 @@ and cURL the following JSON:
 {
   "id": "scaleio-scheduler",
   "uris": [
-    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.3.0/scaleio-scheduler",
-    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.3.0/scaleio-executor"
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.3.1/scaleio-scheduler",
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.3.1/scaleio-executor"
   ],
   "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -experimental=true -rest.port=$PORT -uri=[IP ADDRESS FOR ANY MESOS MASTER]:5050",
   "mem": 32,
@@ -96,8 +96,8 @@ following JSON:
 {
   "id": "scaleio-scheduler",
   "uris": [
-    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.3.0/scaleio-scheduler",
-    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.3.0/scaleio-executor"
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.3.1/scaleio-scheduler",
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.3.1/scaleio-executor"
   ],
   "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -experimental=true -rest.port=$PORT -uri=[IP ADDRESS FOR ANY MESOS MASTER]:5050 -aws.accesskey=[ACCESS KEY] -aws.secretkey=[SECRET KEY]",
   "mem": 32,
