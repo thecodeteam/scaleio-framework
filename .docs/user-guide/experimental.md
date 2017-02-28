@@ -67,7 +67,7 @@ get installed in their own unique racks. For more information on that option,
 please contact us directly in the
 [{code} community slack](http://community.codedellemc.com/).
 
-# Self Remediating Functionality in the Cloud
+## Self Remediating Functionality in the Cloud
 
 This is a preview feature for the ScaleIO Framework which starts to pave the way
 of the real value add for what this project really intends to provide. This

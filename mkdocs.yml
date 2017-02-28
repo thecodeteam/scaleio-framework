@@ -14,7 +14,7 @@ pages:
     - Deployment Strategies: user-guide/deployment-strategies.md
     - Demo: user-guide/demo.md
     - Troubleshooting: user-guide/troubleshooting.md
-    - Troubleshooting: user-guide/experimental.md
+    - Experimental: user-guide/experimental.md
 - Developer guide:
     - Project guidelines: developer-guide/project-guidelines.md
     - REST API: developer-guide/restapi.md
