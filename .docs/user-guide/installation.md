@@ -66,8 +66,8 @@ like before.
 {
   "id": "scaleio-scheduler",
   "uris": [
-    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.2.0/scaleio-scheduler",
-    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.2.0/scaleio-executor"
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.3.0/scaleio-scheduler",
+    "https://github.com/codedellemc/scaleio-framework/releases/download/v0.3.0/scaleio-executor"
   ],
   "cmd": "chmod u+x scaleio-scheduler && ./scaleio-scheduler -loglevel=debug -rest.port=$PORT -uri=[IP ADDRESS FOR ANY MESOS MASTER]:5050 -scaleio.password=[SCALEIO GATEWAY PASSWORD] -scaleio.protectiondomain=[PROTECTION DOMAIN NAME] -scaleio.storagepool=[STORAGE POOL NAME] -scaleio.preconfig.primary=[MASTER MDM IP ADDRESS] -scaleio.preconfig.secondary=[SLAVE MDM IP ADDRESS] -scaleio.preconfig.tiebreaker=[TIEBREAKER MDM IP ADDRESS] -scaleio.preconfig.gateway=[GATEWAY IP ADDRESS]",
   "mem": 32,
@@ -112,3 +112,13 @@ with the http location of your binaries):
   ]
 }
 ```
+
+## (Experimental) Provision the Entire ScaleIO Cluster
+
+There exist an experimental feature to provision the entire ScaleIO cluster from
+scratch which includes the 3 MDM (Primary, Secondary, and TieBreaker) nodes. This
+will allow you to stand up ScaleIO on a bare Mesos cluster without any existing
+ScaleIO infrastructure.
+
+For more information, please visit the [experimental](/user-guide/experimental.md)
+page for more details.
