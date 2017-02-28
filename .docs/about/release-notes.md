@@ -40,6 +40,13 @@ GET [SCHEDULER IP/FQDN]:[Marathon Dynamic Port]/version
 }
 ```
 
+## Version 0.3.1 (2017/02/28)
+ScaleIO Framework 0.3.1 introduces a couple of experimental features.
+
+### Experimental
+- Issue [#67](https://github.com/codedellemc/scaleio-framework/issues/67): (Experimental) Provision entire ScaleIO cluster. Please see the new experimental section in the documentation for more details.
+- Issue [#73](https://github.com/codedellemc/scaleio-framework/issues/73): (Experimental) Self Remediation in AWS. Please see the new experimental section in the documentation for more details.
+
 ## Version 0.3.0 (2017/01/10)
 ScaleIO Framework 0.3.0 introduces the new Imperative approach for deploying ScaleIO.
 
